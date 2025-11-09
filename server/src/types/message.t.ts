@@ -1,7 +1,7 @@
 export interface BaseMessage{
     type:string
     timestamp:number
-}// mensaje base para tipar desde aca que tipo de mensajes tenemos. y 
+}// mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
 
 export interface ChatMessage extends BaseMessage{
     type: "chat.public" | "chat.private";
@@ -15,12 +15,12 @@ export interface ChatMessage extends BaseMessage{
 
 export interface SendMessage extends BaseMessage{
     type:"chat.send";
-    messageId:string;// este lo tengo que crear desde el cliente con cripto uuid
+    messageId:string;// este lo tengo que crear desde el cliente con cripto uuid, es decir viene desde el frontend
     payload:{
         toId:string;
         text:string
     }
-}
+}// tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
 
 export interface ErrorMessage extends BaseMessage{
     type:"error";
@@ -38,11 +38,10 @@ export interface SystemMessage extends BaseMessage{
     }
 }//de momento este tipado lo dejamos para los mensajes del sistema, como conectado, desconectado etc.
 
-export interface SetNickname extends BaseMessage{
-    type:"setNickname";
+export interface RegisterNickname extends BaseMessage{
+    type:"registerNickname";
     payload:{
         nickname:string;
-        newNickname?:string
     }
 }//tipado para el cambio de nickname, viene con el id del usuario para evitar errores y validar, tambien que usuario cambio el nickname y el nuevo nickname.
 
@@ -63,6 +62,8 @@ export interface AckMessage extends BaseMessage{
     }
 }//tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
 
-export type serverToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage | ChangeNickname
 
-export type clientToServerMessage = SetNickname | SendMessage 
+//uniones de tipos para que el switch me tome varios tipos desde una sola interface
+export type ServerToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage | ChangeNickname
+
+export type ClientToServerMessage = RegisterNickname | SendMessage 
