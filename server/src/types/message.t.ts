@@ -1,5 +1,6 @@
+import { type } from "os";
+
 export interface BaseMessage{
-    type:string
     timestamp:number
 }// mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
 
@@ -21,6 +22,8 @@ export interface SendMessage extends BaseMessage{
         text:string
     }
 }// tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
+
+
 
 export interface ErrorMessage extends BaseMessage{
     type:"error";
@@ -45,6 +48,9 @@ export interface RegisterNickname extends BaseMessage{
     }
 }//tipado para el cambio de nickname, viene con el id del usuario para evitar errores y validar, tambien que usuario cambio el nickname y el nuevo nickname.
 
+
+
+
 export interface ChangeNickname extends BaseMessage{
     type:"changeNickname";
     payload:{
@@ -52,6 +58,8 @@ export interface ChangeNickname extends BaseMessage{
         nickname:string;
     }
 }
+
+
 
 export interface AckMessage extends BaseMessage{
     type:"ack";
@@ -64,6 +72,6 @@ export interface AckMessage extends BaseMessage{
 
 
 //uniones de tipos para que el switch me tome varios tipos desde una sola interface
-export type ServerToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage | ChangeNickname
+export type ServerToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage 
 
-export type ClientToServerMessage = RegisterNickname | SendMessage 
+export type ClientToServerMessage = RegisterNickname | SendMessage | ChangeNickname
