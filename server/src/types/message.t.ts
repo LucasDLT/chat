@@ -1,5 +1,3 @@
-import { type } from "os";
-
 export interface BaseMessage{
     timestamp:number
 }// mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora

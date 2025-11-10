@@ -21,17 +21,20 @@ function heartbeat(this: WebSocket) {
 export const websocketSetup = (server: Server) => {
   const wss = new WebSocketServer({ server });
   const mapMessageId = new Map();
-  const TLL = 2*60*1000 
+  const TLL = 2 * 60 * 1000;
 
   function clearSetIdMsg() {
-    const now=Date.now()
-    for (const [id,timestamp] of mapMessageId.entries()) {
-        if(now - timestamp > TLL){
-            mapMessageId.delete(id);
-        }
+    const now = Date.now();
+    for (const [id, timestamp] of mapMessageId.entries()) {
+      if (now - timestamp > TLL) {
+        mapMessageId.delete(id);
+      }
     }
   }
-  const clearIntervalIdMsg: NodeJS.Timeout = setInterval(clearSetIdMsg, 60 * 1000);
+  const clearIntervalIdMsg: NodeJS.Timeout = setInterval(
+    clearSetIdMsg,
+    60 * 1000
+  );
 
   wss.on("connection", (ws: WebSocket) => {
     ws.isAlive = true;
@@ -62,13 +65,10 @@ export const websocketSetup = (server: Server) => {
                 },
               };
               if (ws.readyState === WebSocket.OPEN) {
-                mapMessageId.set(
-                    messageData.messageId,
-                    Date.now()
-                );
                 return ws.send(JSON.stringify(msgAck));
               }
             }
+            mapMessageId.set(messageData.messageId, Date.now());
         }
       } catch (error) {}
     });
@@ -107,6 +107,6 @@ export const websocketSetup = (server: Server) => {
     console.log("close del wss");
     clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
-    mapMessageId.clear()
+    mapMessageId.clear();
   });
 };

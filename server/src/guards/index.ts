@@ -2,7 +2,7 @@ import type {
   ChangeNickname,
   RegisterNickname,
   SendMessage,
-} from "../types/message.t";
+} from "../types/message.t.js";
 
 export function isSendMessage(msg: unknown): msg is SendMessage {
   if (typeof msg !== "object" || msg === null) return false;
