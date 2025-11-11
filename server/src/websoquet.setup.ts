@@ -1,4 +1,4 @@
-import { WebSocket, WebSocketServer } from "ws";
+import { RawData, WebSocket, WebSocketServer } from "ws";
 import type { Server } from "http";
 import type {
   ClientToServerMessage,
@@ -6,6 +6,7 @@ import type {
   SendMessage,
   ServerToClientMessage,
   AckMessage,
+  ChatMessage,
 } from "./types/message.t";
 import {
   isSendMessage,
@@ -44,14 +45,12 @@ export const websocketSetup = (server: Server) => {
 
     ws.on("message", (data) => {
       try {
-        if (typeof data !== "object") return;
-
         const messageData: ClientToServerMessage = JSON.parse(data.toString());
 
         if (typeof messageData.type !== "string") return;
 
         switch (messageData.type) {
-          case "chat.send":
+          case "chat.send": {
             if (!isSendMessage(messageData)) return;
             const id = mapMessageId.has(messageData.messageId);
             if (id) {
@@ -67,10 +66,75 @@ export const websocketSetup = (server: Server) => {
               if (ws.readyState === WebSocket.OPEN) {
                 return ws.send(JSON.stringify(msgAck));
               }
+            } else {
+              mapMessageId.set(messageData.messageId, Date.now());
+              const msgAckOk: AckMessage = {
+                type: "ack",
+                correlationId: messageData.messageId,
+                timestamp: Date.now(),
+                payload: {
+                  status: "ok",
+                  details: "message sent",
+                },
+              };
+              if (ws.readyState === WebSocket.OPEN)
+                ws.send(JSON.stringify(msgAckOk));
+
+              function hasUerId(
+                ws: WebSocket
+              ): ws is WebSocket & { userId: string } {
+                return typeof ws.userId === "string" && ws.userId.length > 0;
+              }
+              if (hasUerId(ws)) {
+                const msgClient: ChatMessage = {
+                  messageId: messageData.messageId,
+                  timestamp: Date.now(),
+                  type: messageData.payload.scope,
+                  payload: {
+                    fromId: ws.userId,
+                    toId: messageData.payload.toId,
+                    text: messageData.payload.text,
+                  },
+                };
+                if (msgClient.type === "chat.public") {
+                  wss.clients.forEach((client: WebSocket) => {
+                    if (client !== ws && client.readyState === WebSocket.OPEN) {
+                      client.send(JSON.stringify(msgClient));
+                    }
+                  });
+                }
+                if (msgClient.type === "chat.private") {
+                  wss.clients.forEach((client: WebSocket) => {
+                    if (
+                      client.readyState === WebSocket.OPEN &&
+                      client !== ws &&
+                      client.userId === msgClient.payload.toId
+                    ) {
+                      client.send(JSON.stringify(msgClient));
+                    }
+                  });
+                }
+              }
             }
-            mapMessageId.set(messageData.messageId, Date.now());
+            break;
+          }
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log("Error WSS handler", error);
+        try {
+          const errorMsg: ErrorMessage = {
+            timestamp: Date.now(),
+            type: "error",
+            payload: {
+              code: "500",
+              message: "internal websocket server error",
+              details: `${ws.nickname} client produce error`,
+            },
+          };
+        } catch (sendErr) {
+          console.error("Failed to send error message to client:", sendErr);
+        }
+      }
     });
 
     ws.on("error", (error: Error) => {

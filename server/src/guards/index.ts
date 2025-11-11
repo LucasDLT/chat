@@ -12,7 +12,7 @@ export function isSendMessage(msg: unknown): msg is SendMessage {
   if (typeof m.timestamp !== "number" || m.timestamp === null) return false;
   if (typeof m.payload !== "object" || m.payload === null) return false;
   const payload = m.payload as Record<string, unknown>;
-  return typeof payload.toId === "string" && typeof payload.text === "string";
+  return (typeof payload.toId === "string" && typeof payload.text === "string" && typeof payload.scope === "string");
 }
 
 export function isRegisterNickname(msg: unknown): msg is RegisterNickname {

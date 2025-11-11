@@ -3,7 +3,7 @@ export interface BaseMessage{
 }// mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
 
 export interface ChatMessage extends BaseMessage{
-    type: "chat.public" | "chat.private";
+    type: "chat.public" | "chat.private"; 
     messageId:string;
     payload:{
         fromId:string;
@@ -16,6 +16,7 @@ export interface SendMessage extends BaseMessage{
     type:"chat.send";
     messageId:string;// este lo tengo que crear desde el cliente con cripto uuid, es decir viene desde el frontend
     payload:{
+        scope:"chat.public" | "chat.private";
         toId:string;
         text:string
     }
@@ -26,7 +27,7 @@ export interface SendMessage extends BaseMessage{
 export interface ErrorMessage extends BaseMessage{
     type:"error";
     payload:{
-        code:number;
+        code:string;
         message:string;
         details?:string
     }

@@ -9,9 +9,15 @@
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
     "target": "es6",
-    "types": [],
+    "types": ["node"],
+    "moduleResolution": "node",
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ] /* Specify multiple folders that act like './node_modules/@types'. */,
+
     // For nodejs:
-    // "lib": ["esnext"],
+    "lib": ["ES2020"],
     // "types": ["node"],
     // and npm install -D @types/node
 
@@ -39,12 +45,12 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true 
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "src/**/*ts"
-  ]
+  "exclude": ["node_modules"],
+  "include": ["src/**/*ts", "global.d.ts"],
+  "ts-node": {
+    "files": true
+  }
+
 }
