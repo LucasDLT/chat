@@ -22,6 +22,7 @@ function heartbeat(this: WebSocket) {
 export const websocketSetup = (server: Server) => {
   const wss = new WebSocketServer({ server });
   const mapMessageId = new Map();
+  const setNicknameId = new Set();
   const TLL = 2 * 60 * 1000;
 
   function clearSetIdMsg() {
@@ -32,6 +33,7 @@ export const websocketSetup = (server: Server) => {
       }
     }
   }
+
   const clearIntervalIdMsg: NodeJS.Timeout = setInterval(
     clearSetIdMsg,
     60 * 1000
@@ -40,8 +42,11 @@ export const websocketSetup = (server: Server) => {
   wss.on("connection", (ws: WebSocket) => {
     ws.isAlive = true;
     ws.once("message", () => {
+      //aca podria tipar un objeto y hacer el envelope para enviarlo al que se conecta o a todos avisando que se conecto
+
       ws.send("conexion ws establecida");
     });
+    //aca podria hacer otro on message con un mensaje como el de arriba avisando de la conexion a todos y construir el mensaje
 
     ws.on("message", (data) => {
       try {
@@ -54,7 +59,7 @@ export const websocketSetup = (server: Server) => {
             if (!isSendMessage(messageData)) return;
             const id = mapMessageId.has(messageData.messageId);
             if (id) {
-              const msgAck: AckMessage = {
+              const msgAckError: AckMessage = {
                 type: "ack",
                 correlationId: messageData.messageId,
                 timestamp: Date.now(),
@@ -64,7 +69,7 @@ export const websocketSetup = (server: Server) => {
                 },
               };
               if (ws.readyState === WebSocket.OPEN) {
-                return ws.send(JSON.stringify(msgAck));
+                return ws.send(JSON.stringify(msgAckError));
               }
             } else {
               mapMessageId.set(messageData.messageId, Date.now());
@@ -116,6 +121,28 @@ export const websocketSetup = (server: Server) => {
                 }
               }
             }
+            break;
+          }
+
+          case "registerNickname": {
+            if (!isRegisterNickname(messageData)) return;
+            if (setNicknameId.has(messageData.payload.messageId)) {
+              const msgAckError: AckMessage = {
+                correlationId: messageData.payload.messageId,
+                timestamp: Date.now(),
+                type: "ack",
+                payload: {
+                  status: "error",
+                  details: "req register nick duplicate, is processing",
+                },
+              };
+              if (ws.readyState === WebSocket.OPEN ) {
+              return ws.send(JSON.stringify(msgAckError))
+              }
+            }else{
+              //logica del registro del nuevo nick y envio de mensaje de cambio como sistem a todos los usuarios y uno especial al que lo pidio
+            }
+
             break;
           }
         }
@@ -172,5 +199,6 @@ export const websocketSetup = (server: Server) => {
     clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
     mapMessageId.clear();
+    mapNicknameId.clear();
   });
 };

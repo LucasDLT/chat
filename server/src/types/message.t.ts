@@ -43,6 +43,7 @@ export interface SystemMessage extends BaseMessage{
 export interface RegisterNickname extends BaseMessage{
     type:"registerNickname";
     payload:{
+        messageId:string;
         nickname:string;
     }
 }//tipado para el cambio de nickname, viene con el id del usuario para evitar errores y validar, tambien que usuario cambio el nickname y el nuevo nickname.
@@ -53,6 +54,7 @@ export interface RegisterNickname extends BaseMessage{
 export interface ChangeNickname extends BaseMessage{
     type:"changeNickname";
     payload:{
+        messageId:string;
         userId:string;
         nickname:string;
     }

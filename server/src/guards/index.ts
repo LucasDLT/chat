@@ -22,7 +22,7 @@ export function isRegisterNickname(msg: unknown): msg is RegisterNickname {
   if (typeof m.timestamp !== "number" || m.timestamp === null) return false;
   if (typeof m.payload !== "object") return false;
   const payload = m.payload as Record<string, unknown>;
-  return typeof payload.nickname === "string";
+  return (typeof payload.nickname === "string" && typeof payload.messageId === "string")
 }
 
 export function isChangeNickname(msg: unknown): msg is ChangeNickname {
@@ -33,6 +33,6 @@ export function isChangeNickname(msg: unknown): msg is ChangeNickname {
   if (typeof m.payload !== "object" || m.payload === null) return false;
   const payload = m.payload as Record<string, unknown>;
   return (
-    typeof payload.userId === "string" && typeof payload.nickname === "string"
+    typeof payload.userId === "string" && typeof payload.nickname === "string" && typeof payload.messageId === "string"
   );
 }
