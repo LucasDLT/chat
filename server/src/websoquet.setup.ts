@@ -7,12 +7,14 @@ import type {
   ServerToClientMessage,
   AckMessage,
   ChatMessage,
+  SystemMessage,
 } from "./types/message.t";
 import {
   isSendMessage,
   isChangeNickname,
   isRegisterNickname,
 } from "./guards/index";
+import { timeStamp } from "console";
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -22,7 +24,7 @@ function heartbeat(this: WebSocket) {
 export const websocketSetup = (server: Server) => {
   const wss = new WebSocketServer({ server });
   const mapMessageId = new Map();
-  const setNicknameId = new Set();
+  const mapNicknameId = new Map();
   const TLL = 2 * 60 * 1000;
 
   function clearSetIdMsg() {
@@ -33,7 +35,18 @@ export const websocketSetup = (server: Server) => {
       }
     }
   }
-
+  function clearSetIdNick() {
+    const now = Date.now();
+    for (const [id, timeStamp] of mapNicknameId.entries()) {
+      if (now - timeStamp > TLL) {
+        mapNicknameId.delete(id);
+      }
+    }
+  }
+  const clearIntervalNicks: NodeJS.Timeout = setInterval(
+    clearSetIdNick,
+    60 * 2000
+  );
   const clearIntervalIdMsg: NodeJS.Timeout = setInterval(
     clearSetIdMsg,
     60 * 1000
@@ -126,7 +139,7 @@ export const websocketSetup = (server: Server) => {
 
           case "registerNickname": {
             if (!isRegisterNickname(messageData)) return;
-            if (setNicknameId.has(messageData.payload.messageId)) {
+            if (mapNicknameId.has(messageData.payload.messageId)) {
               const msgAckError: AckMessage = {
                 correlationId: messageData.payload.messageId,
                 timestamp: Date.now(),
@@ -136,28 +149,61 @@ export const websocketSetup = (server: Server) => {
                   details: "req register nick duplicate, is processing",
                 },
               };
-              if (ws.readyState === WebSocket.OPEN ) {
-              return ws.send(JSON.stringify(msgAckError))
+              if (ws.readyState === WebSocket.OPEN) {
+                return ws.send(JSON.stringify(msgAckError));
               }
-            }else{
-              //logica del registro del nuevo nick y envio de mensaje de cambio como sistem a todos los usuarios y uno especial al que lo pidio
+            } else {
+              mapNicknameId.set(messageData.payload.messageId, Date.now());
+              const msgAckOk: AckMessage = {
+                correlationId: messageData.payload.messageId,
+                timestamp: Date.now(),
+                type: "ack",
+                payload: {
+                  status: "ok",
+                  details: "register nick ok",
+                },
+              };
+              ws.nickname = messageData.payload.nickname;
+              const registerNickname: SystemMessage = {
+                type: "system",
+                timestamp: Date.now(),
+                payload: {
+                  message: `${ws.nickname} ingreso a la sala`,
+                },
+              };
+              wss.clients.forEach((client: WebSocket) => {
+                if (ws !== client && client.readyState === WebSocket.OPEN) {
+                  client.send(JSON.stringify(registerNickname));
+                }
+                if (client.readyState === WebSocket.OPEN) {
+                  registerNickname.payload.message = `${ws.nickname} ingresaste a la sala`;
+                  ws.send(JSON.stringify(msgAckOk));
+                  ws.send(JSON.stringify(registerNickname));
+                }
+              });
             }
-
             break;
+          }
+
+          case "changeNickname":{
+            
           }
         }
       } catch (error) {
         console.log("Error WSS handler", error);
+        const errorMsg: ErrorMessage = {
+          timestamp: Date.now(),
+          type: "error",
+          payload: {
+            code: "500",
+            message: "internal websocket server error",
+            details: `${ws.nickname} client produce error`,
+          },
+        };
         try {
-          const errorMsg: ErrorMessage = {
-            timestamp: Date.now(),
-            type: "error",
-            payload: {
-              code: "500",
-              message: "internal websocket server error",
-              details: `${ws.nickname} client produce error`,
-            },
-          };
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(errorMsg));
+          }
         } catch (sendErr) {
           console.error("Failed to send error message to client:", sendErr);
         }
@@ -198,7 +244,6 @@ export const websocketSetup = (server: Server) => {
     console.log("close del wss");
     clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
-    mapMessageId.clear();
-    mapNicknameId.clear();
+    clearInterval(clearIntervalNicks);
   });
 };
