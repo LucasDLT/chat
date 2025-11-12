@@ -36,3 +36,4 @@ export function isChangeNickname(msg: unknown): msg is ChangeNickname {
     typeof payload.userId === "string" && typeof payload.nickname === "string" && typeof payload.messageId === "string"
   );
 }
+
