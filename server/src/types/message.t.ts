@@ -7,7 +7,7 @@ export interface ChatMessage extends BaseMessage{
     messageId:string;
     payload:{
         fromId:string;
-        toId:string;
+        toId:string; 
         text:string
     }
 }//primer tipo de mensajes que a su vez tiene un subtipo publico y privado. Tiene desde que a que id va el mensaje, y un id unico para identificarlo y evitar duplicados.
