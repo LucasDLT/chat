@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { isSendMessage, isRegisterNickname } from "../guards";
+import { isSendMessage, isRegisterNickname, isChangeNickname } from "../guards";
 
 describe("isSendMessage guard", () => {
   test("Should return true for a valid public SendMessage", () => {
@@ -80,6 +80,17 @@ describe("isSendMessage guard", () => {
     expect(isSendMessage(missingPayload)).toBe(false);
   });
 
+  test("Should return false if unexpected content in payload",()=>{
+    const invalidContent = {
+      type: "registerNickname",
+      timestamp: Date.now(),
+      payload: {
+        messageId: 1234,
+        nickname: "nick",
+      },
+    };
+    expect(isSendMessage(invalidContent)).toBeFalsy()
+  })
   test("Should return false if type missing", () => {
     const missingType = {
       messageId: "msg-id",
@@ -134,7 +145,7 @@ describe("isRegisterNickname guard", () => {
     expect(isRegisterNickname(validMsg)).toBeTruthy();
   });
 
-  test("Should return false if missing timestamp",()=>{
+  test("Should return false if missing timestamp", () => {
     const missingTimestamp = {
       type: "registerNickname",
       payload: {
@@ -142,10 +153,10 @@ describe("isRegisterNickname guard", () => {
         nickname: "nick",
       },
     };
-    expect(isRegisterNickname(missingTimestamp)).toBeFalsy()
+    expect(isRegisterNickname(missingTimestamp)).toBeFalsy();
   });
 
-  test("Should return false if invalid type date", ()=>{
+  test("Should return false if invalid type date", () => {
     const invalidData = {
       type: "registerNickname",
       timestamp: "data string",
@@ -154,8 +165,8 @@ describe("isRegisterNickname guard", () => {
         nickname: "nick",
       },
     };
-    expect(isRegisterNickname(invalidData)).toBeFalsy()
-  })
+    expect(isRegisterNickname(invalidData)).toBeFalsy();
+  });
 
   test("Should return false if invalid type", () => {
     const invalidType = {
@@ -200,6 +211,19 @@ describe("isRegisterNickname guard", () => {
     expect(isRegisterNickname(invalidMsgId)).toBeFalsy();
   });
 
+  test("Should return false if unexpected content in payload",()=>{
+    const invalidPayload = {
+      type: "registerNickname",
+      timestamp: Date.now(),
+      payload: {
+        messageId: 1234,
+        nickname: "nick",
+        invalid:""
+      },
+    };
+    expect(isRegisterNickname(invalidPayload)).toBeFalsy()
+  })
+
   test("Should return false if missing messageId in payload", () => {
     const missingMsgId = {
       type: "registerNickname",
@@ -233,4 +257,154 @@ describe("isRegisterNickname guard", () => {
     };
     expect(isRegisterNickname(missingNick)).toBeFalsy();
   });
+});
+
+describe("isChangeNickname", () => {
+  test("Should return true if type isChangeNickname", () => {
+    const validChangeNickname = {
+      type: "changeNickname",
+      timestamp: Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(validChangeNickname)).toBeTruthy();
+  });
+
+  test("Should return false if missing type", () => {
+    const validChangeNickname = {
+      timestamp: Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(validChangeNickname)).toBeFalsy();
+  });
+
+  test("Should return false if invalid value of type", () => {
+    const invalidTypeValue = {
+      type: "type",
+      timestamp: Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(invalidTypeValue)).toBeFalsy();
+  });
+
+  test("Should return false if invalid type", () => {
+    const invalidType = {
+      type: 1234,
+      timestamp: Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(invalidType)).toBeFalsy();
+  });
+
+  test("Should return false if invalid timestamp", () => {
+    const invalidTimestamp = {
+      type: "changeNickname",
+      timestamp: "timestamp",
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(invalidTimestamp)).toBeFalsy();
+  });
+
+  test("Should return false if missing timestamp", () => {
+    const missingTimestamp = {
+      type: "changeNickname",
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(missingTimestamp)).toBeFalsy();
+  });
+
+  test("Should return false if missing payload", () => {
+    const missingPayload = {
+      type: "changeNickname",
+      timestamp: Date.now(),
+    };
+    expect(isChangeNickname(missingPayload)).toBeFalsy();
+  });
+
+  test("Should return false if unexpected content in payload", () => {
+    const invalidPayload = {
+      type: "changeNickname",
+      timestamp: Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+        invalid: "",
+      },
+    };
+    expect(isChangeNickname(invalidPayload)).toBeFalsy();
+  });
+
+  test("Should return false if invalid messageId", () => {
+    const invalidMessageId= {
+      type: "changeNickname",
+      timestamp: Date.now(),
+      payload: {
+        messageId: 1234,
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(invalidMessageId)).toBeFalsy()
+  });
+
+  test("Should return false if missing messageId",()=>{
+        const missingMsgId = {
+      type: "changeNickname",
+      timestamp:Date.now(),
+      payload: {
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(missingMsgId)).toBeFalsy()
+  })
+
+  test("Should return false if invalid nickname",()=>{
+        const invalidNick = {
+      type: "changeNickname",
+      timestamp:Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: 1234,
+      },
+    };
+    expect(isChangeNickname(invalidNick)).toBeFalsy()
+  })
+
+  test("Should return false if missing nickname",()=>{
+        const missingNickname = {
+      type: "changeNickname",
+      timestamp:Date.now(),
+      payload: {
+        messageId: "string",
+        userId: "string",
+      },
+    };
+    expect(isChangeNickname(missingNickname)).toBeFalsy()
+  })
 });
