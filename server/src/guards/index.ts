@@ -10,22 +10,24 @@ export function isSendMessage(msg: unknown): msg is SendMessage {
   if (typeof m.type !== "string" || m.type !== "chat.send") return false;
   if (typeof m.messageId !== "string" || m.messageId === null) return false;
   if (typeof m.timestamp !== "number" || m.timestamp === null) return false;
+  if (!Number.isFinite(m.timestamp)) return false;
+
   if (typeof m.payload !== "object" || m.payload === null) return false;
 
   const payload = m.payload as Record<string, unknown>;
   const msgKeys = Object.keys(m);
-  const allowedKeys = ["type", "messageId", "payload", "timestamp"];
+  const allowedKeys = ["type", "messageId", "payload", "timestamp"] as const;
 
   const hasUnexpected = msgKeys.some(
-    (key) => !allowedKeys.includes(key as any)
+    (key) => !allowedKeys.includes(key as typeof allowedKeys[number])
   );
 
   if (hasUnexpected) return false;
-  const PayloadKey = Object.keys(payload);
-  const allowedPayloadKeys = ["scope", "toId", "text"];
+  const payloadKey = Object.keys(payload);
+  const allowedPayloadKeys = ["scope", "toId", "text"] as const;
 
-  const hasUnexpectedPayloadKey = PayloadKey.some(
-    (key) => !allowedPayloadKeys.includes(key as any)
+  const hasUnexpectedPayloadKey = payloadKey.some(
+    (key) => !allowedPayloadKeys.includes(key as typeof allowedPayloadKeys[number])
   );
 
   if (hasUnexpectedPayloadKey) return false;
@@ -43,21 +45,23 @@ export function isRegisterNickname(msg: unknown): msg is RegisterNickname {
   if (typeof m !== "object" || m === null) return false;
   if (m.type !== "registerNickname") return false;
   if (typeof m.timestamp !== "number" || m.timestamp === null) return false;
+  if (!Number.isFinite(m.timestamp)) return false;
+
   if (typeof m.payload !== "object") return false;
   const payload = m.payload as Record<string, unknown>;
   const msgKeys = Object.keys(m);
-  const allowedKeys = ["type", "payload", "timestamp"];
+  const allowedKeys = ["type", "payload", "timestamp"] as const;
 
   const hasUnexpected = msgKeys.some(
-    (key) => !allowedKeys.includes(key as any)
+    (key) => !allowedKeys.includes(key as typeof allowedKeys[number])
   );
 
   if (hasUnexpected) return false;
-  const PayloadKey = Object.keys(payload);
-  const allowedPayloadKeys = ["messageId", "nickname"];
+  const payloadKey = Object.keys(payload);
+  const allowedPayloadKeys = ["messageId", "nickname"] as const;
 
-  const hasUnexpectedPayloadKey = PayloadKey.some(
-    (key) => !allowedPayloadKeys.includes(key as any)
+  const hasUnexpectedPayloadKey = payloadKey.some(
+    (key) => !allowedPayloadKeys.includes(key as typeof allowedPayloadKeys[number])
   );
 
   if (hasUnexpectedPayloadKey) return false;
@@ -73,21 +77,23 @@ export function isChangeNickname(msg: unknown): msg is ChangeNickname {
   if (typeof msg !== "object" || msg === null) return false;
   if (m.type !== "changeNickname") return false;
   if (typeof m.timestamp !== "number" || m.timestamp === null) return false;
+  if (!Number.isFinite(m.timestamp)) return false;
+
   if (typeof m.payload !== "object" || m.payload === null) return false;
   const payload = m.payload as Record<string, unknown>;
   const msgKeys = Object.keys(m);
-  const allowedKeys = ["type", "payload", "timestamp"];
+  const allowedKeys = ["type", "payload", "timestamp"] as const;
 
   const hasUnexpected = msgKeys.some(
-    (key) => !allowedKeys.includes(key as any)
+    (key) => !allowedKeys.includes(key as typeof allowedKeys[number])
   );
 
   if (hasUnexpected) return false;
-  const PayloadKey = Object.keys(payload);
-  const allowedPayloadKeys = ["messageId", "nickname", "userId"];
+  const payloadKey = Object.keys(payload);
+  const allowedPayloadKeys = ["messageId", "nickname", "userId"] as const;
 
-  const hasUnexpectedPayloadKey = PayloadKey.some(
-    (key) => !allowedPayloadKeys.includes(key as any)
+  const hasUnexpectedPayloadKey = payloadKey.some(
+    (key) => !allowedPayloadKeys.includes(key as typeof allowedPayloadKeys[number])
   );
 
   if (hasUnexpectedPayloadKey) return false;

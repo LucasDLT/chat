@@ -16,6 +16,21 @@ describe("isSendMessage guard", () => {
     expect(isSendMessage(validMsgPublic)).toBe(true);
   });
 
+  test("Should return false if unexpected content in type",()=>{
+    const invalidContent = {
+      type: "chat.send",
+      messageId: "msg-id",
+      timestamp: Date.now(),
+      invalid:"",
+      payload: {
+        scope: "chat.public",
+        toId: "toid",
+        text: "msg public",
+      },
+    };
+    expect(isSendMessage(invalidContent)).toBeFalsy()
+  })
+
   test("Should return true for a valid private SendMessage", () => {
     const validMsgPrivate = {
       type: "chat.send",
@@ -145,6 +160,18 @@ describe("isRegisterNickname guard", () => {
     expect(isRegisterNickname(validMsg)).toBeTruthy();
   });
 
+  test("Should return false if unexpected content on type",()=>{
+     const invalidContent = {
+      type: "registerNickname",
+      timestamp: Date.now(),
+      invalid:"",
+      payload: {
+        messageId: "msgId",
+        nickname: "nick",
+      },
+    };
+    expect(isRegisterNickname(invalidContent)).toBeFalsy()
+  })
   test("Should return false if missing timestamp", () => {
     const missingTimestamp = {
       type: "registerNickname",
@@ -272,6 +299,20 @@ describe("isChangeNickname", () => {
     };
     expect(isChangeNickname(validChangeNickname)).toBeTruthy();
   });
+
+  test("Should return false if unexpected content on type",()=>{
+    const invalidContent = {
+      type: "changeNickname",
+      timestamp: Date.now(),
+      invalid:"",
+      payload: {
+        messageId: "string",
+        userId: "string",
+        nickname: "string",
+      },
+    };
+    expect(isChangeNickname(invalidContent)).toBeFalsy()
+  })
 
   test("Should return false if missing type", () => {
     const validChangeNickname = {

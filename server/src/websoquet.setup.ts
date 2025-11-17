@@ -322,4 +322,25 @@ export const websocketSetup = (server: Server) => {
     mapMessageId.clear();
     mapNicknameId.clear();
   });
+
+  return{
+    wss,
+    close:()=>{
+      clearInterval(interval)
+      clearInterval(clearIntervalNicks)
+      clearInterval(clearIntervalIdMsg)
+      clearInterval(clearIntervalChangeNick)
+
+      mapChangeNicknameId.clear()
+      mapMessageId.clear()
+      mapNicknameId.clear()
+
+      try {
+        wss.close()
+      } catch(err){
+        console.log("error closing wss:", err);
+        
+      }
+    }
+  }
 };
