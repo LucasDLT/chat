@@ -1,4 +1,4 @@
-import { RawData, WebSocket, WebSocketServer } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 import type { Server } from "http";
 import type {
   ClientToServerMessage,
