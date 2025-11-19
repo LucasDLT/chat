@@ -101,4 +101,33 @@ test("Server change nickname ok & replies ack ok", async () => {
   );
   expect(msgOkSystem).toBeDefined();
 });
+test("Server change nickname duplicate messageId ERROR", async () => {
+  const url = `ws://localhost:${port}`;
+  const client = await createClient(url);
+  clients.push(client);
+
+  const msgId = "duplicate-reg-1";
+  const registerNickname = {
+    timestamp: Date.now(),
+    type: "registerNickname",
+    payload: {
+      messageId: msgId,
+      nickname: "nick",
+    },
+  };
+  client.send(JSON.stringify(registerNickname));
+  const firstRecs = await collectionJsonMessages(client, 2, 4000);
+  const ackeOk = firstRecs.find((r) => r?.type === "ack");
+  expect(ackeOk).toBeDefined(); 
+  expect(ackeOk.correlationId).toBe(msgId);
+  expect(ackeOk.payload?.status).toBe("ok");
+
+  client.send(JSON.stringify(registerNickname));
+  const secondRecs = await collectionJsonMessages(client, 1, 4000);
+  const ackError = secondRecs.find((r) => r?.type === "ack");
+
+  expect(ackError).toBeDefined();
+  expect(ackError.correlationId).toBe(msgId);
+  expect(ackError.payload?.status).toBe("error");
+});
 });

@@ -59,7 +59,8 @@ describe("WSS integration - Handshake", () => {
     const client = await createClient(url)
     clients.push(client);
 
-    client.send("hello server")
+    client.send(JSON.stringify({ type: "handshake-probe" }))
+
 
     const msg=await waitForMessage(client, 2000)
     expect(msg).toBe("conexion ws establecida")

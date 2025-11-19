@@ -76,7 +76,7 @@ export const websocketSetup = (server: Server) => {
 
     ws.once("message", () => {
       //aca podria tipar un objeto y hacer el envelope para enviarlo al que se conecta o a todos avisando que se conecto
-
+      
       ws.send("conexion ws establecida");
     });
     //aca podria hacer otro on message con un mensaje como el de arriba avisando de la conexion a todos y construir el mensaje
