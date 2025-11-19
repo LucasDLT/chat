@@ -185,7 +185,7 @@ export const websocketSetup = (server: Server) => {
                 type: "system",
                 timestamp: Date.now(),
                 payload: {
-                  message: `${ws.nickname} ingreso a la sala`,
+                  message: `${ws.nickname} ingreso a la sala`, 
                 },
               };
               const registerNicknamePrivate: SystemMessage = {

@@ -37,10 +37,9 @@ describe("WSS integration - RegisterNickname", () => {
         if (c.readyState !== WsClient.CLOSED) {
           c.terminate();
         }
-      } catch  {
-      }
+      } catch {}
     }
-    clients.length=0
+    clients.length = 0;
   });
 
   afterAll((done) => {
@@ -57,10 +56,10 @@ describe("WSS integration - RegisterNickname", () => {
     });
   });
 
-  test("Server register Nick name ok & replies ack ok", async () => {
+  test("Server register Nickname ok & replies ack ok", async () => {
     const url = `ws://localhost:${port}`;
     const client1 = await createClient(url);
-    const client2 = await createClient(url)
+    const client2 = await createClient(url);
     clients.push(client1, client2);
     const msgId = "reg-msg-1";
     //aca tengo que crear el mensaje tipado como en los guards
@@ -79,23 +78,58 @@ describe("WSS integration - RegisterNickname", () => {
 
     //despues el cliente1 recibe el ack ok y el system que avisa que ingreso
 
-   const recs= await collectionJsonMessages(client1, 2)
+    const recs = await collectionJsonMessages(client1, 2);
 
     //busco el ack
-    const ack = recs.find((r)=> r?.type ==="ack")
-    expect(ack).toBeDefined()
+    const ack = recs.find((r) => r?.type === "ack");
+    expect(ack).toBeDefined();
 
-    expect(ack.correlationId).toBe(msgId)
-    expect(ack.payload?.status).toBe("ok")
+    expect(ack.correlationId).toBe(msgId);
+    expect(ack.payload?.status).toBe("ok");
 
-    const privateSystemMsg= recs.find((r)=> r?.type === "system" && typeof r.payload?.message === "string" && r.payload.message.includes("ingresaste a la sala"))
-    expect(privateSystemMsg).toBeDefined()
+    const privateSystemMsg = recs.find(
+      (r) =>
+        r?.type === "system" &&
+        typeof r.payload?.message === "string" &&
+        r.payload.message.includes("ingresaste a la sala")
+    );
+    expect(privateSystemMsg).toBeDefined();
 
-const [parsedB]=await collectionJsonMessages(client2,1)
+    const [parsedB] = await collectionJsonMessages(client2, 1);
 
-    expect(parsedB.type).toBe("system")
-    expect(typeof parsedB.payload?.message).toBe("string")
-    expect(parsedB.payload.message).toContain("ingreso a la sala")
+    expect(parsedB.type).toBe("system");
+    expect(typeof parsedB.payload?.message).toBe("string");
+    expect(parsedB.payload.message).toContain("ingreso a la sala");
+  });
 
+  test("Server register Nickname duplicate messageId ERROR", async () => {
+    const url = `ws://localhost:${port}`;
+    const client = await createClient(url);
+    clients.push(client);
+
+    const msgId = "duplicate-reg-1";
+    const registerNickname = {
+      timestamp: Date.now(),
+      type: "registerNickname",
+      payload: {
+        messageId: msgId,
+        nickname: "nick",
+      },
+    };
+    client.send(JSON.stringify(registerNickname));
+    const firstRecs = await collectionJsonMessages(client, 2, 4000);
+    const ackeOk = firstRecs.find((r) => r?.type === "ack");
+    expect(ackeOk).toBeDefined(); //ESPERAMOS A QUE ESTE DEFINIDO EL TIPO
+    expect(ackeOk.correlationId).toBe(msgId);
+    expect(ackeOk.payload?.status).toBe("ok");
+
+    client.send(JSON.stringify(registerNickname));
+    const secondRecs = await collectionJsonMessages(client, 1, 4000);
+    const ackError = secondRecs.find((r) => r?.type === "ack");
+
+    expect(ackError).toBeDefined();
+    expect(ackError.correlationId).toBe(msgId);
+    expect(ackError.payload?.status).toBe("error");
+  
   });
 });
