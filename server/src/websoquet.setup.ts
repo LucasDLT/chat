@@ -72,7 +72,7 @@ export const websocketSetup = (server: Server) => {
   }
   wss.on("connection", (ws: WebSocket) => {
     ws.isAlive = true;
-
+    ws.userId= crypto.randomUUID()
 
     ws.once("message", () => {
       //aca podria tipar un objeto y hacer el envelope para enviarlo al que se conecta o a todos avisando que se conecto
@@ -92,7 +92,9 @@ export const websocketSetup = (server: Server) => {
         switch (messageData.type) {
           case "chat.send": {
             if (!isSendMessage(messageData)) return;
+            
             const id = mapMessageId.has(messageData.messageId);
+            
             if (id) {
               const msgAckError: AckMessage = {
                 type: "ack",
@@ -119,8 +121,9 @@ export const websocketSetup = (server: Server) => {
               };
               if (ws.readyState === WebSocket.OPEN)
                 ws.send(JSON.stringify(msgAckOk));
-
-              if (hasUserId(ws)) {
+          
+              
+               if (hasUserId(ws)) {
                 const msgClient: ChatMessage = {
                   messageId: messageData.messageId,
                   timestamp: Date.now(),
@@ -130,8 +133,10 @@ export const websocketSetup = (server: Server) => {
                     toId: messageData.payload.toId,
                     text: messageData.payload.text,
                   },
-                };
+                };                
+                
                 if (msgClient.type === "chat.public") {
+                  
                   wss.clients.forEach((client: WebSocket) => {
                     if (client !== ws && client.readyState === WebSocket.OPEN) {
                       client.send(JSON.stringify(msgClient));
@@ -290,7 +295,9 @@ export const websocketSetup = (server: Server) => {
     ws.on("pong", heartbeat);
 
     ws.on("close", () => {
-      console.log("conexion finalizada");
+      if (process.env.NODE_ENV !== "test") {
+    console.log("conexion finalizada");
+  }
     });
   });
 
@@ -313,8 +320,9 @@ export const websocketSetup = (server: Server) => {
   });
 
   wss.on("close", () => {
-    console.log("close del wss");
-    clearInterval(interval);
+if (process.env.NODE_ENV !== "test") {
+    console.log("conexion finalizada");
+  }    clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
     clearInterval(clearIntervalNicks);
     clearInterval(clearIntervalChangeNick);
