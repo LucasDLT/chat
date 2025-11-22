@@ -56,7 +56,7 @@ describe("WSS integration - SendMessage", () => {
     });
   });
 
-  test("Server sendmessage", async () => {
+  test("Server sendmessage public", async () => {
     const url = `ws://localhost:${port}`;
     const client1 = await createClient(url);
     const client2 = await createClient(url);
@@ -109,8 +109,8 @@ const msgIdSend= "reg-send-1"
     expect(publicMsg).toBeDefined();
     expect(publicMsg.payload?.text).toBe("msg public");
     expect(publicMsg.payload?.fromId).toBeDefined();
-     
-
-
   });
+
+
+
 });

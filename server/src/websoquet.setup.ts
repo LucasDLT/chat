@@ -65,18 +65,16 @@ export const websocketSetup = (server: Server) => {
   );
 
   //guard para el ID de usuario
-  function hasUserId(
-    ws: WebSocket
-  ): ws is WebSocket & { userId: string } {
+  function hasUserId(ws: WebSocket): ws is WebSocket & { userId: string } {
     return typeof ws.userId === "string" && ws.userId.length > 0;
   }
   wss.on("connection", (ws: WebSocket) => {
     ws.isAlive = true;
-    ws.userId= crypto.randomUUID()
+    ws.userId = crypto.randomUUID();
 
     ws.once("message", () => {
       //aca podria tipar un objeto y hacer el envelope para enviarlo al que se conecta o a todos avisando que se conecto
-      
+
       ws.send("conexion ws establecida");
     });
     //aca podria hacer otro on message con un mensaje como el de arriba avisando de la conexion a todos y construir el mensaje
@@ -86,15 +84,14 @@ export const websocketSetup = (server: Server) => {
         const raw = data instanceof Buffer ? data.toString() : String(data);
         const messageData: ClientToServerMessage = JSON.parse(raw);
 
-
         if (typeof messageData.type !== "string") return;
 
         switch (messageData.type) {
           case "chat.send": {
             if (!isSendMessage(messageData)) return;
-            
+
             const id = mapMessageId.has(messageData.messageId);
-            
+
             if (id) {
               const msgAckError: AckMessage = {
                 type: "ack",
@@ -121,29 +118,35 @@ export const websocketSetup = (server: Server) => {
               };
               if (ws.readyState === WebSocket.OPEN)
                 ws.send(JSON.stringify(msgAckOk));
-          
-              
-               if (hasUserId(ws)) {
+
+              if (hasUserId(ws)) {
+                const toIdMsg =
+                  messageData.payload.scope === "chat.public"
+                    ? undefined
+                    : messageData.payload.toId;
                 const msgClient: ChatMessage = {
                   messageId: messageData.messageId,
                   timestamp: Date.now(),
                   type: messageData.payload.scope,
                   payload: {
                     fromId: ws.userId,
-                    toId: messageData.payload.toId,
+                    toId: toIdMsg,
                     text: messageData.payload.text,
                   },
-                };                
-                
+                };
+
                 if (msgClient.type === "chat.public") {
-                  
                   wss.clients.forEach((client: WebSocket) => {
                     if (client !== ws && client.readyState === WebSocket.OPEN) {
                       client.send(JSON.stringify(msgClient));
                     }
                   });
                 }
-                if (msgClient.type === "chat.private") {
+                if (
+                  msgClient.type === "chat.private" &&
+                  typeof msgClient.payload.toId === "string" &&
+                  msgClient.payload.toId.trim()
+                ) {
                   wss.clients.forEach((client: WebSocket) => {
                     if (
                       client.readyState === WebSocket.OPEN &&
@@ -190,14 +193,14 @@ export const websocketSetup = (server: Server) => {
                 type: "system",
                 timestamp: Date.now(),
                 payload: {
-                  message: `${ws.nickname} ingreso a la sala`, 
+                  message: `${ws.nickname} ingreso a la sala`,
                 },
               };
               const registerNicknamePrivate: SystemMessage = {
                 type: "system",
                 timestamp: Date.now(),
                 payload: {
-                  message: `${ws.nickname} ingresaste a la sala`
+                  message: `${ws.nickname} ingresaste a la sala`,
                 },
               };
               if (ws.readyState === WebSocket.OPEN) {
@@ -296,8 +299,8 @@ export const websocketSetup = (server: Server) => {
 
     ws.on("close", () => {
       if (process.env.NODE_ENV !== "test") {
-    console.log("conexion finalizada");
-  }
+        console.log("conexion finalizada");
+      }
     });
   });
 
@@ -320,9 +323,10 @@ export const websocketSetup = (server: Server) => {
   });
 
   wss.on("close", () => {
-if (process.env.NODE_ENV !== "test") {
-    console.log("conexion finalizada");
-  }    clearInterval(interval);
+    if (process.env.NODE_ENV !== "test") {
+      console.log("conexion finalizada");
+    }
+    clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
     clearInterval(clearIntervalNicks);
     clearInterval(clearIntervalChangeNick);
@@ -331,24 +335,23 @@ if (process.env.NODE_ENV !== "test") {
     mapNicknameId.clear();
   });
 
-  return{
+  return {
     wss,
-    close:()=>{
-      clearInterval(interval)
-      clearInterval(clearIntervalNicks)
-      clearInterval(clearIntervalIdMsg)
-      clearInterval(clearIntervalChangeNick)
+    close: () => {
+      clearInterval(interval);
+      clearInterval(clearIntervalNicks);
+      clearInterval(clearIntervalIdMsg);
+      clearInterval(clearIntervalChangeNick);
 
-      mapChangeNicknameId.clear()
-      mapMessageId.clear()
-      mapNicknameId.clear()
+      mapChangeNicknameId.clear();
+      mapMessageId.clear();
+      mapNicknameId.clear();
 
       try {
-        wss.close()
-      } catch(err){
+        wss.close();
+      } catch (err) {
         console.log("error closing wss:", err);
-        
       }
-    }
-  }
+    },
+  };
 };

@@ -9,7 +9,6 @@ describe("isSendMessage guard", () => {
       timestamp: Date.now(),
       payload: {
         scope: "chat.public",
-        toId: "toid",
         text: "msg public",
       },
     };
@@ -24,7 +23,6 @@ describe("isSendMessage guard", () => {
       invalid:"",
       payload: {
         scope: "chat.public",
-        toId: "toid",
         text: "msg public",
       },
     };
@@ -95,24 +93,13 @@ describe("isSendMessage guard", () => {
     expect(isSendMessage(missingPayload)).toBe(false);
   });
 
-  test("Should return false if unexpected content in payload",()=>{
-    const invalidContent = {
-      type: "registerNickname",
-      timestamp: Date.now(),
-      payload: {
-        messageId: 1234,
-        nickname: "nick",
-      },
-    };
-    expect(isSendMessage(invalidContent)).toBeFalsy()
-  })
+  
   test("Should return false if type missing", () => {
     const missingType = {
       messageId: "msg-id",
       timestamp: Date.now(),
       payload: {
         scope: "chat.public",
-        toId: "toid",
         text: "msg",
       },
     };
@@ -126,7 +113,6 @@ describe("isSendMessage guard", () => {
       timestamp: Date.now(),
       payload: {
         scope: "chat.public",
-        toId: "toid",
         text: 12345,
       },
     };

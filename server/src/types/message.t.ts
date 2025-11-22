@@ -7,7 +7,7 @@ export interface ChatMessage extends BaseMessage{
     messageId:string;
     payload:{
         fromId:string;
-        toId:string; 
+        toId?:string | undefined; 
         text:string
     }
 }//primer tipo de mensajes que a su vez tiene un subtipo publico y privado. Tiene desde que a que id va el mensaje, y un id unico para identificarlo y evitar duplicados.
@@ -17,7 +17,7 @@ export interface SendMessage extends BaseMessage{
     messageId:string;// este lo tengo que crear desde el cliente con cripto uuid, es decir viene desde el frontend
     payload:{
         scope:"chat.public" | "chat.private";
-        toId:string;
+        toId?:string;
         text:string
     }
 }// tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
