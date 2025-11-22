@@ -124,6 +124,7 @@ export const websocketSetup = (server: Server) => {
                   messageData.payload.scope === "chat.public"
                     ? undefined
                     : messageData.payload.toId;
+
                 const msgClient: ChatMessage = {
                   messageId: messageData.messageId,
                   timestamp: Date.now(),
@@ -186,6 +187,7 @@ export const websocketSetup = (server: Server) => {
                 payload: {
                   status: "ok",
                   details: "register nick ok",
+                  fromId: ws.userId,
                 },
               };
               ws.nickname = messageData.payload.nickname;

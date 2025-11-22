@@ -66,8 +66,9 @@ export interface AckMessage extends BaseMessage{
     type:"ack";
     correlationId:string;// aca iria el id del mensaje que llega en el sendmessage
     payload:{
-        status:"ok" | "error"
-        details?:string
+        status:"ok" | "error",
+        details?:string,
+        fromId?:string | undefined
     }
 }//tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
 
