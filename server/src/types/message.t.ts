@@ -42,7 +42,7 @@ export interface SystemMessage extends BaseMessage{
 
 export interface RegisterNickname extends BaseMessage{
     type:"registerNickname";
-    payload:{
+    payload:{ 
         messageId:string;
         nickname:string;
     }

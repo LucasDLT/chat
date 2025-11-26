@@ -263,7 +263,7 @@ export const websocketSetup = (server: Server) => {
                 if (client === ws && ws.readyState === WebSocket.OPEN) {
                   ws.send(JSON.stringify(msgAckOk));
                 }
-                if (client.readyState === WebSocket.OPEN) {
+                if (client.readyState === WebSocket.OPEN && client !== ws) {
                   client.send(JSON.stringify(changeNickname));
                 }
               });
