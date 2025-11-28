@@ -95,9 +95,12 @@ export interface ProcessMsg {
   };
   clients?: ClientsConected[];
   count?: number;
+  systemMessage?: SystemMessage
 }
 
 export interface ClientsConected {
+  messageIn?:boolean;
+  totalMessageIn?:number;
   userId: string;
   nick: string;
 }

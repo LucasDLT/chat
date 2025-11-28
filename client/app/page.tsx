@@ -21,7 +21,6 @@ export default function Home() {
   const [nickConected, setNickConected] = useState<ClientsConected[]>([]);
   const [privateIdMsg, setPrivateIdMsg] = useState<string | undefined>("");
   const [clientSelected, setClientSelected] = useState<string | undefined>("");
-  const [inputMsgPriv, setInputMsgPriv] = useState<string | undefined>("");
   const [messageFeedPriv, setMessageFeedPriv] = useState<string[]>([]);
 
   useEffect(() => {
@@ -50,15 +49,31 @@ export default function Home() {
             }
             //este en el caso del register que estoy probando captura el mensaje personalizado de que ingreso a la sala y si resuelve la promesa
             if (msg.type === "system" && msg.payload.message) {
-             // resolve({ message: msg.payload.message });
+              resolve({
+                systemMessage: {
+                  type: msg.type,
+                  timestamp: msg.timestamp,
+                  payload: { message: msg.payload.message },
+                },
+              });
             }
             //con este el mensaje publico
             if (msg.type === "chat.public" && msg.payload.text) {
-              resolve({ message: {type:msg.type,text:msg.payload.text} });
+              resolve({ message: { type: msg.type, text: msg.payload.text } });
             }
-            if (msg.type==="chat.private" && msg.payload.text && msg.payload.toId){
-              resolve({message:{type:msg.type,text:msg.payload.text, toId:msg.payload.toId, fromId:msg.payload.fromId}})
-
+            if (
+              msg.type === "chat.private" &&
+              msg.payload.text &&
+              msg.payload.toId
+            ) {
+              resolve({
+                message: {
+                  type: msg.type,
+                  text: msg.payload.text,
+                  toId: msg.payload.toId,
+                  fromId: msg.payload.fromId,
+                },
+              });
             }
             if (msg.type === "snapshot:clients" && msg.payload) {
               const conectedNicks: ClientsConected[] = [];
@@ -74,32 +89,49 @@ export default function Home() {
           });
         };
 
-
         if (socketRef.current !== null) {
           let message = await handleProcesMsgToFeed(parse, socketRef.current);
           console.log("listado resuelto", message);
+          //para el mensaje system
+          if (
+            message.systemMessage?.type &&
+            message.systemMessage.type === "system"
+          ) {
+            let msg: string = message.systemMessage.payload.message;
+            setMessageFeed((prev: string[]) => [...prev, msg]);
+          }
+
           //datos para el feed de mensajes
-          if ( message.message?.type==="chat.public" && typeof message.message.text === "string") {
-
-            let msg:string=message.message.text
-
-            setMessageFeed((prevMsg: string[]) => [
-              ...prevMsg,
-              msg,
-            ]);
+          if (
+            message.message?.type === "chat.public" &&
+            typeof message.message.text === "string"
+          ) {
+            let msg: string = message.message.text;
+            setMessageFeed((prevMsg: string[]) => [...prevMsg, msg]);
           }
-          if (message.message?.type==="chat.private" && message.message?.toId) {
-                        let msg:string=message.message.text
-            setMessageFeedPriv((prev:string[])=>[
-              ...prev,
-              msg
-            ])
+
+          //datos para los chats privados
+          if (
+            message.message?.type === "chat.private" &&
+            message.message?.toId
+          ) {
+            let msg: string = message.message.text;
+            setMessageFeedPriv((prev: string[]) => [...prev, msg]);
           }
+
+          //datos para el feed de clientes conectados
           if (Array.isArray(message.clients)) {
             const nicks = message.clients;
             setNickConected(nicks);
             //datos para el contador y nicks conectados
             setConectedCount(nicks.length);
+            if (nickConected) {
+              nickConected.forEach((c)=>{
+                console.log("lista de conectados",c.nick);
+
+              })
+              
+            }
           }
         }
       });
@@ -119,9 +151,9 @@ export default function Home() {
     };
   }, []);
 
-  const handleSelectClient = (userId: string, nick:string) => {
+  const handleSelectClient = (userId: string, nick: string) => {
     setPrivateIdMsg(userId);
-    setClientSelected(nick)
+    setClientSelected(nick);
   };
   const registerNick = (event: FormEvent) => {
     event.preventDefault();
@@ -148,20 +180,20 @@ export default function Home() {
   const sendMessagePrivate = (event: FormEvent) => {
     event.preventDefault();
     const messageId = nanoid();
-    if (privateIdMsg && inputMsgPriv) {
+    if (privateIdMsg && inputMsg) {
       const message: SendMessage = {
         timestamp: Date.now(),
         type: "chat.send",
         messageId: messageId,
         payload: {
           scope: "chat.private",
-          text: inputMsgPriv,
+          text: inputMsg,
           toId: privateIdMsg,
         },
       };
       socketRef.current?.send(JSON.stringify(message));
-      setInputMsgPriv("");
-      setMessageFeedPriv(prev=>[...prev, inputMsgPriv])
+      setInputMsg("");
+      setMessageFeedPriv((prev) => [...prev, inputMsg]);
     }
   };
   const sendMessage = (event: FormEvent) => {
@@ -186,6 +218,10 @@ export default function Home() {
     const data = event.currentTarget as HTMLInputElement;
     setInputMsg(data.value);
   };
+  const returnToGroup = () => {
+    setPrivateIdMsg("");
+    setClientSelected("");
+  };
   return (
     <div className="flex flex-col justify-center items-center">
       <h1>chat</h1>
@@ -202,11 +238,17 @@ export default function Home() {
           value={inputRegister}
         />
         <button className="border rounded p-1 m-1">registrar</button>
+
         {/*contador de usuarios conectados*/}
         <div className="flex gap-2 p-4 m-1 rounded bg-gray-700">
-          <h3>conectados: </h3>
+          <button className="hover:cursor-pointer" onClick={returnToGroup}>
+            grupo:{" "}
+          </button>
           <p>{conectedCount ? conectedCount : "usuarios conectados"}</p>
         </div>
+
+        {/*lista de usuarios conectados*/}
+
         <div className="flex gap-2 m-1 p-3 rounded bg-gray-700">
           <h3>usuarios</h3>
           <div>
@@ -218,41 +260,46 @@ export default function Home() {
                   key={index}
                 >
                   {nick.nick}
+                  {nick.messageIn}
                 </p>
               );
             })}
+            <p></p>
           </div>
         </div>
 
-        {/*section para el feed de mensajes*/}
-       {privateIdMsg?
-       <section className="border h-[70vh] w-[50vw]">
-        <h3>hablas con {clientSelected}</h3>
-        <div className="grid grid-cols-1 gap-2 bg-blue-950">
-            {messageFeedPriv.map((msg, index) => {
-              return (
-                <p key={index} className="border bg-gray-800">
-                  {msg}
-                </p>
-              );
-            })}
-          </div>
-       </section>
-       :<section className="border h-[70vh] w-[50vw]">
-          <div className="grid grid-cols-1 gap-2 bg-blue-950">
-            {messageFeed.map((msg, index) => {
-              return (
-                <p key={index} className="border bg-gray-800">
-                  {msg}
-                </p>
-              );
-            })}
-          </div>
-        </section>}
+        {/*section para el feed de mensajes privados*/}
+        {privateIdMsg ? (
+          <section className="border h-[70vh] w-[50vw]">
+            <h3>hablas con {clientSelected}</h3>
+            <div className="grid grid-cols-1 gap-2 bg-blue-950">
+              {messageFeedPriv.map((msg, index) => {
+                return (
+                  <p key={index} className="border bg-gray-800">
+                    {msg}
+                  </p>
+                );
+              })}
+            </div>
+          </section> 
+        ) : ( 
+          /*section para el feed de mensajes publicos*/
+          <section className="border h-[70vh] w-[50vw]">
+            <div className="grid grid-cols-1 gap-2 bg-blue-950">
+              {messageFeed.map((msg, index) => {
+                return (
+                  <p key={index} className="border bg-gray-800">
+                    {msg}
+                  </p>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </form>
       {/*formulario para envio de mensajes*/}
       <form
-        onSubmit={privateIdMsg? sendMessage: sendMessagePrivate}
+        onSubmit={privateIdMsg ? sendMessagePrivate : sendMessage}
         className="flex items-center bg-amber-50 rounded mt-1"
       >
         <input
