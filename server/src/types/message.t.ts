@@ -22,7 +22,22 @@ export interface SendMessage extends BaseMessage{
     }
 }// tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
 
+//para mandar al cliente el total de usuarios conectados necesito este tipado 
+export interface userData{
+    userId:string;
+    nickname?:string | null;
+    isAlive?:boolean | undefined
+}
+export interface SnapshotClients {
+  type: "snapshot:clients";
+  payload: userData[];
+  timestamp: number;
+  count:number
+}
 
+export interface PongServer extends BaseMessage{
+    type:"pong.server";
+}
 
 export interface ErrorMessage extends BaseMessage{
     type:"error";
@@ -60,7 +75,9 @@ export interface ChangeNickname extends BaseMessage{
     }
 }
 
-
+export interface PingClient extends BaseMessage{
+    type:"ping.client";
+}
 
 export interface AckMessage extends BaseMessage{
     type:"ack";
@@ -74,6 +91,6 @@ export interface AckMessage extends BaseMessage{
 
 
 //uniones de tipos para que el switch me tome varios tipos desde una sola interface
-export type ServerToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage 
+export type ServerToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage | PongServer
 
-export type ClientToServerMessage = RegisterNickname | SendMessage | ChangeNickname
+export type ClientToServerMessage = RegisterNickname | SendMessage | ChangeNickname | PingClient

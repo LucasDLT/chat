@@ -6,6 +6,9 @@ import type {
   AckMessage,
   ChatMessage,
   SystemMessage,
+  userData,
+  PongServer,
+  SnapshotClients,
 } from "./types/message.t";
 import {
   isSendMessage,
@@ -17,12 +20,46 @@ import {
 function heartbeat(this: WebSocket) {
   this.isAlive = true;
 }
+
 //set para guardar los id de mensajes y simular una bdd y cache temporal
 export const websocketSetup = (server: Server) => {
   const wss = new WebSocketServer({ server });
   const mapMessageId = new Map<string, number>();
   const mapNicknameId = new Map<string, number>();
   const mapChangeNicknameId = new Map<string, number>();
+  const registeredClients = new Map<string, userData>(); //map paralelo a clients solo para enviarlo al cliente y tener los conectados
+
+  //para pasar de map a array. No se usa directamente, va dentro de otra fn
+  function serializeRegisteredClients() {
+    return Array.from(registeredClients.values()).map((u) => ({
+      userId: u.userId,
+      nickname: u.nickname ?? null,
+      isAlive: u.isAlive,
+    }));
+  }
+  //para pasar el userData, pase a JSON y se envie a todos los conectados. No se usa directamente, va dentro de otra fn
+  function broadcastRegisteredClients(messageObj: SnapshotClients) {
+    const raw = JSON.stringify(messageObj);
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(raw);
+      }
+    });
+  }
+
+  //para mandar al socket el resultado de la funcion que cambia map por array, lo pone en el payload. Se usa directamente. Por mas que aun no esta con los datos completos sirve para ver que alguien esta conectado y a la espera de entrar en la sala
+  function sendSnapshotToSocket() {
+
+    broadcastRegisteredClients({
+      type: "snapshot:clients",
+      payload: serializeRegisteredClients(),
+      timestamp: Date.now(),
+      count: registeredClients.size,
+    });
+
+
+  }
+
 
   const TTL = 2 * 60 * 1000;
 
@@ -72,10 +109,20 @@ export const websocketSetup = (server: Server) => {
     ws.isAlive = true;
     ws.userId = crypto.randomUUID();
 
+    const userData: userData = {
+      userId: ws.userId,
+      isAlive: ws.isAlive,
+      nickname: ws.nickname ?? null,
+    };
+
+    registeredClients.set(userData.userId, userData);
+
+    sendSnapshotToSocket();
+
     ws.once("message", () => {
       //aca podria tipar un objeto y hacer el envelope para enviarlo al que se conecta o a todos avisando que se conecto
 
-      ws.send("conexion ws establecida");
+      ws.send(JSON.stringify("conexion ws establecida"));
     });
     //aca podria hacer otro on message con un mensaje como el de arriba avisando de la conexion a todos y construir el mensaje
 
@@ -190,6 +237,9 @@ export const websocketSetup = (server: Server) => {
                   fromId: ws.userId,
                 },
               };
+              userData.nickname = messageData.payload.nickname;
+              registeredClients.set(userData.userId, userData);
+              sendSnapshotToSocket();
               ws.nickname = messageData.payload.nickname;
               const registerNicknamePublic: SystemMessage = {
                 type: "system",
@@ -215,6 +265,7 @@ export const websocketSetup = (server: Server) => {
                 }
               });
             }
+
             break;
           }
 
@@ -251,6 +302,9 @@ export const websocketSetup = (server: Server) => {
                   details: "change nick ok",
                 },
               };
+              userData.nickname = messageData.payload.nickname;
+              registeredClients.set(userData.userId, userData);
+              sendSnapshotToSocket();
               const changeNickname: SystemMessage = {
                 type: "system",
                 timestamp: Date.now(),
@@ -267,6 +321,16 @@ export const websocketSetup = (server: Server) => {
                   client.send(JSON.stringify(changeNickname));
                 }
               });
+            }
+            break;
+          }
+          case "ping.client": {
+            const pongServer: PongServer = {
+              type: "pong.server",
+              timestamp: messageData.timestamp,
+            };
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify(pongServer));
             }
             break;
           }
@@ -303,15 +367,23 @@ export const websocketSetup = (server: Server) => {
       if (process.env.NODE_ENV !== "test") {
         console.log("conexion finalizada");
       }
+      if (ws.userId) {
+        registeredClients.delete(ws.userId);
+
+        sendSnapshotToSocket();
+      }
     });
   });
 
   //continuamos con la funcion del ping-pong. Limpiamos cada 30s de inactividad y verificamos el isAlive como el readyState
   const interval: NodeJS.Timeout = setInterval(function ping() {
     wss.clients.forEach(function each(client: WebSocket) {
-      if (client.isAlive === false) return client.terminate();
-      if (client.readyState !== WebSocket.OPEN) return client.terminate();
-
+      if (client.isAlive === false || client.readyState !== WebSocket.OPEN) {
+        if (client.userId) {
+          registeredClients.delete(client.userId);
+        }
+        return client.terminate();
+      }
       client.isAlive = false;
       client.ping();
     });
