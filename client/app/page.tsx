@@ -116,7 +116,21 @@ export default function Home() {
             message.message?.toId
           ) {
             let msg: string = message.message.text;
+            let fromId:string= message.message.fromId!
             setMessageFeedPriv((prev: string[]) => [...prev, msg]);
+
+            setNickConected((prev) =>
+              prev.map((c) =>
+                c.userId === fromId
+                  ? {
+                      ...c,
+                      messageIn: true,
+                      totalMessageIn: (c.totalMessageIn ?? 0) + 1,
+                      msgPriv: [...(c.msgPriv ?? []), msg],
+                    }
+                  : c
+              )
+            );
           }
 
           //datos para el feed de clientes conectados
@@ -125,13 +139,6 @@ export default function Home() {
             setNickConected(nicks);
             //datos para el contador y nicks conectados
             setConectedCount(nicks.length);
-            if (nickConected) {
-              nickConected.forEach((c)=>{
-                console.log("lista de conectados",c.nick);
-
-              })
-              
-            }
           }
         }
       });
@@ -260,7 +267,7 @@ export default function Home() {
                   key={index}
                 >
                   {nick.nick}
-                  {nick.messageIn}
+                  {nick.totalMessageIn ? `(${nick.totalMessageIn})` : ""}
                 </p>
               );
             })}
@@ -281,8 +288,8 @@ export default function Home() {
                 );
               })}
             </div>
-          </section> 
-        ) : ( 
+          </section>
+        ) : (
           /*section para el feed de mensajes publicos*/
           <section className="border h-[70vh] w-[50vw]">
             <div className="grid grid-cols-1 gap-2 bg-blue-950">

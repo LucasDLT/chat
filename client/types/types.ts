@@ -101,9 +101,11 @@ export interface ProcessMsg {
 export interface ClientsConected {
   messageIn?:boolean;
   totalMessageIn?:number;
+  msgPriv?:string[];
   userId: string;
   nick: string;
 }
+
 
 //uniones de tipos para que el switch me tome varios tipos desde una sola interface
 export type ServerToClientMessage =
