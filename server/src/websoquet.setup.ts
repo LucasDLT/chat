@@ -312,10 +312,18 @@ export const websocketSetup = (server: Server) => {
                   message: `${oldNick} cambio a ${messageData.payload.nickname}`,
                 },
               };
+              const msgForClient: SystemMessage = {
+                type: "system",
+                timestamp: Date.now(),
+                payload: {
+                  message: `${oldNick} cambiaste a ${messageData.payload.nickname}`,
+                },
+              };
 
               wss.clients.forEach((client) => {
                 if (client === ws && ws.readyState === WebSocket.OPEN) {
                   ws.send(JSON.stringify(msgAckOk));
+                  ws.send(JSON.stringify(msgForClient))
                 }
                 if (client.readyState === WebSocket.OPEN && client !== ws) {
                   client.send(JSON.stringify(changeNickname));
