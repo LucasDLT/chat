@@ -1,12 +1,12 @@
 "use client";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
+  ChangeNickname,
   ClientsConected,
   ProcessMsg,
   RegisterNickname,
   SendMessage,
   ServerToClientMessage,
-  userData,
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 export default function Home() {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
+  const nickRef=useRef<string>("")
   const [inputRegister, setInputRegister] = useState<string | undefined>("");
   const [messageFeed, setMessageFeed] = useState<string[]>([]);
   const [inputMsg, setInputMsg] = useState<string | undefined>("");
@@ -22,6 +23,7 @@ export default function Home() {
   const [privateIdMsg, setPrivateIdMsg] = useState<string | undefined>("");
   const [clientSelected, setClientSelected] = useState<string | undefined>("");
   const [messageFeedPriv, setMessageFeedPriv] = useState<string[]>([]);
+  const [hasNickname, setHasNickname] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -36,7 +38,8 @@ export default function Home() {
         // console.log("lo que llega del servidor antes de la funcion normalizadora", parse);
         const handleProcesMsgToFeed = (
           msg: ServerToClientMessage,
-          client: WebSocket
+          client: WebSocket,
+          nick?:string
         ): Promise<ProcessMsg> => {
           return new Promise((resolve, reject) => {
             //este if cubre el registro donde el servidor me devuelve el id del cliente creado una vez que verifica que el messageId no esta duplicado
@@ -46,6 +49,8 @@ export default function Home() {
               msg.payload.fromId
             ) {
               client.userId = msg.payload.fromId;
+              client.isAlive= true
+              client.nickname=nick
             }
             //este en el caso del register que estoy probando captura el mensaje personalizado de que ingreso a la sala y si resuelve la promesa
             if (msg.type === "system" && msg.payload.message) {
@@ -90,7 +95,8 @@ export default function Home() {
         };
 
         if (socketRef.current !== null) {
-          let message = await handleProcesMsgToFeed(parse, socketRef.current);
+          let nick= nickRef.current
+          let message = await handleProcesMsgToFeed(parse, socketRef.current, nick);
           console.log("listado resuelto", message);
           //para el mensaje system
           if (
@@ -99,6 +105,17 @@ export default function Home() {
           ) {
             let msg: string = message.systemMessage.payload.message;
             setMessageFeed((prev: string[]) => [...prev, msg]);
+            if (message.systemMessage.payload.message.includes("ingresaste")) {
+              setHasNickname(true);
+            }
+            
+          
+
+            console.log("nick del socket", socketRef.current.nickname);
+            
+            console.log("isalive del sokcket", socketRef.current.isAlive);
+            console.log("id del sokcket", socketRef.current.userId);
+            
           }
 
           //datos para el feed de mensajes
@@ -116,9 +133,9 @@ export default function Home() {
             message.message?.toId
           ) {
             let msg: string = message.message.text;
-            let fromId:string= message.message.fromId!
+            let fromId: string = message.message.fromId!;
             setMessageFeedPriv((prev: string[]) => [...prev, msg]);
-
+            //aca recorde que el estado solo podria modificarlo el setter y no una funcion externa, se puede hacer el set y dentro aplicar un map o lo que querramos, mientras devuelva la variable modificada, en este caso las propiedades del estado que era un objeto se cambiaron.
             setNickConected((prev) =>
               prev.map((c) =>
                 c.userId === fromId
@@ -161,12 +178,26 @@ export default function Home() {
   const handleSelectClient = (userId: string, nick: string) => {
     setPrivateIdMsg(userId);
     setClientSelected(nick);
+    const client = nickConected.find((id) => id.userId === userId);
+    if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {
+      setMessageFeedPriv([...client.msgPriv]);
+    } else {
+      setMessageFeedPriv([]);
+    }
+    //replique la funcion para pushear con el setter el objeto dentro del estado con sus propiedades resteadas
+    setNickConected((prev) =>
+      prev.map((c) =>
+        c.userId === userId
+          ? { ...c, messageIn: false, totalMessageIn: 0, msgPriv: [] }
+          : c
+      )
+    );
   };
   const registerNick = (event: FormEvent) => {
     event.preventDefault();
     const messageId = nanoid();
 
-    if (inputRegister) {
+    if (inputRegister && !hasNickname) {
       const registerNick: RegisterNickname = {
         type: "registerNickname",
         timestamp: Date.now(),
@@ -176,7 +207,19 @@ export default function Home() {
         },
       };
       socketRef.current?.send(JSON.stringify(registerNick));
-      setInputRegister("");
+      nickRef.current=inputRegister
+    }
+    if (inputRegister && hasNickname && socketRef.current?.userId) {
+      const changeNickname: ChangeNickname = {
+        type: "changeNickname",
+        timestamp: Date.now(),
+        payload: {
+          messageId: messageId,
+          nickname: inputRegister,
+          userId: socketRef.current?.userId,
+        },
+      };      
+      socketRef.current?.send(JSON.stringify(changeNickname));
     }
   };
   const changeRegisterNick = (event: FormEvent) => {
@@ -237,19 +280,21 @@ export default function Home() {
         onSubmit={registerNick}
         className="flex flex-col g-1 justify-center items-center"
       >
-        <label>registrar nick</label>
+        <label>Nick</label>
         <input
           type="text"
           className="border border-amber-100"
           onChange={changeRegisterNick}
-          value={inputRegister}
+          value={socketRef.current?.nickname}
         />
-        <button className="border rounded p-1 m-1">registrar</button>
+        <button className="border rounded p-1 m-1">
+          {hasNickname ? "cambiar nick" : "registrar nick"}
+        </button>
 
         {/*contador de usuarios conectados*/}
         <div className="flex gap-2 p-4 m-1 rounded bg-gray-700">
           <button className="hover:cursor-pointer" onClick={returnToGroup}>
-            grupo:{" "}
+            grupo:
           </button>
           <p>{conectedCount ? conectedCount : "usuarios conectados"}</p>
         </div>
