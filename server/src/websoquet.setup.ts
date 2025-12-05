@@ -235,6 +235,7 @@ export const websocketSetup = (server: Server) => {
                   status: "ok",
                   details: "register nick ok",
                   fromId: ws.userId,
+                  nickname:messageData.payload.nickname
                 },
               };
               userData.nickname = messageData.payload.nickname;
@@ -300,6 +301,8 @@ export const websocketSetup = (server: Server) => {
                 payload: {
                   status: "ok",
                   details: "change nick ok",
+                  nickname:messageData.payload.nickname,
+                  fromId:ws.userId
                 },
               };
               userData.nickname = messageData.payload.nickname;

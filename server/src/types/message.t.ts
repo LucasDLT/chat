@@ -86,6 +86,7 @@ export interface AckMessage extends BaseMessage{
         status:"ok" | "error",
         details?:string,
         fromId?:string | undefined
+        nickname?:string
     }
 }//tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
 
