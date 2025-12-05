@@ -14,7 +14,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 export default function Home() {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
-  const nickRef=useRef<string>("")
+  const pendingNickRef=useRef<Record<string, string>>({})
   const [inputRegister, setInputRegister] = useState<string | undefined>("");
   const [messageFeed, setMessageFeed] = useState<string[]>([]);
   const [inputMsg, setInputMsg] = useState<string | undefined>("");
@@ -39,7 +39,6 @@ export default function Home() {
         const handleProcesMsgToFeed = (
           msg: ServerToClientMessage,
           client: WebSocket,
-          nick?:string
         ): Promise<ProcessMsg> => {
           return new Promise((resolve, reject) => {
             //este if cubre el registro donde el servidor me devuelve el id del cliente creado una vez que verifica que el messageId no esta duplicado
@@ -50,7 +49,10 @@ export default function Home() {
             ) {
               client.userId = msg.payload.fromId;
               client.isAlive= true
-              client.nickname=nick
+
+              client.nickname=msg.payload.nickname
+                          console.log("nick del socket modificado", client.nickname);
+
             }
             //este en el caso del register que estoy probando captura el mensaje personalizado de que ingreso a la sala y si resuelve la promesa
             if (msg.type === "system" && msg.payload.message) {
@@ -95,8 +97,7 @@ export default function Home() {
         };
 
         if (socketRef.current !== null) {
-          let nick= nickRef.current
-          let message = await handleProcesMsgToFeed(parse, socketRef.current, nick);
+          let message = await handleProcesMsgToFeed(parse, socketRef.current);
           console.log("listado resuelto", message);
           //para el mensaje system
           if (
@@ -207,7 +208,6 @@ export default function Home() {
         },
       };
       socketRef.current?.send(JSON.stringify(registerNick));
-      nickRef.current=inputRegister
     }
     if (inputRegister && hasNickname && socketRef.current?.userId) {
       const changeNickname: ChangeNickname = {
@@ -220,6 +220,7 @@ export default function Home() {
         },
       };      
       socketRef.current?.send(JSON.stringify(changeNickname));
+      pendingNickRef.current[messageId]=inputRegister //con corchetes asigno la key para que el value sea inputRegister. Dejo esto para el yo de mañana por que ahora tengo sueño
     }
   };
   const changeRegisterNick = (event: FormEvent) => {
@@ -285,7 +286,7 @@ export default function Home() {
           type="text"
           className="border border-amber-100"
           onChange={changeRegisterNick}
-          value={socketRef.current?.nickname}
+          value={inputRegister}
         />
         <button className="border rounded p-1 m-1">
           {hasNickname ? "cambiar nick" : "registrar nick"}
