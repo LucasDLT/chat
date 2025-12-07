@@ -63,7 +63,9 @@ describe("WSS integration - Handshake", () => {
 
 
     const msg=await waitForMessage(client, 2000)
-    expect(msg).toBe("conexion ws establecida")
+    
+    
+    expect(JSON.parse(msg)).toBe("conexion ws establecida")
 
     client.close
   },10000);

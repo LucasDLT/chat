@@ -88,7 +88,7 @@ test("Server change nickname ok & replies ack ok", async () => {
   };
   const sendParsedChange = client1.send(JSON.stringify(changeNickname));
   const resMsgs = await collectionJsonMessages(client1, 2);
-
+  
   const ackOk = resMsgs.find((res) => res?.type === "ack");
   expect(ackOk).toBeDefined();
 
@@ -97,7 +97,7 @@ test("Server change nickname ok & replies ack ok", async () => {
 
   const msgOkSystem = resMsgs.find((res) => res?.type === "system" &&
       typeof res.payload?.message === "string" &&
-      res.payload.message.includes(`${oldNick} cambio a ${newNick}`)
+      res.payload.message.includes(`${oldNick} cambiaste a ${newNick}`)
   );
   expect(msgOkSystem).toBeDefined();
 });

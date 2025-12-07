@@ -78,10 +78,11 @@ describe("WSS integration - RegisterNickname", () => {
 
     //despues el cliente1 recibe el ack ok y el system que avisa que ingreso
 
-    const recs = await collectionJsonMessages(client1, 2);
+    const recs = await collectionJsonMessages(client1,3);//aca aumentamos de 2 a 3 la cantidad de mensajes, en el helper ya excluimos el type snapshot y como uno se envia antes que todo, le ponemos 3 mensajes. 
 
     //busco el ack
     const ack = recs.find((r) => r?.type === "ack");
+    
     expect(ack).toBeDefined();
 
     expect(ack.correlationId).toBe(msgId);
@@ -93,7 +94,7 @@ describe("WSS integration - RegisterNickname", () => {
         typeof r.payload?.message === "string" &&
         r.payload.message.includes("ingresaste a la sala")
     );
-    expect(privateSystemMsg).toBeDefined();
+    expect(privateSystemMsg).toBeDefined(); 
 
     const [parsedB] = await collectionJsonMessages(client2, 1);
 

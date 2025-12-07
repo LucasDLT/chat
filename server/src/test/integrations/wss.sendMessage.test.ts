@@ -12,8 +12,7 @@ import { websocketSetup } from "../../websoquet.setup";
 import { collectionJsonMessages } from "../helpers/collectionMsg";
 import { WebSocket as WsClient } from "ws";
 import { createClient } from "../helpers/createClientWs";
-import { create } from "domain";
-import { timeStamp } from "console";
+
 
 describe("WSS integration - SendMessage", () => {
   let httpServer: HttpServer;
@@ -101,6 +100,8 @@ describe("WSS integration - SendMessage", () => {
     const sendMsg = client1.send(JSON.stringify(sendmessage));
     const resMsgClient1 = await collectionJsonMessages(client1, 1);
     const ackeOk = resMsgClient1.find((res) => res?.type === "ack");
+    console.log(ackeOk);
+    
     expect(ackeOk).toBeDefined();
     expect(ackeOk.correlationId).toBe(msgIdSend);
     expect(ackeOk.payload.status).toBe("ok");
@@ -149,7 +150,9 @@ describe("WSS integration - SendMessage", () => {
     expect(IdClient1).toBeDefined();
 
     client2.send(JSON.stringify(registerClient2));
-    const resClient2 = await collectionJsonMessages(client2, 2);
+    const resClient2 = await collectionJsonMessages(client2, 3);
+    console.log('resclient2',resClient2);
+    
     const ackeOkClient2 = resClient2.find((res) => res?.type === "ack");
     expect(ackeOkClient2).toBeDefined();
 
@@ -204,7 +207,8 @@ describe("WSS integration - SendMessage", () => {
       },
     };    
     client1.send(JSON.stringify(registerClient1));
-    const resClient1 = await collectionJsonMessages(client1, 1);
+    const resClient1 = await collectionJsonMessages(client1, 2);
+    
     const ackeOkClient1 = resClient1.find((res) => res?.type === "ack");
     expect(ackeOkClient1).toBeDefined();    
     expect(ackeOkClient1.payload?.status).toBe("ok");

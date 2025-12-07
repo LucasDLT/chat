@@ -9,7 +9,11 @@ export function collectionJsonMessages(ws: WsClient, n:number, timeoutMs = 2000)
       const raw = data instanceof Buffer ? data.toString() : String(data);
         try {
             const parsed=JSON.parse(raw)
-            messages.push(parsed)
+            if (parsed.type !== "snapshot:clients" ) {
+              messages.push(parsed)
+              
+            }
+
             if (messages.length>=n) {
                 cleanup()
                 resolve(messages)
