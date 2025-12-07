@@ -25,6 +25,8 @@ export default function Home() {
   const [clientSelected, setClientSelected] = useState<string | undefined>("");
   const [messageFeedPriv, setMessageFeedPriv] = useState<string[]>([]);
   const [hasNickname, setHasNickname] = useState<boolean>(false);
+  const [activeRegister, setActiveRegister] = useState<boolean>(false);
+
 
   useEffect(() => {
     try {
@@ -177,6 +179,12 @@ export default function Home() {
     };
   }, []);
 
+  const handleActiveRegister=() => {
+    //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco. 
+    setActiveRegister(!activeRegister)
+    setInputRegister('')
+    setHasNickname(false)
+  }
   const handleSelectClient = (userId: string, nick: string) => {
     setPrivateIdMsg(userId);
     setClientSelected(nick);
@@ -275,8 +283,8 @@ export default function Home() {
     setClientSelected("");
   };
   return (
-    <div className="flex flex-col justify-center items-center yellowBg border border-amber-950" >
-      <RegisterSection onChange={changeRegisterNick} value={inputRegister?inputRegister:""} onSubmit={registerNick} hasNickname />
+    <div className="flex flex-col justify-center items-center yellowBg" >
+      <RegisterSection onClick={handleActiveRegister} activeRegister={activeRegister} onChange={changeRegisterNick} value={inputRegister?inputRegister:""} onSubmit={registerNick} hasNickname={hasNickname} />
       {/*formulario para registrar nickname
       <form
         onSubmit={registerNick}

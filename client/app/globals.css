@@ -46,6 +46,13 @@ body {
 .titleColor{
   color:#FFD369
 }
+.borderYellow{
+  border-color: #ffd26910;
+}
+.bgBlurYellow{
+  background-color: #ffd26969;
+  backdrop-filter: blur(2px);
+}
 /*fonts*/
 
 .animalHunter{
