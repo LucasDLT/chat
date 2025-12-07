@@ -21,9 +21,9 @@ export const RegisterSection: React.FC<RegisterSectionProps> = ({
       <Image
         height={300}
         width={500}
-        alt="background registe section"
+        alt="background register section"
         src={"/background-app.jpg"}
-        className="rounded-sm mt-10"
+        className="h-full w-full object-cover xl:h-80 xl:rounded-sm xl:mt-10 xl:mb-10 "
       />
 
       {activeRegister ? (
@@ -41,10 +41,12 @@ export const RegisterSection: React.FC<RegisterSectionProps> = ({
             onChange={onChange}
             value={value}
           />
-          <button type="submit" className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer">
+          <button type="submit" className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow">
             {hasNickname ? "cambiar" : "registrar"}
           </button>
+          <p className="titleColor mesoninaRegular font-bold tracking-widest">Ya casi terminas</p>
         </form>
+        
       ) : (
         <button
           onClick={onClick}

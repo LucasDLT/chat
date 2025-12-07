@@ -283,7 +283,7 @@ export default function Home() {
     setClientSelected("");
   };
   return (
-    <div className="flex flex-col justify-center items-center yellowBg" >
+    <div className="flex flex-col justify-between items-center yellowBg h-screen" >
       <RegisterSection onClick={handleActiveRegister} activeRegister={activeRegister} onChange={changeRegisterNick} value={inputRegister?inputRegister:""} onSubmit={registerNick} hasNickname={hasNickname} />
       {/*formulario para registrar nickname
       <form
@@ -380,8 +380,8 @@ export default function Home() {
         </button>
       </form>
       */}
-      <section className="bg-black flex justify-center items-center xl:h-[40vh] xl:w-full ">
-            <h1 className='animalHunter titleColor font-bold tracking-wider xl:text-7xl'>LIVE CHAT</h1>
+      <section className="bg-black flex justify-center items-center h-[40vh] w-full xl:h-[40vh] xl:w-full ">
+            <h1 className='animalHunter titleColor font-bold tracking-wider text-7xl xl:text-7xl'>LIVE CHAT</h1>
       </section>
     </div>
   );
