@@ -8,8 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,4 +22,35 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/*para textos*/
+.grey{
+  color:#EEEEEE
+}
+
+/*para los fondos*/
+.black{
+  color:#222831
+}
+
+/*para los fondos de los mensajes*/
+.blackDeg{
+  color:#393E46
+}
+
+/*para acentuar y bordes*/
+.yellowBg{
+  background-color:#FFD369
+}
+.titleColor{
+  color:#FFD369
+}
+/*fonts*/
+
+.animalHunter{
+  font-family: var(--font-animal-hunter);
+}
+.mesoninaRegular{
+  font-family: var(--font-mesonina-regular);
 }

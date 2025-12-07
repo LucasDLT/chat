@@ -10,6 +10,7 @@ import {
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { RegisterSection } from "@/components/RegisterSection";
 
 export default function Home() {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
@@ -274,25 +275,28 @@ export default function Home() {
     setClientSelected("");
   };
   return (
-    <div className="flex flex-col justify-center items-center">
-      <h1>chat</h1>
-      {/*formulario para registrar nickname*/}
+    <div className="flex flex-col justify-center items-center yellowBg border border-amber-950" >
+      <RegisterSection onChange={changeRegisterNick} value={inputRegister?inputRegister:""} onSubmit={registerNick} hasNickname />
+      {/*formulario para registrar nickname
       <form
         onSubmit={registerNick}
         className="flex flex-col g-1 justify-center items-center"
       >
-        <label>Nick</label>
+        <label className="mesoninaRegular">Nick</label>
         <input
           type="text"
           className="border border-amber-100"
           onChange={changeRegisterNick}
           value={inputRegister}
         />
-        <button className="border rounded p-1 m-1">
+        <button className="border rounded p-1 m-1 ">
           {hasNickname ? "cambiar nick" : "registrar nick"}
         </button>
+      </form>*/}
 
-        {/*contador de usuarios conectados*/}
+      {/*
+      
+              //contador de usuarios conectados
         <div className="flex gap-2 p-4 m-1 rounded bg-gray-700">
           <button className="hover:cursor-pointer" onClick={returnToGroup}>
             grupo:
@@ -300,10 +304,10 @@ export default function Home() {
           <p>{conectedCount ? conectedCount : "usuarios conectados"}</p>
         </div>
 
-        {/*lista de usuarios conectados*/}
+        //lista de usuarios conectados
 
         <div className="flex gap-2 m-1 p-3 rounded bg-gray-700">
-          <h3>usuarios</h3>
+          <h3 className="mesoninaRegular">usuarios</h3>
           <div>
             {nickConected.map((nick, index) => {
               return (
@@ -321,7 +325,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/*section para el feed de mensajes privados*/}
+        //section para el feed de mensajes privados
         {privateIdMsg ? (
           <section className="border h-[70vh] w-[50vw]">
             <h3>hablas con {clientSelected}</h3>
@@ -336,7 +340,7 @@ export default function Home() {
             </div>
           </section>
         ) : (
-          /*section para el feed de mensajes publicos*/
+          //section para el feed de mensajes publicos
           <section className="border h-[70vh] w-[50vw]">
             <div className="grid grid-cols-1 gap-2 bg-blue-950">
               {messageFeed.map((msg, index) => {
@@ -349,8 +353,10 @@ export default function Home() {
             </div>
           </section>
         )}
-      </form>
-      {/*formulario para envio de mensajes*/}
+      */}
+     
+     {/*formulario para envio de mensajes*/}
+     {/* 
       <form
         onSubmit={privateIdMsg ? sendMessagePrivate : sendMessage}
         className="flex items-center bg-amber-50 rounded mt-1"
@@ -365,6 +371,10 @@ export default function Home() {
           enviar
         </button>
       </form>
+      */}
+      <section className="bg-black flex justify-center items-center xl:h-[40vh] xl:w-full ">
+            <h1 className='animalHunter titleColor font-bold tracking-wider xl:text-7xl'>LIVE CHAT</h1>
+      </section>
     </div>
   );
 }
