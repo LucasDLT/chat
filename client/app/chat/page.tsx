@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 export default function Chat() {
   const router = useRouter();
-  const [active, setActive]=useState<boolean>(false)
+  const [active, setActive] = useState<boolean>(false);
   return (
     <main className="yellowBg h-screen flex flex-row justify-between">
       <section className="flex flex-col h-screen w-60 relative">
@@ -33,18 +33,29 @@ export default function Chat() {
         </div>
       </section>
       <section>feed en blanco</section>
-      <section className={`bg-black flex flex-col h-screen ${active===false? 'w-20':'w-60' } items-center justify-end`}>
-        <nav className={`yellowBg flex flex-col justify-between items-center h-[85vh] ${active===false?'w-10':'w-50'} rounded-sm mb-2 pt-2 pb-2`}>
-          <Image
-            alt="icon user"
-            src={"/icons/usuario.png"}
-            width={30}
-            height={30}
-            onClick={() => {
-              setActive(!active)//aca dejamos esta funcion para poner el setter del cambio de estado para abrir el nav y cerrarlo
-            }}
-            className="hover:cursor-pointer"
-          />
+      <section
+        className={`bg-black flex flex-col h-screen ${
+          active === false ? "w-20 transition-all duration-100" : "w-60 transition-all duration-100"
+        } items-center justify-end`}
+      >
+        <nav
+          className={`yellowBg flex flex-col justify-between items-center h-[85vh] ${
+            active === false ? "w-10 transition-all duration-100" : "w-50 transition-all duration-100 "
+          } rounded-sm mb-2 pt-2 pb-2`}
+        >
+          <div className="flex flex-col relative">
+            <Image
+              alt="icon user"
+              src={"/icons/usuario.png"}
+              width={30}
+              height={30}
+              onClick={() => {
+                  setActive(!active); //aca dejamos esta funcion para poner el setter del cambio de estado para abrir el nav y cerrarlo
+                }}
+              className="hover:cursor-pointer"
+            />
+
+          </div>
           <Image
             alt="icon chat"
             src={"/icons/chat.png"}
