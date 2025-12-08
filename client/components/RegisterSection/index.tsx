@@ -8,7 +8,7 @@ interface RegisterSectionProps {
   activeRegister: boolean;
 }
 
-export const RegisterSection: React.FC<RegisterSectionProps> = ({
+export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
   hasNickname,
   onChange,
   value,

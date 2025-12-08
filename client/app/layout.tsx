@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from 'next/font/local'
 import "./globals.css";
+import { ContextWebSocket } from "@/context/context";
 
 const animalHunter= localFont({
 src:'../public/fonts/AnimalHunterRegular.woff2',
@@ -39,11 +40,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <ContextWebSocket>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${animalHunter.variable} ${mesoninaRegular.variable} antialiased`}
       >
         {children}
       </body>
+      </ContextWebSocket>
     </html>
   );
 }
