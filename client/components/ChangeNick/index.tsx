@@ -2,12 +2,14 @@ interface ChangeSectionProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
+  name: string;
 }
 
 export const ChangeNickSection: React.FC<ChangeSectionProps> = ({
   onChange,
   value,
   onSubmit,
+  name
 }) => {
   return (
     <form
@@ -15,7 +17,7 @@ export const ChangeNickSection: React.FC<ChangeSectionProps> = ({
       onSubmit={onSubmit}
     >
       <label className="mesoninaRegular text-black font-bold tracking-wider text-xl">
-        Nombre
+        {name}
       </label>
       <input
         type="text"

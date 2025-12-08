@@ -140,6 +140,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputRegister(data.value);
   };
   const handleSelectClient = (userId: string, nick: string) => {
+
     setPrivateIdMsg(userId);
     setClientSelected(nick);
     const client = nickConected.find((id) => id.userId === userId);
@@ -151,6 +152,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     //replique la funcion para pushear con el setter el objeto dentro del estado con sus propiedades resteadas
     setNickConected((prev) =>
       prev.map((c) =>
+          
+        
         c.userId === userId
           ? { ...c, messageIn: false, totalMessageIn: 0, msgPriv: [] }
           : c
