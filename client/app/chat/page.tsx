@@ -10,7 +10,7 @@ export default function Chat() {
   const router = useRouter();
   const [active, setActive] = useState<boolean>(false);
   const [inputSearch, setInputSearch] = useState<string>("");
-  const [resSearch, setResSearch] = useState<string>("");
+  const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
   const {
     conectedCount,
     nickConected,
@@ -21,17 +21,24 @@ export default function Chat() {
     socketRef,
   } = useAppContextWs();
 
+  const myId = socketRef.current?.userId;
+
+  const visibleContacts =
+    resSearch.length > 0
+      ? resSearch
+      : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
+
   function changeInputSearch(e: FormEvent<HTMLInputElement>) {
-    let data = e.currentTarget;
-    setInputSearch(data.value);
+    const data = e.currentTarget.value;
+    setInputSearch(data);
+    const res = nickConected.filter(
+      (nick) =>
+        nick.userId !== socketRef.current?.userId &&
+        nick.nick.trim().toLowerCase().includes(data.trim().toLowerCase())
+    );
+    setResSearch(res);
   }
-  function handleInputSearch(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    const res = nickConected.find((nick) => nick.nick === inputSearch);
-    if (res?.nick) {
-      setResSearch(res.nick);
-    }
-  }
+
   return (
     <main className="yellowBg h-screen flex flex-row justify-between">
       <section className="flex flex-col h-screen w-60">
@@ -54,18 +61,17 @@ export default function Chat() {
             <input
               onChange={changeInputSearch}
               type="text"
-              className=" yellowBg h-6 rounded "
+              className=" yellowBg h-6 rounded-xs text-black px-px text-center"
+              value={inputSearch}
             />
             <div className="flex justify-center items-center">
-              <button onClick={handleInputSearch}>
                 <Image
                   alt="icon user"
                   src={"/icons/lupa.png"}
                   width={30}
                   height={30}
-                  className="p-2 rounded-xs object-cover hover:cursor-pointer"
+                  className="p-2 rounded-xs object-cover"
                 />
-              </button>
             </div>
           </form>
           <Image
@@ -75,29 +81,24 @@ export default function Chat() {
             height={100}
             className="p-2 h-140 rounded-xs object-cover"
           />
-          {resSearch ? (
-            <p className="border absolute top-30 p-1 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl tracking-wider rounded hover:cursor-pointer h-10 flex justify-center items-center">
-              {resSearch}
-            </p>
-          ) : (
-            <div className="absolute h-80 w-full  p-1 m-4">
-              {nickConected.map((nick, index) => {
-                //puse este if para evitar renderizar mi propio nick
-                if (nick.userId !== socketRef.current?.userId) {
-                  return (
-                    <p
-                      onClick={() => handleSelectClient(nick.userId, nick.nick)}
-                      className="border p-1 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl tracking-wider rounded hover:cursor-pointer h-10 flex justify-center items-center gap-4"
-                      key={index}
-                    >
-                      {nick.nick}
-                      {nick.totalMessageIn ? `(${nick.totalMessageIn})` : ""}
-                    </p>
-                  );
-                }
-              })}
-            </div>
-          )}
+          <div className="absolute top-30 w-full p-1 m-4 overflow-y-auto">
+            {visibleContacts.length > 0 ? (
+              visibleContacts.map((client) => (
+                <p
+                  key={client.userId} 
+                  onClick={() => handleSelectClient(client.userId, client.nick)}
+                  className="border p-1 mb-2 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded hover:cursor-pointer h-6 flex items-center justify-center tracking-widest"
+                >
+                  {client.nick}
+                  {client.totalMessageIn ? ` (${client.totalMessageIn})` : ""}
+                </p>
+              ))
+            ) : (
+              <p className="border p-1 mb-2 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded hover:cursor-pointer h-6 flex items-center justify-center tracking-widest">
+                No hay usuarios
+              </p>
+            )}
+          </div>
         </div>
       </section>
       <section>feed en blanco</section>
