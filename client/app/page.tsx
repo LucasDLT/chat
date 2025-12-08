@@ -11,11 +11,12 @@ import {
 import { nanoid } from "nanoid";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { RegisterSection } from "@/components/RegisterSection";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
-  const pendingNickRef=useRef<Record<string, string>>({})
+  const pendingNickRef = useRef<Record<string, string>>({});
   const [inputRegister, setInputRegister] = useState<string | undefined>("");
   const [messageFeed, setMessageFeed] = useState<string[]>([]);
   const [inputMsg, setInputMsg] = useState<string | undefined>("");
@@ -26,7 +27,7 @@ export default function Home() {
   const [messageFeedPriv, setMessageFeedPriv] = useState<string[]>([]);
   const [hasNickname, setHasNickname] = useState<boolean>(false);
   const [activeRegister, setActiveRegister] = useState<boolean>(false);
-
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -41,7 +42,7 @@ export default function Home() {
         // console.log("lo que llega del servidor antes de la funcion normalizadora", parse);
         const handleProcesMsgToFeed = (
           msg: ServerToClientMessage,
-          client: WebSocket,
+          client: WebSocket
         ): Promise<ProcessMsg> => {
           return new Promise((resolve, reject) => {
             //este if cubre el registro donde el servidor me devuelve el id del cliente creado una vez que verifica que el messageId no esta duplicado
@@ -51,11 +52,10 @@ export default function Home() {
               msg.payload.fromId
             ) {
               client.userId = msg.payload.fromId;
-              client.isAlive= true
+              client.isAlive = true;
 
-              client.nickname=msg.payload.nickname
-                          console.log("nick del socket modificado", client.nickname);
-
+              client.nickname = msg.payload.nickname;
+              console.log("nick del socket modificado", client.nickname);
             }
             //este en el caso del register que estoy probando captura el mensaje personalizado de que ingreso a la sala y si resuelve la promesa
             if (msg.type === "system" && msg.payload.message) {
@@ -112,14 +112,11 @@ export default function Home() {
             if (message.systemMessage.payload.message.includes("ingresaste")) {
               setHasNickname(true);
             }
-            
-          
 
             console.log("nick del socket", socketRef.current.nickname);
-            
+
             console.log("isalive del sokcket", socketRef.current.isAlive);
             console.log("id del sokcket", socketRef.current.userId);
-            
           }
 
           //datos para el feed de mensajes
@@ -179,12 +176,12 @@ export default function Home() {
     };
   }, []);
 
-  const handleActiveRegister=() => {
-    //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco. 
-    setActiveRegister(!activeRegister)
-    setInputRegister('')
-    setHasNickname(false)
-  }
+  const handleActiveRegister = () => {
+    //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco.
+    setActiveRegister(!activeRegister);
+    setInputRegister("");
+    setHasNickname(false);
+  };
   const handleSelectClient = (userId: string, nick: string) => {
     setPrivateIdMsg(userId);
     setClientSelected(nick);
@@ -217,6 +214,11 @@ export default function Home() {
         },
       };
       socketRef.current?.send(JSON.stringify(registerNick));
+      //navegacion a /chat
+        router.push("/chat");
+      
+      //limpieza del estado
+      setInputRegister("");
     }
     if (inputRegister && hasNickname && socketRef.current?.userId) {
       const changeNickname: ChangeNickname = {
@@ -227,9 +229,16 @@ export default function Home() {
           nickname: inputRegister,
           userId: socketRef.current?.userId,
         },
-      };      
+      };
       socketRef.current?.send(JSON.stringify(changeNickname));
-      pendingNickRef.current[messageId]=inputRegister //con corchetes asigno la key para que el value sea inputRegister. Dejo esto para el yo de mañana por que ahora tengo sueño
+      pendingNickRef.current[messageId] = inputRegister; //con corchetes asigno la key para que el value sea inputRegister. Dejo esto para el yo de mañana por que ahora tengo sueño
+
+      //navegacion a /chat
+      if (socketRef.current?.nickname === inputRegister) {
+        router.push("/chat");
+      }
+      //limpieza del estado
+      setInputRegister("");
     }
   };
   const changeRegisterNick = (event: FormEvent) => {
@@ -283,8 +292,15 @@ export default function Home() {
     setClientSelected("");
   };
   return (
-    <div className="flex flex-col justify-between items-center yellowBg h-screen" >
-      <RegisterSection onClick={handleActiveRegister} activeRegister={activeRegister} onChange={changeRegisterNick} value={inputRegister?inputRegister:""} onSubmit={registerNick} hasNickname={hasNickname} />
+    <div className="flex flex-col justify-between items-center yellowBg h-screen">
+      <RegisterSection
+        onClick={handleActiveRegister}
+        activeRegister={activeRegister}
+        onChange={changeRegisterNick}
+        value={inputRegister ? inputRegister : ""}
+        onSubmit={registerNick}
+        hasNickname={hasNickname}
+      />
       {/*formulario para registrar nickname
       <form
         onSubmit={registerNick}
@@ -362,9 +378,9 @@ export default function Home() {
           </section>
         )}
       */}
-     
-     {/*formulario para envio de mensajes*/}
-     {/* 
+
+      {/*formulario para envio de mensajes*/}
+      {/* 
       <form
         onSubmit={privateIdMsg ? sendMessagePrivate : sendMessage}
         className="flex items-center bg-amber-50 rounded mt-1"
@@ -381,7 +397,9 @@ export default function Home() {
       </form>
       */}
       <section className="bg-black flex justify-center items-center h-[40vh] w-full xl:h-[40vh] xl:w-full ">
-            <h1 className='animalHunter titleColor font-bold tracking-wider text-7xl xl:text-7xl'>LIVE CHAT</h1>
+        <h1 className="animalHunter titleColor font-bold tracking-wider text-7xl xl:text-7xl">
+          LIVE CHAT
+        </h1>
       </section>
     </div>
   );
