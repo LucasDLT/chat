@@ -33,32 +33,9 @@ export default function Home() {
         onSubmit={registerNick}
         hasNickname={hasNickname}
       />
-      {/*formulario para registrar nickname
-      <form
-        onSubmit={registerNick}
-        className="flex flex-col g-1 justify-center items-center"
-      >
-        <label className="mesoninaRegular">Nick</label>
-        <input
-          type="text"
-          className="border border-amber-100"
-          onChange={changeRegisterNick}
-          value={inputRegister}
-        />
-        <button className="border rounded p-1 m-1 ">
-          {hasNickname ? "cambiar nick" : "registrar nick"}
-        </button>
-      </form>*/}
+     
 
       {/*
-      
-              //contador de usuarios conectados
-        <div className="flex gap-2 p-4 m-1 rounded bg-gray-700">
-          <button className="hover:cursor-pointer" onClick={returnToGroup}>
-            grupo:
-          </button>
-          <p>{conectedCount ? conectedCount : "usuarios conectados"}</p>
-        </div>
 
 
 
