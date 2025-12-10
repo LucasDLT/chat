@@ -42,7 +42,7 @@ export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
             value={value}
           />
           <button type="submit" className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow">
-            {hasNickname ? "cambiar" : "registrar"}
+            registrar
           </button>
           <p className="titleColor mesoninaRegular font-bold tracking-widest">Ya casi terminas</p>
         </form>

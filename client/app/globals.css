@@ -36,7 +36,7 @@ body {
 
 /*para los fondos de los mensajes*/
 .blackDeg{
-  background-color:#393E46
+  background-color:#2e3135
 }
 .blackDegbg{
   background-color:#1d20247c
@@ -56,6 +56,27 @@ body {
   background-color: #ffd26969;
   backdrop-filter: blur(2px);
 }
+
+/*scroll custom*/
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c99b05b7;
+  border-radius: 5px;
+  padding: 1px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 /*fonts*/
 
 .animalHunter{

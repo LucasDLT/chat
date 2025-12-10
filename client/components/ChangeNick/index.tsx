@@ -31,9 +31,7 @@ export const ChangeNickSection: React.FC<ChangeSectionProps> = ({
       >
         guardar y cambiar
       </button>
-      <p className="titleColor mesoninaRegular font-bold tracking-widest">
-        Ya casi terminas
-      </p>
+
     </form>
   );
 };

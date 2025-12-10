@@ -51,6 +51,8 @@ interface IcontextProps {
   sendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
   changeInputMessage: (e: React.ChangeEvent<HTMLInputElement>) => void;
   returnToGroup: () => void;
+  activeFeed:boolean;
+  setActiveFeed:React.Dispatch<React.SetStateAction<boolean>>
 }
 
 interface ContextProviderProps {
@@ -91,6 +93,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   );
   const [inputMsg, setInputMsg] = useState<string | undefined>(undefined);
   const [activeRegister, setActiveRegister] = useState<boolean>(false);
+  const [activeFeed, setActiveFeed]=useState<boolean>(false)
+
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
 
@@ -140,7 +144,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputRegister(data.value);
   };
   const handleSelectClient = (userId: string, nick: string) => {
-
+    setActiveFeed(true)
     setPrivateIdMsg(userId);
     setClientSelected(nick);
     const client = nickConected.find((id) => id.userId === userId);
@@ -389,6 +393,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     sendMessage,
     changeInputMessage,
     returnToGroup,
+    activeFeed,
+    setActiveFeed
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 
