@@ -100,7 +100,6 @@ describe("WSS integration - SendMessage", () => {
     const sendMsg = client1.send(JSON.stringify(sendmessage));
     const resMsgClient1 = await collectionJsonMessages(client1, 1);
     const ackeOk = resMsgClient1.find((res) => res?.type === "ack");
-    console.log(ackeOk);
     
     expect(ackeOk).toBeDefined();
     expect(ackeOk.correlationId).toBe(msgIdSend);
@@ -151,7 +150,6 @@ describe("WSS integration - SendMessage", () => {
 
     client2.send(JSON.stringify(registerClient2));
     const resClient2 = await collectionJsonMessages(client2, 3);
-    console.log('resclient2',resClient2);
     
     const ackeOkClient2 = resClient2.find((res) => res?.type === "ack");
     expect(ackeOkClient2).toBeDefined();
