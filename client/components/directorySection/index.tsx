@@ -1,12 +1,11 @@
-'use client'
 import { ClientsConected } from "@/types/types";
 import Image from "next/image"
-import { ChangeEventHandler } from "react";
+import { ChangeEventHandler, FormEvent } from "react";
 
 interface DirectoryProps{
     activeFeed:boolean;
     conectedCount:number;
-    onChange:ChangeEventHandler<HTMLInputElement>;
+    onChange:(e: FormEvent<HTMLInputElement>)=>void;
     inputSearch:string|undefined;
     visibleContacts:ClientsConected[];
     handleSelectClient: (userId: string, nick: string) => void;
