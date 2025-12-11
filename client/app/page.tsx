@@ -1,9 +1,5 @@
-"use client";
-import { ChangeNickname, RegisterNickname, SendMessage } from "@/types/types";
-import { nanoid } from "nanoid";
-import { FormEvent, useEffect, useRef, useState } from "react";
+'use client'
 import { RegisterNickSection } from "@/components/RegisterSection";
-import { useRouter } from "next/navigation";
 import { useAppContextWs } from "@/context/context";
 
 export default function Home() {
@@ -33,14 +29,9 @@ export default function Home() {
         onSubmit={registerNick}
         hasNickname={hasNickname}
       />
-     
+
 
       {/*
-
-
-
-
-
 
         //section para el feed de mensajes privados
         {privateIdMsg ? (

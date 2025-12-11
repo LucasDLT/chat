@@ -215,6 +215,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const returnToGroup = () => {
     setPrivateIdMsg("");
     setClientSelected("");
+    setActiveFeed(true)
   };
 
   useEffect(() => {

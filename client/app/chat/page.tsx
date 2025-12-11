@@ -22,6 +22,11 @@ export default function Chat() {
     socketRef,
     activeFeed,
     setActiveFeed,
+    privateIdMsg,
+    clientSelected,
+    messageFeed,
+    messageFeedPriv,
+    returnToGroup,
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -51,9 +56,36 @@ export default function Chat() {
         inputSearch={inputSearch}
         visibleContacts={visibleContacts}
         handleSelectClient={handleSelectClient}
+        onClick={returnToGroup}
       />
-      <section className={`${activeFeed ? "flex" : "hidden"}`}>
-        feed en blanco
+      <section className={`${activeFeed ? "flex bg-amber-950" : "hidden"}`}>
+        {privateIdMsg ? (
+          <section className="border  bg-emerald-600">
+            <h3>hablas con {clientSelected}</h3>
+            <div className="grid grid-cols-1 gap-2">
+              {messageFeedPriv.map((msg, index) => {
+                return (
+                  <p key={index} className="border bg-gray-800">
+                    {msg}
+                  </p>
+                );
+              })}
+            </div>
+          </section>
+        ) : (
+          //section para el feed de mensajes publicos
+          <section className="border   bg-blue-950">
+            <div className="grid grid-cols-1 gap-2">
+              {messageFeed.map((msg, index) => {
+                return (
+                  <p key={index} className="border bg-gray-800">
+                    {msg}
+                  </p>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </section>
 
       <NavbarChat

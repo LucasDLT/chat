@@ -1,3 +1,4 @@
+'use client'
 import Image from "next/image";
 import { ChangeNickSection } from "@/components/ChangeNick";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -50,7 +51,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
           ${
             activeMobile === false
               ? "transition-all duration-100"
-              : "w-50 h-170 z-10 flex flex-col justify-evenly gap-2 items-center  transition-all duration-100 "
+              : "w-50 h-170 z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-100 "
           }
           `}
       >
@@ -61,7 +62,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
             width={30}
             height={30}
             onClick={() => {
-              setActive(!active); //aca dejamos esta funcion para poner el setter del cambio de estado para abrir el nav y cerrarlo
+              setActive(!active);
               setActiveMobile(!activeMobile);
             }}
             className="hover:cursor-pointer"
