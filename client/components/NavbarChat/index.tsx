@@ -31,7 +31,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
 }) => {
   return (
     <section
-      className={`bg-black flex justify-center items-center absolute top-20 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
+      className={`bg-black flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
         active === false
           ? "xl:w-15 transition-all duration-100"
           : "xl:w-60 transition-all duration-100"
@@ -43,7 +43,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
          }`}
     >
       <nav
-        className={`yellowBg flex justify-between items-center p-1 mt-2 h-9 w-60 rounded-sm xl:mb-2 pt-2 pb-2 xl:flex-col xl:h-full  ${
+        className={`yellowBg flex justify-between items-center p-1 mt-1 h-9 w-60 rounded-sm xl:mb-2 pt-2 pb-2 xl:mt-2 xl:flex-col xl:h-full  ${
           active === false
             ? "xl:w-10 transition-all duration-100"
             : "xl:w-50 transition-all duration-100 "

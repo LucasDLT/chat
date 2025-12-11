@@ -8,7 +8,7 @@ interface DirectoryProps {
   onChange: (e: FormEvent<HTMLInputElement>) => void;
   inputSearch: string | undefined;
   visibleContacts: ClientsConected[];
-  handleSelectClient: (userId: string, nick: string) => void;
+  handleSelectClient: (userId: string, nick: string) => void ;
   onClick: () => void;
 }
 export const DirectorySection: React.FC<DirectoryProps> = ({
@@ -18,14 +18,14 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
   inputSearch,
   visibleContacts,
   handleSelectClient,
-  onClick,
+  onClick
 }) => {
   return (
     <section
       className={`${
         activeFeed
           ? "hidden h-screen w-full xl:flex xl:flex-col  xl:w-60 "
-          : " h-[94vh] w-full xl:flex xl:flex-col  xl:w-60 "
+          : " h-[80vh] w-full xl:h-[94vh] xl:flex xl:flex-col  xl:w-60 "
       }`}
     >
       <div className="bg-black flex justify-center items-center h-20 m-1 rounded-xs">
@@ -74,7 +74,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
         />
         {visibleContacts.length > 0 && (
           <button
-            className=" absolute top-40 p-1 my-1 bgBlurYellow w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest"
+            className=" absolute top-40 left-2 p-1 my-1 bgBlurYellow  w-90 xl:w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest"
             onClick={onClick}
           >
             mensaje publico
