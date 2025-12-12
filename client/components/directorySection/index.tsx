@@ -50,7 +50,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
             {conectedCount ? conectedCount : 0}
           </p>
         </div>
-        <form className={`${activeFeed? "z-10 top-[57] xl:z-0":""} absolute w-90 h-9 top-14 left-2 flex flex-row items-center justify-center blackDeg py-py rounded-xs g-1 xl:w-54 xl:top-24` }>
+        <form className={`${activeFeed? "hidden xl:flex":""} absolute w-90 h-9 top-14 left-2 flex flex-row items-center justify-center blackDeg py-py rounded-xs g-1 xl:w-54 xl:top-24` }>
           {/*NOTA: todavia no, pero en un momento voy a agregar aca una condicion con un estado que detecte en que modo de pantalla estamos y en que modo de feed estamos, dependendiendo de eso, este form va a ser para filtrar entre contactos o entre los mensajes del contacto seleccionado o del chat publico*/}
           <input
             onChange={onChange}

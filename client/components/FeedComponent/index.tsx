@@ -1,11 +1,19 @@
 import Image from "next/image";
-
+import { InputMsgSearch } from "../InputMsgSearch";
+import { ChangeEvent, FormEvent } from "react";
 interface FeedProps {
   activeFeed: boolean;
   privateIdMsg: string | undefined;
   messageFeed: string[];
   messageFeedPriv: string[];
   clientSelected: string | undefined;
+  resMsgSearch:string[] | undefined;
+
+  //props para el inputsearchmsg
+  inputMsgSearch: string | undefined;
+  onChange: (e:ChangeEvent<HTMLInputElement>) => void;
+  handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
+
 }
 
 export const FeedSection: React.FC<FeedProps> = ({
@@ -14,6 +22,9 @@ export const FeedSection: React.FC<FeedProps> = ({
   messageFeed,
   messageFeedPriv,
   clientSelected,
+  inputMsgSearch,
+  onChange,
+  handleSearchMsg
 }) => {
   return (
     <section
@@ -23,6 +34,8 @@ export const FeedSection: React.FC<FeedProps> = ({
           : "hidden"
       }`}
     >
+      <InputMsgSearch inputMsgSearch={inputMsgSearch} onChange={onChange} handleSearchMsg={handleSearchMsg} />
+
       {privateIdMsg ? (
         <section
           className={`h-[65vh] w-95 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-bl-xs rounded-br-xs 

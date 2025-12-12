@@ -7,6 +7,7 @@ import {
   useRef,
   useContext,
   FormEvent,
+  ChangeEvent,
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
@@ -19,8 +20,6 @@ import {
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
-import { log } from "node:console";
-
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -49,12 +48,18 @@ interface IcontextProps {
   inputMsg: string | undefined;
   setInputMsg: React.Dispatch<React.SetStateAction<string | undefined>>;
   registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
-  sendMessagePrivate: (e: React.FormEvent<HTMLInputElement>) => void;
+  sendMessagePrivate: (e: React.FormEvent<HTMLFormElement>) => void;
   sendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
   changeInputMessage: (e: React.ChangeEvent<HTMLInputElement>) => void;
   returnToGroup: () => void;
-  activeFeed:boolean;
-  setActiveFeed:React.Dispatch<React.SetStateAction<boolean>>
+  activeFeed: boolean;
+  setActiveFeed: React.Dispatch<React.SetStateAction<boolean>>;
+  inputMsgSearch: string | undefined;
+  setInputMsgSearch: React.Dispatch<React.SetStateAction<string | undefined>>;
+  handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
+  onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
+  resMsgSearch: string[] | [];
+  setResMsgSearch: React.Dispatch<React.SetStateAction<string[] | []>>;
 }
 
 interface ContextProviderProps {
@@ -95,8 +100,11 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   );
   const [inputMsg, setInputMsg] = useState<string | undefined>(undefined);
   const [activeRegister, setActiveRegister] = useState<boolean>(false);
-  const [activeFeed, setActiveFeed]=useState<boolean>(false)
-
+  const [activeFeed, setActiveFeed] = useState<boolean>(false);
+  const [inputMsgSearch, setInputMsgSearch] = useState<string | undefined>(
+    undefined
+  );
+  const [resMsgSearch, setResMsgSearch] = useState<string[] | []>([]);
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
 
@@ -146,7 +154,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputRegister(data.value);
   };
   const handleSelectClient = (userId: string, nick: string) => {
-    setActiveFeed(true)
+    setActiveFeed(true);
     setPrivateIdMsg(userId);
     setClientSelected(nick);
     const client = nickConected.find((id) => id.userId === userId);
@@ -156,16 +164,36 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setMessageFeedPriv([]);
     }
     //replique la funcion para pushear con el setter el objeto dentro del estado con sus propiedades resteadas
+    //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
     setNickConected((prev) =>
       prev.map((c) =>
-          
-        
         c.userId === userId
           ? { ...c, messageIn: false, totalMessageIn: 0, msgPriv: [] }
           : c
       )
     );
   };
+  const handleSearchMsg = (e:FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if(clientSelected && privateIdMsg && inputMsgSearch){//verifico primero que las tres condiciones que son necesarias esten, quehaya un cliente seleccionado, que su id este, y que haya un mensaje capturado que filtrar
+
+      const res = messageFeedPriv.filter((msgPriv)=>msgPriv.trim().toLowerCase().includes(inputMsgSearch.trim().toLowerCase()))
+      setResMsgSearch(res)
+      console.log(res);
+      
+    }else if(messageFeed && inputMsgSearch){
+            const res = messageFeed.filter((msgPublic)=>msgPublic.trim().toLowerCase().includes(inputMsgSearch.trim().toLowerCase()))
+            setResMsgSearch(res)
+            console.log(res);
+            
+    }
+  };
+
+  const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const data = e.currentTarget.value;
+    setInputMsgSearch(data);
+  };
+
   const handleActiveRegister = () => {
     //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco.
     setActiveRegister(!activeRegister);
@@ -191,7 +219,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setInputMsg("");
       setMessageFeedPriv((prev) => [...prev, inputMsg]);
     }
-    
   };
   const sendMessage = (event: FormEvent) => {
     event.preventDefault();
@@ -212,13 +239,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     }
   };
   const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const data = event.currentTarget ;
+    const data = event.currentTarget;
     setInputMsg(data.value);
   };
   const returnToGroup = () => {
     setPrivateIdMsg("");
     setClientSelected("");
-    setActiveFeed(true)
+    setActiveFeed(true);
   };
 
   useEffect(() => {
@@ -398,7 +425,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     changeInputMessage,
     returnToGroup,
     activeFeed,
-    setActiveFeed
+    setActiveFeed,
+    inputMsgSearch,
+    setInputMsgSearch,
+    handleSearchMsg,
+    setResMsgSearch,
+    resMsgSearch,
+    onChangeSearchMsgFeed,
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 

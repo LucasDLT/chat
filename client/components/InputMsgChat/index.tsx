@@ -31,7 +31,7 @@ export const InputMsgChat: React.FC<InputMsgChatProps> = ({
       <form
         
         onSubmit={handleSubmit}
-        className="flex items-center justify-center bg-black px-3 absolute xl:bottom-1 xl:right-35 xl:w-[70vw] xl:h-[8vh] rounded"
+        className="flex items-center justify-center bg-black px-3 absolute bottom-[-50] right-1 h-[7vh]  rounded-none w-[98vw] xl:bottom-1 xl:right-35 xl:w-[70vw] xl:h-[8vh] xl:rounded"
       >
         <input
           onChange={changeInputMessage}

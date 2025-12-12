@@ -6,7 +6,7 @@ import { ClientsConected } from "@/types/types";
 import { DirectorySection } from "@/components/DirectorySection";
 import { NavbarChat } from "@/components/NavbarChat";
 import { FeedSection } from "@/components/FeedComponent";
-import {InputMsgChat} from "@/components/InputMsgChat"
+import { InputMsgChat } from "@/components/InputMsgChat";
 
 export default function Chat() {
   const router = useRouter();
@@ -32,7 +32,11 @@ export default function Chat() {
     changeInputMessage,
     inputMsg,
     sendMessage,
-sendMessagePrivate
+    sendMessagePrivate,
+    inputMsgSearch,
+    handleSearchMsg,
+    onChangeSearchMsgFeed,
+    resMsgSearch
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -43,6 +47,7 @@ sendMessagePrivate
       : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
 
   function changeInputSearch(e: FormEvent<HTMLInputElement>) {
+
     const data = e.currentTarget.value;
     setInputSearch(data);
     const res = nickConected.filter(
@@ -71,16 +76,19 @@ sendMessagePrivate
         messageFeed={messageFeed}
         messageFeedPriv={messageFeedPriv}
         clientSelected={clientSelected}
+        inputMsgSearch={inputMsgSearch}
+        onChange={onChangeSearchMsgFeed}
+        handleSearchMsg={handleSearchMsg}
+        resMsgSearch={resMsgSearch}
       />
       <InputMsgChat
-      changeInputMessage={changeInputMessage}
-      inputMsg={inputMsg}
-      privateIdMsg={privateIdMsg}
-      sendMessage={sendMessage}
-      sendMessagePrivate={sendMessagePrivate}
-      activeFeed={activeFeed}
-      
-       />
+        changeInputMessage={changeInputMessage}
+        inputMsg={inputMsg}
+        privateIdMsg={privateIdMsg}
+        sendMessage={sendMessage}
+        sendMessagePrivate={sendMessagePrivate}
+        activeFeed={activeFeed}
+      />
       <NavbarChat
         active={active}
         activeMobile={activeMobile}
