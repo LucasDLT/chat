@@ -3,10 +3,9 @@ import Image from "next/image";
 interface FeedProps {
   activeFeed: boolean;
   privateIdMsg: string | undefined;
-  messageFeed:string[];
-  messageFeedPriv:string[];
-  clientSelected:string|undefined;
-
+  messageFeed: string[];
+  messageFeedPriv: string[];
+  clientSelected: string | undefined;
 }
 
 export const FeedSection: React.FC<FeedProps> = ({
@@ -14,7 +13,7 @@ export const FeedSection: React.FC<FeedProps> = ({
   privateIdMsg,
   messageFeed,
   messageFeedPriv,
-  clientSelected
+  clientSelected,
 }) => {
   return (
     <section
@@ -39,10 +38,12 @@ export const FeedSection: React.FC<FeedProps> = ({
           <h3 className="absolute top-5 left-25 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
             {clientSelected}
           </h3>
-          <div className="grid grid-cols-1 gap-2 z-10">
+          <div
+            className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+          >
             {messageFeedPriv.map((msg, index) => {
               return (
-                <p key={index} className="border bg-gray-800">
+                <p key={index} className="">
                   {msg}
                 </p>
               );

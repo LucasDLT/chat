@@ -19,6 +19,8 @@ import {
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
+import { log } from "node:console";
+
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -47,7 +49,7 @@ interface IcontextProps {
   inputMsg: string | undefined;
   setInputMsg: React.Dispatch<React.SetStateAction<string | undefined>>;
   registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
-  sendMessagePrivate: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  sendMessagePrivate: (e: React.FormEvent<HTMLInputElement>) => void;
   sendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
   changeInputMessage: (e: React.ChangeEvent<HTMLInputElement>) => void;
   returnToGroup: () => void;
@@ -189,6 +191,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setInputMsg("");
       setMessageFeedPriv((prev) => [...prev, inputMsg]);
     }
+    
   };
   const sendMessage = (event: FormEvent) => {
     event.preventDefault();
@@ -208,8 +211,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setMessageFeed((prev) => [...prev, inputMsg]);
     }
   };
-  const changeInputMessage = (event: FormEvent) => {
-    const data = event.currentTarget as HTMLInputElement;
+  const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const data = event.currentTarget ;
     setInputMsg(data.value);
   };
   const returnToGroup = () => {

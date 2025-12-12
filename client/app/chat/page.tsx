@@ -6,6 +6,7 @@ import { ClientsConected } from "@/types/types";
 import { DirectorySection } from "@/components/DirectorySection";
 import { NavbarChat } from "@/components/NavbarChat";
 import { FeedSection } from "@/components/FeedComponent";
+import {InputMsgChat} from "@/components/InputMsgChat"
 
 export default function Chat() {
   const router = useRouter();
@@ -28,6 +29,10 @@ export default function Chat() {
     messageFeed,
     messageFeedPriv,
     returnToGroup,
+    changeInputMessage,
+    inputMsg,
+    sendMessage,
+sendMessagePrivate
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -67,6 +72,15 @@ export default function Chat() {
         messageFeedPriv={messageFeedPriv}
         clientSelected={clientSelected}
       />
+      <InputMsgChat
+      changeInputMessage={changeInputMessage}
+      inputMsg={inputMsg}
+      privateIdMsg={privateIdMsg}
+      sendMessage={sendMessage}
+      sendMessagePrivate={sendMessagePrivate}
+      activeFeed={activeFeed}
+      
+       />
       <NavbarChat
         active={active}
         activeMobile={activeMobile}

@@ -2,16 +2,10 @@
 import { RegisterNickSection } from "@/components/RegisterSection";
 import { useAppContextWs } from "@/context/context";
 
+
 export default function Home() {
   const {
     hasNickname,
-    setHasNickname,
-    setMessageFeedPriv,
-    socketRef,
-    setMessageFeed,
-    privateIdMsg,
-    setPrivateIdMsg,
-    setClientSelected,
     handleActiveRegister,
     activeRegister,
     changeRegisterNick,
@@ -30,38 +24,6 @@ export default function Home() {
         hasNickname={hasNickname}
       />
 
-
-      {/*
-
-        //section para el feed de mensajes privados
-        {privateIdMsg ? (
-          <section className="border h-[70vh] w-[50vw]">
-            <h3>hablas con {clientSelected}</h3>
-            <div className="grid grid-cols-1 gap-2 bg-blue-950">
-              {messageFeedPriv.map((msg, index) => {
-                return (
-                  <p key={index} className="border bg-gray-800">
-                    {msg}
-                  </p>
-                );
-              })}
-            </div>
-          </section>
-        ) : (
-          //section para el feed de mensajes publicos
-          <section className="border h-[70vh] w-[50vw]">
-            <div className="grid grid-cols-1 gap-2 bg-blue-950">
-              {messageFeed.map((msg, index) => {
-                return (
-                  <p key={index} className="border bg-gray-800">
-                    {msg}
-                  </p>
-                );
-              })}
-            </div>
-          </section>
-        )}
-      */}
 
       {/*formulario para envio de mensajes*/}
       {/* 
