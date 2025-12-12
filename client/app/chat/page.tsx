@@ -49,7 +49,7 @@ export default function Chat() {
   }
 
   return (
-    <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between">
+    <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
       <DirectorySection
         activeFeed={activeFeed}
         conectedCount={conectedCount}
@@ -58,19 +58,18 @@ export default function Chat() {
         visibleContacts={visibleContacts}
         handleSelectClient={handleSelectClient}
         onClick={returnToGroup}
-
       />
-      <section className={`${activeFeed ? "flex yellowBg justify-center items-center h-100vh w-screen" : "hidden"}`}>
+      <section className={`${activeFeed ? "flex yellowBg justify-center items-center h-100vh " : "hidden"}`}>
         {privateIdMsg ? (
-          <section className="h-[90vh] w-[79vw]  absolute top-0 right-19 rounded-bl-xs rounded-br-xs">
+          <section className={`h-[65vh] w-95 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-bl-xs rounded-br-xs ${activeMobile?"xl:w-[55vw]":""}`}>
             <Image
               src={'/background-directorio.jpg'}
               width={3000}
               height={1000}
               alt="background feed chat"
-              className="w-full h-full object-cover z-0 rounded-bl-xs rounded-br-xs"
+              className={`w-full h-full object-cover z-0 rounded-xs`}
             ></Image>
-            <h3 className="absolute top-2 left-34 flex justify-center items-center w-[50vw] h-10   text-2xl mesoninaRegular backdrop-blur-xl z-10">{clientSelected}</h3>
+            <h3 className="absolute top-5 left-25 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">{clientSelected}</h3>
             <div className="grid grid-cols-1 gap-2 z-10">
               {messageFeedPriv.map((msg, index) => {
                 return (
@@ -83,19 +82,19 @@ export default function Chat() {
           </section>
         ) : (
           //section para el feed de mensajes publicos
-          <section className="h-[90vh] w-[79vw]  absolute top-0  right-19 rounded-bl-xs rounded-br-xs ">
+          <section className=" h-[65vh] w-95 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-sm">
             <Image
               src={'/background-directorio.jpg'}
               width={3000}
               height={1000}
               alt="background feed chat"
-              className="w-full h-full object-cover z-0 rounded-bl-xs rounded-br-xs"
+              className={`w-full h-full object-cover z-0 rounded-xs`}
             ></Image>
-            <h3 className="absolute top-2 left-34 flex justify-center items-center w-[50vw] h-10   text-2xl mesoninaRegular backdrop-blur-xl z-10">mensaje publico</h3>
-            <div className="grid grid-cols-1 gap-2 overflow-y-auto h-[84vh] absolute top-10 z-10 w-full">
+            <h3 className="absolute top-5 left-25 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">mensaje publico</h3>
+            <div className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}>
               {messageFeed.map((msg, index) => {
                 return (
-                  <p key={index} className="border bg-gray-800">
+                  <p key={index} className="text-center mt-2 xl:mt-2 ">
                     {msg}
                   </p>
                 );

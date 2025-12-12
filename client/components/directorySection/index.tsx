@@ -18,15 +18,15 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
   inputSearch,
   visibleContacts,
   handleSelectClient,
-  onClick
+  onClick,
 }) => {
   return (
     <section
-      className={`${
-        activeFeed
-          ? "hidden h-screen w-full xl:flex xl:flex-col  xl:w-60 "
-          : " h-[80vh] w-full xl:h-[94vh] xl:flex xl:flex-col  xl:w-60 "
-      }`}
+      className={`
+        
+           h-[80vh] w-full xl:flex xl:flex-col  xl:w-60 
+           xl:h-[94vh] 
+      `}
     >
       <div className="bg-black flex justify-center items-center h-20 m-1 rounded-xs">
         <h1 className="titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
@@ -34,7 +34,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
         </h1>
       </div>
 
-      <div className="bg-black p-1 rounded-xs m-1 h-full flex flex-col justify-between items-start  xl:items-center relative">
+      <div className={`bg-black p-1 rounded-xs m-1 h-full flex flex-col justify-between items-start  xl:items-center relative `}>
         <div className="flex flex-row justify-center items-center ml-2 xl:justify-between xl:w-53">
           <h2 className="hidden mesoninaRegular p-1 blackDeg xl:flex xl:rounded-xs  xl:tracking-[3px] xl:font-bold">
             conectados
@@ -50,7 +50,8 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
             {conectedCount ? conectedCount : 0}
           </p>
         </div>
-        <form className="absolute w-90 h-9 top-30 left-2 flex flex-row items-center justify-center blackDeg py-py rounded-xs g-1 xl:w-54 xl:top-24 ">
+        <form className={`${activeFeed? "z-10 top-[57] xl:z-0":""} absolute w-90 h-9 top-14 left-2 flex flex-row items-center justify-center blackDeg py-py rounded-xs g-1 xl:w-54 xl:top-24` }>
+          {/*NOTA: todavia no, pero en un momento voy a agregar aca una condicion con un estado que detecte en que modo de pantalla estamos y en que modo de feed estamos, dependendiendo de eso, este form va a ser para filtrar entre contactos o entre los mensajes del contacto seleccionado o del chat publico*/}
           <input
             onChange={onChange}
             type="text"
@@ -70,30 +71,30 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
           src={"/background-directorio.jpg"}
           width={500}
           height={200}
-          className="h-150 border rounded-xs object-cover"
+          className={`h-150 border rounded-xs object-cover ${activeFeed ?"hidden xl:flex":""} `}
         />
         {visibleContacts.length > 0 && (
           <button
-            className=" absolute top-40 left-2 p-1 my-1 bgBlurYellow  w-90 xl:w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest"
+            className={`absolute top-30 xl:top-40 left-2 p-1 my-1 bgBlurYellow  w-90 xl:w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest ${activeFeed ?"hidden xl:flex":""}`}
             onClick={onClick}
           >
             mensaje publico
           </button>
         )}
-        <div className={`absolute ${visibleContacts.length > 0 ? "top-50 transition-all duration-1000":"top-40 transition-all duration-1000"} left-2 flex flex-col justify-start items-center w-90 xl:w-54  h-110 xl:left-2 overflow-y-auto`}>
+        <div className={`absolute ${visibleContacts.length > 0 ? "top-40 xl:top-50 transition-all duration-1000":"top-30 transition-all duration-1000"} left-2 flex flex-col justify-start items-center w-90 xl:w-54  h-110 xl:left-2 overflow-y-auto ${activeFeed ?"hidden xl:flex":""}`}>
           {visibleContacts.length > 0 ? (
             visibleContacts.map((client) => (
               <p
                 key={client.userId}
                 onClick={() => handleSelectClient(client.userId, client.nick)}
-                className=" p-1 my-1 bgBlurYellow w-full text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest"
+                className=" p-1 my-1 bgBlurYellow w-full text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest transition-all duration-1000"
               >
                 {client.nick}
                 {client.totalMessageIn ? ` (${client.totalMessageIn})` : ""}
               </p>
             ))
           ) : (
-            <p className="p-1 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded-xs  h-6 flex items-center justify-center tracking-widest w-full xl:text-sm">
+            <p className="p-1 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded-xs  h-6 flex items-center justify-center tracking-widest w-full mt-6 xl:text-sm">
               no hay usuarios conectados
             </p>
           )}
