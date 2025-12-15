@@ -1,19 +1,26 @@
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
-import { ChangeEvent, FormEvent } from "react";
+import { ChangeEvent } from "react";
+import { MsgInFeed } from "@/types/types";
+import { useAppContextWs } from "@/context/context";
+import {MessageItem} from "@/components/msgItem"
+
 interface FeedProps {
   activeFeed: boolean;
   privateIdMsg: string | undefined;
-  messageFeed: string[];
-  messageFeedPriv: string[];
+  messageFeed: MsgInFeed[];
+  messageFeedPriv: MsgInFeed[];
   clientSelected: string | undefined;
-  resMsgSearch:string[] | undefined;
+  resMsgSearch:MsgInFeed[] | undefined;
 
   //props para el inputsearchmsg
   inputMsgSearch: string | undefined;
   onChange: (e:ChangeEvent<HTMLInputElement>) => void;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
 
+  matches: string[];
+  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
+  activeIndex: number;
 }
 
 export const FeedSection: React.FC<FeedProps> = ({
@@ -24,8 +31,14 @@ export const FeedSection: React.FC<FeedProps> = ({
   clientSelected,
   inputMsgSearch,
   onChange,
-  handleSearchMsg
+  handleSearchMsg, 
+  matches,
+  setActiveIndex,
+  activeIndex
 }) => {
+    const {searchMatches, activeMatchIndex}=useAppContextWs()
+    const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
+
   return (
     <section
       className={`${
@@ -34,7 +47,7 @@ export const FeedSection: React.FC<FeedProps> = ({
           : "hidden"
       }`}
     >
-      <InputMsgSearch inputMsgSearch={inputMsgSearch} onChange={onChange} handleSearchMsg={handleSearchMsg} />
+      <InputMsgSearch inputMsgSearch={inputMsgSearch} onChange={onChange} handleSearchMsg={handleSearchMsg} activeIndex={activeIndex} matches={matches} setActiveIndex={setActiveIndex} />
 
       {privateIdMsg ? (
         <section
@@ -54,11 +67,16 @@ export const FeedSection: React.FC<FeedProps> = ({
           <div
             className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
           >
-            {messageFeedPriv.map((msg, index) => {
+            {messageFeedPriv.map((msg) => {
+              const isMatch = searchMatches.includes(msg.messageId)
+              const isActive= msg.messageId === activeMessageId
               return (
-                <p key={index} className="">
-                  {msg}
-                </p>
+                <MessageItem
+                key={msg.messageId}
+                isActive={isActive}
+                isMatch={isMatch}
+                message={msg}
+                 />
               );
             })}
           </div>
@@ -82,7 +100,7 @@ export const FeedSection: React.FC<FeedProps> = ({
             {messageFeed.map((msg, index) => {
               return (
                 <p key={index} className="text-center mt-2 xl:mt-2 ">
-                  {msg}
+                  {msg.msg}
                 </p>
               );
             })}

@@ -85,3 +85,15 @@ body {
 .mesoninaRegular{
   font-family: var(--font-mesonina-regular);
 }
+
+.message {
+  padding: 6px 10px;
+}
+
+.message--match {
+  background-color: #fff3b0; /* amarillo suave */
+}
+
+.message--active {
+  background-color: #ffd000; /* más fuerte */
+}

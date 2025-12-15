@@ -1,5 +1,5 @@
 "use client";
-import {
+import React, {
   useState,
   createContext,
   ReactNode,
@@ -8,11 +8,13 @@ import {
   useContext,
   FormEvent,
   ChangeEvent,
+  SetStateAction,
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
   ChangeNickname,
   ClientsConected,
+  MsgInFeed,
   ProcessMsg,
   RegisterNickname,
   SendMessage,
@@ -24,14 +26,14 @@ import { useRouter } from "next/navigation";
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
   socketRef: React.RefObject<WebSocket | null>;
-  setMessageFeed: React.Dispatch<React.SetStateAction<string[]>>;
-  messageFeed: string[];
+  setMessageFeed: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
+  messageFeed: MsgInFeed[];
   hasNickname: boolean;
   setHasNickname: React.Dispatch<React.SetStateAction<boolean>>;
   nickConected: ClientsConected[];
   setNickConected: React.Dispatch<React.SetStateAction<ClientsConected[]>>;
-  messageFeedPriv: string[];
-  setMessageFeedPriv: React.Dispatch<React.SetStateAction<string[]>>;
+  messageFeedPriv: MsgInFeed[];
+  setMessageFeedPriv: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
   conectedCount: number;
   setConectedCount: React.Dispatch<React.SetStateAction<number>>;
   privateIdMsg: string | undefined;
@@ -58,8 +60,12 @@ interface IcontextProps {
   setInputMsgSearch: React.Dispatch<React.SetStateAction<string | undefined>>;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
   onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
-  resMsgSearch: string[] | [];
-  setResMsgSearch: React.Dispatch<React.SetStateAction<string[] | []>>;
+  resMsgSearch: MsgInFeed[];
+  setResMsgSearch: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
+  searchMatches:string[]
+  setSearchMatches:React.Dispatch<React.SetStateAction<string[]>>
+  activeMatchIndex:number;
+  setActiveMatchIndex:React.Dispatch<React.SetStateAction<number>>
 }
 
 interface ContextProviderProps {
@@ -84,10 +90,10 @@ export function useAppContextWs(): IcontextProps {
 export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
-  const [messageFeed, setMessageFeed] = useState<string[]>([]);
+  const [messageFeed, setMessageFeed] = useState<MsgInFeed[]>([]);
+  const [messageFeedPriv, setMessageFeedPriv] = useState<MsgInFeed[]>([]);
   const [hasNickname, setHasNickname] = useState<boolean>(false);
   const [nickConected, setNickConected] = useState<ClientsConected[]>([]);
-  const [messageFeedPriv, setMessageFeedPriv] = useState<string[]>([]);
   const [conectedCount, setConectedCount] = useState<number>(0);
   const [privateIdMsg, setPrivateIdMsg] = useState<string | undefined>(
     undefined
@@ -104,7 +110,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [inputMsgSearch, setInputMsgSearch] = useState<string | undefined>(
     undefined
   );
-  const [resMsgSearch, setResMsgSearch] = useState<string[] | []>([]);
+  const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
+
+  //estado para el filtrado tipo wp
+  const[searchMatches, setSearchMatches]=useState<string[]>([])
+  //este es para los saltos entre indices del array de coincidencias del filtrado de arriba
+  const[activeMatchIndex, setActiveMatchIndex]=useState<number>(0)
+
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
 
@@ -173,22 +185,36 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       )
     );
   };
-  const handleSearchMsg = (e:FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if(clientSelected && privateIdMsg && inputMsgSearch){//verifico primero que las tres condiciones que son necesarias esten, quehaya un cliente seleccionado, que su id este, y que haya un mensaje capturado que filtrar
+ const handleSearchMsg = (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-      const res = messageFeedPriv.filter((msgPriv)=>msgPriv.trim().toLowerCase().includes(inputMsgSearch.trim().toLowerCase()))
-      setResMsgSearch(res)
-      console.log(res);
-      
-    }else if(messageFeed && inputMsgSearch){
-            const res = messageFeed.filter((msgPublic)=>msgPublic.trim().toLowerCase().includes(inputMsgSearch.trim().toLowerCase()))
-            setResMsgSearch(res)
-            console.log(res);
-            
-    }
-  };
+  if (!inputMsgSearch) return;
 
+  const query = inputMsgSearch.trim().toLowerCase();
+
+  if (clientSelected && privateIdMsg) {
+    const res = messageFeedPriv
+      .filter(m => m.msg.toLowerCase().includes(query))
+      .map(m => m.messageId);
+
+    setSearchMatches(res);
+    setActiveMatchIndex(0)
+    console.log(res);
+    
+  } else if (messageFeed) {
+    const res = messageFeed
+      .filter(m => m.msg.toLowerCase().includes(query))
+      .map(m => m.messageId);
+
+    setSearchMatches(res);
+    setActiveMatchIndex(0)
+    console.log(res);
+    
+  }
+};
+
+
+  //esta la vamos a usar en el filtro tipo WS
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
@@ -217,7 +243,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       };
       socketRef.current?.send(JSON.stringify(message));
       setInputMsg("");
-      setMessageFeedPriv((prev) => [...prev, inputMsg]);
+      setMessageFeedPriv((prev) => [
+        ...prev,
+        { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },
+      ]);
     }
   };
   const sendMessage = (event: FormEvent) => {
@@ -235,9 +264,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       };
       socketRef.current?.send(JSON.stringify(message));
       setInputMsg("");
-      setMessageFeed((prev) => [...prev, inputMsg]);
+      setMessageFeed((prev) => [
+        ...prev,
+        { messageId: messageId, msg: inputMsg, timestamp: message.timestamp },
+      ]);
     }
   };
+
   const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.currentTarget;
     setInputMsg(data.value);
@@ -288,7 +321,14 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             }
             //con este el mensaje publico
             if (msg.type === "chat.public" && msg.payload.text) {
-              resolve({ message: { type: msg.type, text: msg.payload.text } });
+              resolve({
+                message: {
+                  type: msg.type,
+                  text: msg.payload.text,
+                  messageId: msg.messageId,
+                  timestamp: msg.timestamp,
+                },
+              });
             }
             if (
               msg.type === "chat.private" &&
@@ -301,6 +341,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                   text: msg.payload.text,
                   toId: msg.payload.toId,
                   fromId: msg.payload.fromId,
+                  messageId: msg.messageId,
+                  timestamp: msg.timestamp,
                 },
               });
             }
@@ -321,21 +363,26 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         if (socketRef.current !== null) {
           let message = await handleProcesMsgToFeed(parse, socketRef.current);
           console.log("listado resuelto", message);
-          //para el mensaje system
+          //para el mensaje system hago el id y verifico que este el system
+
           if (
-            message.systemMessage?.type &&
-            message.systemMessage.type === "system"
+            message?.systemMessage !== undefined &&
+            message?.systemMessage?.type === "system" &&
+            message?.systemMessage?.payload !== undefined
           ) {
-            let msg: string = message.systemMessage.payload.message;
-            setMessageFeed((prev: string[]) => [...prev, msg]);
-            if (message.systemMessage.payload.message.includes("ingresaste")) {
+            const {timestamp, payload}=message.systemMessage
+            const messageIdSystem = nanoid()
+            setMessageFeed((prev) => [
+              ...prev,
+              {
+                messageId: messageIdSystem,
+                timestamp:timestamp ,
+                msg: payload.message,
+              },
+            ]);
+            if (message.systemMessage?.payload.message.includes("ingresaste")) {
               setHasNickname(true);
             }
-
-            console.log("nick del socket", socketRef.current.nickname);
-
-            console.log("isalive del sokcket", socketRef.current.isAlive);
-            console.log("id del sokcket", socketRef.current.userId);
           }
 
           //datos para el feed de mensajes
@@ -343,8 +390,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             message.message?.type === "chat.public" &&
             typeof message.message.text === "string"
           ) {
-            let msg: string = message.message.text;
-            setMessageFeed((prevMsg: string[]) => [...prevMsg, msg]);
+            const { text, messageId, timestamp } = message.message;
+            //aca deberia tipar el mensaje publico agregando messageId y timestamp: HACER
+            setMessageFeed((prevMsg) => [...prevMsg, {msg:text, timestamp:timestamp, messageId:messageId}]);
           }
 
           //datos para los chats privados
@@ -352,10 +400,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             message.message?.type === "chat.private" &&
             message.message?.toId
           ) {
-            let msg: string = message.message.text;
-            let fromId: string = message.message.fromId!;
-            setMessageFeedPriv((prev: string[]) => [...prev, msg]);
+            const { text, messageId, timestamp, fromId } = message.message;
+
+            setMessageFeedPriv((prev) => [...prev, {msg:text, messageId:messageId, timestamp:timestamp }]);
             //aca recorde que el estado solo podria modificarlo el setter y no una funcion externa, se puede hacer el set y dentro aplicar un map o lo que querramos, mientras devuelva la variable modificada, en este caso las propiedades del estado que era un objeto se cambiaron.
+            //aca es a donde deberia tipar el mensaje, y agregar messageId y timestamp:HACER
+
             setNickConected((prev) =>
               prev.map((c) =>
                 c.userId === fromId
@@ -363,8 +413,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                       ...c,
                       messageIn: true,
                       totalMessageIn: (c.totalMessageIn ?? 0) + 1,
-                      msgPriv: [...(c.msgPriv ?? []), msg],
-                    }
+                      msgPriv: [...(c.msgPriv ?? []), {msg:text, messageId:messageId, timestamp:timestamp }],
+                    } 
                   : c
               )
             );
@@ -432,6 +482,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setResMsgSearch,
     resMsgSearch,
     onChangeSearchMsgFeed,
+    setSearchMatches,
+    searchMatches,
+    setActiveMatchIndex,
+    activeMatchIndex
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 

@@ -3,6 +3,7 @@ export interface BaseMessage {
 } // mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
 
 export interface ChatMessage extends BaseMessage {
+  //esta interfaz la voy a usar para el filtrado de mensajes al estilo WP
   type: "chat.public" | "chat.private";
   messageId: string;
   payload: {
@@ -32,6 +33,7 @@ export interface ErrorMessage extends BaseMessage {
 } //tipado basico para mensaje de error luego desestrucuraremos para hacer el envelope del msg diciendo que es un error, el numero del codigo y detalles si hay.
 
 export interface SystemMessage extends BaseMessage {
+  timestamp:number;
   type: "system";
   payload: {
     message: string;
@@ -70,7 +72,7 @@ export interface AckMessage extends BaseMessage {
     status: "ok" | "error";
     details?: string;
     fromId?: string | undefined;
-    nickname?:string 
+    nickname?: string;
   };
 } //tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
 
@@ -90,23 +92,23 @@ export interface ProcessMsg {
   message?: {
     type: "chat.public" | "chat.private";
     text: string;
-    toId?:string;
-    fromId?:string
-
+    toId?: string;
+    fromId?: string;
+    messageId:string;
+    timestamp:number
   };
   clients?: ClientsConected[];
   count?: number;
-  systemMessage?: SystemMessage
+  systemMessage?: SystemMessage;
 }
 
 export interface ClientsConected {
-  messageIn?:boolean;
-  totalMessageIn?:number;
-  msgPriv?:string[];
+  messageIn?: boolean;
+  totalMessageIn?: number;
+  msgPriv?: MsgInFeed[];
   userId: string;
   nick: string;
 }
-
 
 //uniones de tipos para que el switch me tome varios tipos desde una sola interface
 export type ServerToClientMessage =
@@ -122,3 +124,11 @@ export type ClientToServerMessage =
   | SendMessage
   | ChangeNickname
   | PingClient;
+
+//tipado para los mensajes en feeds privados y publicos
+
+export interface MsgInFeed {
+  msg: string;
+  messageId: string;
+  timestamp: number;
+}
