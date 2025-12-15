@@ -1,9 +1,10 @@
+"use client";
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { MsgInFeed } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
-import {MessageItem} from "@/components/msgItem"
+import { MessageItem } from "@/components/msgItem";
 
 interface FeedProps {
   activeFeed: boolean;
@@ -11,16 +12,18 @@ interface FeedProps {
   messageFeed: MsgInFeed[];
   messageFeedPriv: MsgInFeed[];
   clientSelected: string | undefined;
-  resMsgSearch:MsgInFeed[] | undefined;
+  resMsgSearch: MsgInFeed[] | undefined;
 
   //props para el inputsearchmsg
   inputMsgSearch: string | undefined;
-  onChange: (e:ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
 
+  //props para el filtrado WP
   matches: string[];
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   activeIndex: number;
+  messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
 }
 
 export const FeedSection: React.FC<FeedProps> = ({
@@ -31,13 +34,97 @@ export const FeedSection: React.FC<FeedProps> = ({
   clientSelected,
   inputMsgSearch,
   onChange,
-  handleSearchMsg, 
+  handleSearchMsg,
   matches,
   setActiveIndex,
-  activeIndex
+  activeIndex,
+  messageRefs,
 }) => {
-    const {searchMatches, activeMatchIndex}=useAppContextWs()
-    const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
+  const { searchMatches, activeMatchIndex } = useAppContextWs();
+  const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
+  const refMessageInFeedPublic = useRef<HTMLDivElement | null>(null);
+  const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
+  const [activeButton, setActiveButton] = useState<boolean>(false);
+
+  useEffect(() => {
+    const container = privateIdMsg
+      ? refMessageInFeedPrivate.current
+      : refMessageInFeedPublic.current;
+
+    if (!container) return;
+
+    handleToBottom(); 
+
+    container.addEventListener("scroll", handleToBottom);
+
+    return () => {
+      container.removeEventListener("scroll", handleToBottom);
+    };
+  }, [privateIdMsg]);
+
+  useEffect(() => {
+    if (!activeMessageId) return;
+
+    const el = messageRefs.current[activeMessageId];
+
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [activeMessageId]);
+
+  useEffect(() => {
+    if (searchMatches.length > 0) return;
+
+    const container = privateIdMsg
+      ? refMessageInFeedPrivate.current
+      : refMessageInFeedPublic.current;
+
+    if (!container) return;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      80;
+
+    if (!isNearBottom) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messageFeed, messageFeedPriv, privateIdMsg, searchMatches.length]);
+
+  //funcion de calculo solamente
+  const handleToBottom = () => {
+    const container = privateIdMsg
+      ? refMessageInFeedPrivate.current
+      : refMessageInFeedPublic.current;
+
+    if (!container) return;
+
+    //calculo para saber si estas abajo o arriba en el feed
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      50;
+    setActiveButton(!isNearBottom); //paso el valor contrario por que si el valor es true, si esta abajo el boton no tiene que mostrarse, y si el valor es false, no esta abajo, se tiene que mostrar, y como el estado inicia el false para no ser visible, la logica debe ser al reves. Dejo esta nota por que me consto entener la vuelta
+  };
+  
+
+  //funcion para scrollear al final
+  const handleGoToBottom = () => {
+  const container = privateIdMsg
+    ? refMessageInFeedPrivate.current
+    : refMessageInFeedPublic.current;
+
+  if (!container) return;
+
+  container.scrollTo({
+    top: container.scrollHeight,
+    behavior: "smooth",
+  });
+};
 
   return (
     <section
@@ -47,7 +134,14 @@ export const FeedSection: React.FC<FeedProps> = ({
           : "hidden"
       }`}
     >
-      <InputMsgSearch inputMsgSearch={inputMsgSearch} onChange={onChange} handleSearchMsg={handleSearchMsg} activeIndex={activeIndex} matches={matches} setActiveIndex={setActiveIndex} />
+      <InputMsgSearch
+        inputMsgSearch={inputMsgSearch}
+        onChange={onChange}
+        handleSearchMsg={handleSearchMsg}
+        activeIndex={activeIndex}
+        matches={matches}
+        setActiveIndex={setActiveIndex}
+      />
 
       {privateIdMsg ? (
         <section
@@ -66,20 +160,30 @@ export const FeedSection: React.FC<FeedProps> = ({
           </h3>
           <div
             className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            ref={refMessageInFeedPrivate}
           >
             {messageFeedPriv.map((msg) => {
-              const isMatch = searchMatches.includes(msg.messageId)
-              const isActive= msg.messageId === activeMessageId
+              const isMatch = searchMatches.includes(msg.messageId);
+              const isActive = msg.messageId === activeMessageId;
               return (
                 <MessageItem
-                key={msg.messageId}
-                isActive={isActive}
-                isMatch={isMatch}
-                message={msg}
-                 />
+                  key={msg.messageId}
+                  isActive={isActive}
+                  isMatch={isMatch}
+                  message={msg}
+                  messageRefs={messageRefs}
+                />
               );
             })}
           </div>
+          {activeButton && (
+        <button
+          onClick={handleGoToBottom}
+          className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
+        >
+          ↓
+        </button>
+      )}
         </section>
       ) : (
         //section para el feed de mensajes publicos
@@ -96,17 +200,32 @@ export const FeedSection: React.FC<FeedProps> = ({
           </h3>
           <div
             className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            ref={refMessageInFeedPublic}
           >
-            {messageFeed.map((msg, index) => {
+            {messageFeed.map((msg) => {
+              const isMatch = searchMatches.includes(msg.messageId);
+              const isActive = msg.messageId === activeMessageId;
               return (
-                <p key={index} className="text-center mt-2 xl:mt-2 ">
-                  {msg.msg}
-                </p>
+                <MessageItem
+                  key={msg.messageId}
+                  isActive={isActive}
+                  isMatch={isMatch}
+                  message={msg}
+                  messageRefs={messageRefs}
+                />
               );
             })}
           </div>
+          {activeButton && (
+        <button
+          onClick={handleGoToBottom}
+          className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
+        >
+          ↓
+        </button>
+      )}
         </section>
       )}
-    </section>
+           </section>
   );
 };

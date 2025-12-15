@@ -66,6 +66,7 @@ interface IcontextProps {
   setSearchMatches:React.Dispatch<React.SetStateAction<string[]>>
   activeMatchIndex:number;
   setActiveMatchIndex:React.Dispatch<React.SetStateAction<number>>
+  messageRefs:React.RefObject<Record<string, HTMLDivElement | null>>;
 }
 
 interface ContextProviderProps {
@@ -116,6 +117,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const[searchMatches, setSearchMatches]=useState<string[]>([])
   //este es para los saltos entre indices del array de coincidencias del filtrado de arriba
   const[activeMatchIndex, setActiveMatchIndex]=useState<number>(0)
+  //referencia para el scroll automatico al mensaje filtrado activo
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  //referencia para el scroll automatico al mensaje nuevo ingresado al feed
+
 
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
@@ -180,7 +185,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setNickConected((prev) =>
       prev.map((c) =>
         c.userId === userId
-          ? { ...c, messageIn: false, totalMessageIn: 0, msgPriv: [] }
+          ? { ...c, messageIn: false, totalMessageIn: 0,  }
           : c
       )
     );
@@ -218,6 +223,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
+    if(data.trim()===""){
+      setSearchMatches([])
+      setActiveMatchIndex(0)
+    }
   };
 
   const handleActiveRegister = () => {
@@ -444,6 +453,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current?.close();
     };
   }, []);
+
+  
   const value = {
     socketRef,
     messageFeed,
@@ -485,7 +496,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setSearchMatches,
     searchMatches,
     setActiveMatchIndex,
-    activeMatchIndex
+    activeMatchIndex,
+    messageRefs,
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 

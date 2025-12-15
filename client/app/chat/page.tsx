@@ -40,6 +40,7 @@ export default function Chat() {
     activeMatchIndex,
     searchMatches,
     setActiveMatchIndex,
+    messageRefs,
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -86,6 +87,7 @@ export default function Chat() {
         activeIndex={activeMatchIndex}
         matches={searchMatches}
         setActiveIndex={setActiveMatchIndex}
+        messageRefs={messageRefs}
       />
       <InputMsgChat
         changeInputMessage={changeInputMessage}
