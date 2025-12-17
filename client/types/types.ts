@@ -132,4 +132,5 @@ export interface MsgInFeed {
   msg: string;
   messageId: string;
   timestamp: number;
+  type: "user" | "system";
 }

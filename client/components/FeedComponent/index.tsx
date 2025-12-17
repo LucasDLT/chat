@@ -219,12 +219,13 @@ export const FeedSection: React.FC<FeedProps> = ({
             mensaje publico
           </h3>
           <div
-            className={` flex flex-col overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            className={` flex flex-col justify-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPublic}
           >
             {messageFeed.map((msg) => {
               const isMatch = searchMatches.includes(msg.messageId);
               const isActive = msg.messageId === activeMessageId;
+              
               return (
                 <MessageItem
                   key={msg.messageId}

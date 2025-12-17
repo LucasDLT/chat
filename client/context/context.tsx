@@ -266,6 +266,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                     messageId: messageId,
                     timestamp: message.timestamp,
                     fromId: socketRef.current?.userId,
+                    toId: privateIdMsg,
+                    type: "user",
                   },
                 ],
               }
@@ -292,7 +294,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setInputMsg("");
       setMessageFeed((prev) => [
         ...prev,
-        { messageId: messageId, msg: inputMsg, timestamp: message.timestamp, fromId: socketRef.current?.userId, },
+        { messageId: messageId, msg: inputMsg, timestamp: message.timestamp, type: "user", fromId: socketRef.current?.userId },
       ]);
     }
   };
@@ -364,6 +366,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                   text: msg.payload.text,
                   messageId: msg.messageId,
                   timestamp: msg.timestamp,
+                  fromId: msg.payload.fromId,
                 },
               });
             }
@@ -415,6 +418,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                 messageId: messageIdSystem,
                 timestamp: timestamp,
                 msg: payload.message,
+                type: "system",
               },
             ]);
             if (message.systemMessage?.payload.message.includes("ingresaste")) {
@@ -427,11 +431,11 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             message.message?.type === "chat.public" &&
             typeof message.message.text === "string"
           ) {
-            const { text, messageId, timestamp } = message.message;
+            const { text, messageId, timestamp, fromId } = message.message;
             //aca deberia tipar el mensaje publico agregando messageId y timestamp: HACER
             setMessageFeed((prevMsg) => [
               ...prevMsg,
-              { msg: text, timestamp: timestamp, messageId: messageId },
+              { msg: text, timestamp: timestamp, messageId: messageId, type: "user", fromId },
             ]);
           }
 
@@ -460,6 +464,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                           msg: text,
                           messageId: messageId,
                           timestamp: timestamp,
+                          fromId: fromId,
+                          type: "user",
                         },
                       ],
                     }

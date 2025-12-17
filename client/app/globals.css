@@ -88,21 +88,52 @@ body {
 
 .message {
   padding: 6px 10px;
+  
 }
 
 .message--match {
-  background-color: #dc6e0e; /* amarillo suave */
+color: #561303;
 }
 
 .message--active {
-  background-color: #ff2a00; /* más fuerte */
-}
+  border: #561303 solid 2px;
+  }
 
 .message--you {
   text-align: right;
   background-color: #a29714;
+  margin: 10px;
+  width: fit-content;
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-right: 14rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+
+  display: block;
+  align-self: flex-end;
 }
 .message--other {
   text-align: left;
   background-color: #a98543;
+  margin: 10px;
+  margin-left: 14rem;
+  width: fit-content;
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+
+  display: block;
+  align-self: flex-start;
+}
+
+.message--system {
+  align-self: center;
+  background-color: #999;
 }
