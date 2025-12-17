@@ -8,7 +8,6 @@ import React, {
   useContext,
   FormEvent,
   ChangeEvent,
-  SetStateAction,
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
@@ -62,11 +61,11 @@ interface IcontextProps {
   onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
   resMsgSearch: MsgInFeed[];
   setResMsgSearch: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
-  searchMatches:string[]
-  setSearchMatches:React.Dispatch<React.SetStateAction<string[]>>
-  activeMatchIndex:number;
-  setActiveMatchIndex:React.Dispatch<React.SetStateAction<number>>
-  messageRefs:React.RefObject<Record<string, HTMLDivElement | null>>;
+  searchMatches: string[];
+  setSearchMatches: React.Dispatch<React.SetStateAction<string[]>>;
+  activeMatchIndex: number;
+  setActiveMatchIndex: React.Dispatch<React.SetStateAction<number>>;
+  messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
 }
 
 interface ContextProviderProps {
@@ -114,13 +113,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
 
   //estado para el filtrado tipo wp
-  const[searchMatches, setSearchMatches]=useState<string[]>([])
+  const [searchMatches, setSearchMatches] = useState<string[]>([]);
   //este es para los saltos entre indices del array de coincidencias del filtrado de arriba
-  const[activeMatchIndex, setActiveMatchIndex]=useState<number>(0)
+  const [activeMatchIndex, setActiveMatchIndex] = useState<number>(0);
   //referencia para el scroll automatico al mensaje filtrado activo
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   //referencia para el scroll automatico al mensaje nuevo ingresado al feed
-
 
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
@@ -174,58 +172,52 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setActiveFeed(true);
     setPrivateIdMsg(userId);
     setClientSelected(nick);
+    
     const client = nickConected.find((id) => id.userId === userId);
     if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {
       setMessageFeedPriv([...client.msgPriv]);
-    } else {
-      setMessageFeedPriv([]);
     }
     //replique la funcion para pushear con el setter el objeto dentro del estado con sus propiedades resteadas
     //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
     setNickConected((prev) =>
       prev.map((c) =>
-        c.userId === userId
-          ? { ...c, messageIn: false, totalMessageIn: 0,  }
-          : c
+        c.userId === userId ? { ...c, messageIn: false, totalMessageIn: 0 } : c
       )
     );
   };
- const handleSearchMsg = (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  const handleSearchMsg = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  if (!inputMsgSearch) return;
+    if (!inputMsgSearch) return;
 
-  const query = inputMsgSearch.trim().toLowerCase();
+    const query = inputMsgSearch.trim().toLowerCase();
 
-  if (clientSelected && privateIdMsg) {
-    const res = messageFeedPriv
-      .filter(m => m.msg.toLowerCase().includes(query))
-      .map(m => m.messageId);
+    if (clientSelected && privateIdMsg) {
+      const res = messageFeedPriv
+        .filter((m) => m.msg.toLowerCase().includes(query))
+        .map((m) => m.messageId);
 
-    setSearchMatches(res);
-    setActiveMatchIndex(0)
-    console.log(res);
-    
-  } else if (messageFeed) {
-    const res = messageFeed
-      .filter(m => m.msg.toLowerCase().includes(query))
-      .map(m => m.messageId);
+      setSearchMatches(res);
+      setActiveMatchIndex(0);
+      console.log(res);
+    } else if (messageFeed) {
+      const res = messageFeed
+        .filter((m) => m.msg.toLowerCase().includes(query))
+        .map((m) => m.messageId);
 
-    setSearchMatches(res);
-    setActiveMatchIndex(0)
-    console.log(res);
-    
-  }
-};
-
+      setSearchMatches(res);
+      setActiveMatchIndex(0);
+      console.log(res);
+    }
+  };
 
   //esta la vamos a usar en el filtro tipo WS
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
-    if(data.trim()===""){
-      setSearchMatches([])
-      setActiveMatchIndex(0)
+    if (data.trim() === "") {
+      setSearchMatches([]);
+      setActiveMatchIndex(0);
     }
   };
 
@@ -251,11 +243,26 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         },
       };
       socketRef.current?.send(JSON.stringify(message));
+      // setMessageFeedPriv((prev) => [...prev, { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },]); 1ER PUNTO CRITICO PARA MSJ PRIVADOS
+      setNickConected((prev) =>
+        prev.map((c) =>
+          c.userId === privateIdMsg
+            ? {
+                ...c,
+                
+                msgPriv: [
+                  ...(c.msgPriv ?? []),
+                  {
+                    msg: inputMsg,
+                    messageId: messageId,
+                    timestamp: message.timestamp,
+                  },
+                ],
+              }
+            : c
+        )
+      );
       setInputMsg("");
-      setMessageFeedPriv((prev) => [
-        ...prev,
-        { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },
-      ]);
     }
   };
   const sendMessage = (event: FormEvent) => {
@@ -289,6 +296,15 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setClientSelected("");
     setActiveFeed(true);
   };
+
+  useEffect(() => {
+  if (!privateIdMsg) return;
+
+  const client = nickConected.find(c => c.userId === privateIdMsg);
+  if (!client || !Array.isArray(client.msgPriv)) return;
+
+  setMessageFeedPriv(client.msgPriv);
+}, [nickConected, privateIdMsg]);
 
   useEffect(() => {
     try {
@@ -379,13 +395,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             message?.systemMessage?.type === "system" &&
             message?.systemMessage?.payload !== undefined
           ) {
-            const {timestamp, payload}=message.systemMessage
-            const messageIdSystem = nanoid()
+            const { timestamp, payload } = message.systemMessage;
+            const messageIdSystem = nanoid();
             setMessageFeed((prev) => [
               ...prev,
               {
                 messageId: messageIdSystem,
-                timestamp:timestamp ,
+                timestamp: timestamp,
                 msg: payload.message,
               },
             ]);
@@ -401,7 +417,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           ) {
             const { text, messageId, timestamp } = message.message;
             //aca deberia tipar el mensaje publico agregando messageId y timestamp: HACER
-            setMessageFeed((prevMsg) => [...prevMsg, {msg:text, timestamp:timestamp, messageId:messageId}]);
+            setMessageFeed((prevMsg) => [
+              ...prevMsg,
+              { msg: text, timestamp: timestamp, messageId: messageId },
+            ]);
           }
 
           //datos para los chats privados
@@ -411,7 +430,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           ) {
             const { text, messageId, timestamp, fromId } = message.message;
 
-            setMessageFeedPriv((prev) => [...prev, {msg:text, messageId:messageId, timestamp:timestamp }]);
+            // setMessageFeedPriv((prev) => [...prev, {msg:text, messageId:messageId, timestamp:timestamp }]); PUNTO CRITICO PARA PRIVADOS
+
             //aca recorde que el estado solo podria modificarlo el setter y no una funcion externa, se puede hacer el set y dentro aplicar un map o lo que querramos, mientras devuelva la variable modificada, en este caso las propiedades del estado que era un objeto se cambiaron.
             //aca es a donde deberia tipar el mensaje, y agregar messageId y timestamp:HACER
 
@@ -422,8 +442,15 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                       ...c,
                       messageIn: true,
                       totalMessageIn: (c.totalMessageIn ?? 0) + 1,
-                      msgPriv: [...(c.msgPriv ?? []), {msg:text, messageId:messageId, timestamp:timestamp }],
-                    } 
+                      msgPriv: [
+                        ...(c.msgPriv ?? []),
+                        {
+                          msg: text,
+                          messageId: messageId,
+                          timestamp: timestamp,
+                        },
+                      ],
+                    }
                   : c
               )
             );
@@ -454,7 +481,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     };
   }, []);
 
-  
   const value = {
     socketRef,
     messageFeed,

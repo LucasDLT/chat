@@ -44,7 +44,24 @@ export const FeedSection: React.FC<FeedProps> = ({
   const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
   const refMessageInFeedPublic = useRef<HTMLDivElement | null>(null);
   const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
-  const [activeButton, setActiveButton] = useState<boolean>(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const prevLengthRef = useRef(0);
+
+
+  useEffect(() => {
+  const currentFeed = privateIdMsg ? messageFeedPriv : messageFeed;
+  const prevLength = prevLengthRef.current;
+
+  if (currentFeed.length > prevLength) {
+    if (!isNearBottom) {
+      setUnreadCount((prev) => prev + (currentFeed.length - prevLength));
+    }
+  }
+
+  prevLengthRef.current = currentFeed.length;
+}, [messageFeed, messageFeedPriv, isNearBottom, privateIdMsg]);
+
 
   useEffect(() => {
     const container = privateIdMsg
@@ -53,7 +70,7 @@ export const FeedSection: React.FC<FeedProps> = ({
 
     if (!container) return;
 
-    handleToBottom(); 
+    handleToBottom();
 
     container.addEventListener("scroll", handleToBottom);
 
@@ -105,26 +122,26 @@ export const FeedSection: React.FC<FeedProps> = ({
     if (!container) return;
 
     //calculo para saber si estas abajo o arriba en el feed
-    const isNearBottom =
+    const nearBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight <
       50;
-    setActiveButton(!isNearBottom); //paso el valor contrario por que si el valor es true, si esta abajo el boton no tiene que mostrarse, y si el valor es false, no esta abajo, se tiene que mostrar, y como el estado inicia el false para no ser visible, la logica debe ser al reves. Dejo esta nota por que me consto entener la vuelta
+    setIsNearBottom(nearBottom); //paso el valor contrario por que si el valor es true, si esta abajo el boton no tiene que mostrarse, y si el valor es false, no esta abajo, se tiene que mostrar, y como el estado inicia el false para no ser visible, la logica debe ser al reves. Dejo esta nota por que me consto entener la vuelta
   };
-  
 
   //funcion para scrollear al final
   const handleGoToBottom = () => {
-  const container = privateIdMsg
-    ? refMessageInFeedPrivate.current
-    : refMessageInFeedPublic.current;
+    const container = privateIdMsg
+      ? refMessageInFeedPrivate.current
+      : refMessageInFeedPublic.current;
 
-  if (!container) return;
+    if (!container) return;
 
-  container.scrollTo({
-    top: container.scrollHeight,
-    behavior: "smooth",
-  });
-};
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+    setUnreadCount(0);
+  };
 
   return (
     <section
@@ -176,14 +193,14 @@ export const FeedSection: React.FC<FeedProps> = ({
               );
             })}
           </div>
-          {activeButton && (
-        <button
-          onClick={handleGoToBottom}
-          className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
-        >
-          ↓
-        </button>
-      )}
+          {unreadCount > 0 && !isNearBottom && (
+            <button
+              onClick={handleGoToBottom}
+              className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
+            >
+              ↓ {unreadCount}
+            </button>
+          )}
         </section>
       ) : (
         //section para el feed de mensajes publicos
@@ -216,16 +233,16 @@ export const FeedSection: React.FC<FeedProps> = ({
               );
             })}
           </div>
-          {activeButton && (
-        <button
-          onClick={handleGoToBottom}
-          className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
-        >
-          ↓
-        </button>
-      )}
+          {unreadCount > 0 && !isNearBottom && (
+            <button
+              onClick={handleGoToBottom}
+              className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
+            >
+              ↓ {unreadCount}
+            </button>
+          )}
         </section>
       )}
-           </section>
+    </section>
   );
 };
