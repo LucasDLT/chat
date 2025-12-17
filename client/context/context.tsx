@@ -265,6 +265,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                     msg: inputMsg,
                     messageId: messageId,
                     timestamp: message.timestamp,
+                    fromId: socketRef.current?.userId,
                   },
                 ],
               }
@@ -291,7 +292,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setInputMsg("");
       setMessageFeed((prev) => [
         ...prev,
-        { messageId: messageId, msg: inputMsg, timestamp: message.timestamp },
+        { messageId: messageId, msg: inputMsg, timestamp: message.timestamp, fromId: socketRef.current?.userId, },
       ]);
     }
   };

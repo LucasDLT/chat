@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useAppContextWs } from "@/context/context";
-import { ClientsConected } from "@/types/types";
 import { DirectorySection } from "@/components/DirectorySection";
 import { NavbarChat } from "@/components/NavbarChat";
 import { FeedSection } from "@/components/FeedComponent";
@@ -90,6 +89,7 @@ export default function Chat() {
         matches={searchMatches}
         setActiveIndex={setActiveMatchIndex}
         messageRefs={messageRefs}
+        socketRef={socketRef}
       />
       <InputMsgChat
         changeInputMessage={changeInputMessage}

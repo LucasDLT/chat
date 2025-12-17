@@ -128,6 +128,7 @@ export type ClientToServerMessage =
 //tipado para los mensajes en feeds privados y publicos
 
 export interface MsgInFeed {
+  fromId?: string;
   msg: string;
   messageId: string;
   timestamp: number;

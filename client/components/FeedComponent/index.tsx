@@ -13,6 +13,7 @@ interface FeedProps {
   messageFeedPriv: MsgInFeed[];
   clientSelected: string | undefined;
   resMsgSearch: MsgInFeed[] | undefined;
+  socketRef: React.RefObject<WebSocket | null>;
 
   //props para el inputsearchmsg
   inputMsgSearch: string | undefined;
@@ -39,6 +40,7 @@ export const FeedSection: React.FC<FeedProps> = ({
   setActiveIndex,
   activeIndex,
   messageRefs,
+  socketRef
 }) => {
   const { searchMatches, activeMatchIndex } = useAppContextWs();
   const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
@@ -176,7 +178,7 @@ export const FeedSection: React.FC<FeedProps> = ({
             {clientSelected}
           </h3>
           <div
-            className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            className={` flex flex-col overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPrivate}
           >
             {messageFeedPriv.map((msg) => {
@@ -189,6 +191,7 @@ export const FeedSection: React.FC<FeedProps> = ({
                   isMatch={isMatch}
                   message={msg}
                   messageRefs={messageRefs}
+                  myUserId={socketRef.current?.userId ?? ""}
                 />
               );
             })}
@@ -216,7 +219,7 @@ export const FeedSection: React.FC<FeedProps> = ({
             mensaje publico
           </h3>
           <div
-            className={` flex flex-col items-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            className={` flex flex-col overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPublic}
           >
             {messageFeed.map((msg) => {
@@ -229,6 +232,7 @@ export const FeedSection: React.FC<FeedProps> = ({
                   isMatch={isMatch}
                   message={msg}
                   messageRefs={messageRefs}
+                  myUserId={socketRef.current?.userId ?? ""}
                 />
               );
             })}

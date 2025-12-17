@@ -91,9 +91,18 @@ body {
 }
 
 .message--match {
-  background-color: #fff3b0; /* amarillo suave */
+  background-color: #dc6e0e; /* amarillo suave */
 }
 
 .message--active {
-  background-color: #ffd000; /* más fuerte */
+  background-color: #ff2a00; /* más fuerte */
+}
+
+.message--you {
+  text-align: right;
+  background-color: #a29714;
+}
+.message--other {
+  text-align: left;
+  background-color: #a98543;
 }
