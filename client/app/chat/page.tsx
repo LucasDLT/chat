@@ -12,8 +12,6 @@ export default function Chat() {
   const router = useRouter();
   const [active, setActive] = useState<boolean>(false);
   const [activeMobile, setActiveMobile] = useState<boolean>(false);
-  const [inputSearch, setInputSearch] = useState<string>("");
-  const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
   const {
     conectedCount,
     nickConected,
@@ -41,6 +39,10 @@ export default function Chat() {
     searchMatches,
     setActiveMatchIndex,
     messageRefs,
+    inputSearch,
+    setInputSearch,
+    resSearch,
+    setResSearch
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;

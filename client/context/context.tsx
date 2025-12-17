@@ -66,6 +66,11 @@ interface IcontextProps {
   activeMatchIndex: number;
   setActiveMatchIndex: React.Dispatch<React.SetStateAction<number>>;
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
+  inputSearch: string;
+  setInputSearch:React.Dispatch<React.SetStateAction<string>>;
+ resSearch:ClientsConected[]; 
+ setResSearch:React.Dispatch<React.SetStateAction<ClientsConected[]>>;
+
 }
 
 interface ContextProviderProps {
@@ -111,6 +116,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     undefined
   );
   const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
+  const [inputSearch, setInputSearch] = useState<string>("");
+  const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
+
+
 
   //estado para el filtrado tipo wp
   const [searchMatches, setSearchMatches] = useState<string[]>([]);
@@ -295,6 +304,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setPrivateIdMsg("");
     setClientSelected("");
     setActiveFeed(true);
+    setInputSearch("");
+    setResSearch([]);
   };
 
   useEffect(() => {
@@ -524,6 +535,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setActiveMatchIndex,
     activeMatchIndex,
     messageRefs,
+    inputSearch,
+    setInputSearch,
+    resSearch, 
+    setResSearch
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 
