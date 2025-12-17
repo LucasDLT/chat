@@ -57,6 +57,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
       >
         <div className="flex flex-col justify-center items-center relative">
           <Image
+            title="cambiar nickname"
             alt="icon user"
             src={"/icons/usuario.png"}
             width={30}
@@ -65,7 +66,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
               setActive(!active);
               setActiveMobile(!activeMobile);
             }}
-            className="hover:cursor-pointer"
+            className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 rounded-full ${active === false ? "": "bg-yellow-100 hover:bg-transparent p-p transition-all ease-in-out duration-500 rounded-full"}`}
           />
 
           {active && (
@@ -79,7 +80,10 @@ export const NavbarChat: React.FC<NabvarProps> = ({
             />
           )}
         </div>
+        <div className={`flex justify-center items-center ${active===false?"bg-yellow-100 rounded-full p-p transition-all ease-in-out duration-500":"hover:bg-yellow-100"}`}>
+          
         <Image
+          title="ir al chat"
           alt="icon chat"
           src={"/icons/chat.png"}
           width={25}
@@ -89,9 +93,12 @@ export const NavbarChat: React.FC<NabvarProps> = ({
             setActive(false);
             setActiveMobile(false);
           }}
-          className="hover:cursor-pointer"
+            className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 ${active === false ? "": "xl:top-85 absolute"}`}
         />
+        </div>
+
         <Image
+          title="regresar atras"
           alt="icon arrow"
           src={"/icons/flecha-izquierda.png"}
           width={20}
@@ -99,7 +106,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
           onClick={() => {
             activeFeed ? setActiveFeed(false) : router.push("/");
           }}
-          className="hover:cursor-pointer"
+          className="hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300"
         />
       </nav>
     </section>
