@@ -133,4 +133,6 @@ export interface MsgInFeed {
   messageId: string;
   timestamp: number;
   type: "user" | "system";
+  fromNick?: string;
+  privateId?: string;
 }

@@ -8,7 +8,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,34 +24,34 @@ body {
 }
 
 /*para textos*/
-.grey{
-  color:#EEEEEE
+.grey {
+  color: #eeeeee;
 }
 
 /*para los fondos*/
-.black{
-  color:#222831
+.black {
+  color: #222831;
 }
 
 /*para los fondos de los mensajes*/
-.blackDeg{
-  background-color:#2e3135
+.blackDeg {
+  background-color: #2e3135;
 }
-.blackDegbg{
-  background-color:#1d20247c
+.blackDegbg {
+  background-color: #1d20247c;
 }
 
 /*para acentuar y bordes*/
-.yellowBg{
-  background-color:#FFD369
+.yellowBg {
+  background-color: #ffd369;
 }
-.titleColor{
-  color:#FFD369
+.titleColor {
+  color: #ffd369;
 }
-.borderYellow{
+.borderYellow {
   border-color: #ffd26934;
 }
-.bgBlurYellow{
+.bgBlurYellow {
   background-color: #ffd26969;
   backdrop-filter: blur(2px);
 }
@@ -61,10 +60,11 @@ body {
 
 ::-webkit-scrollbar {
   width: 10px;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  margin: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -74,30 +74,29 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #c99b057e;
 }
 
 /*fonts*/
 
-.animalHunter{
+.animalHunter {
   font-family: var(--font-animal-hunter);
 }
-.mesoninaRegular{
+.mesoninaRegular {
   font-family: var(--font-mesonina-regular);
 }
 
 .message {
   padding: 6px 10px;
-  
 }
 
 .message--match {
-color: #561303;
+  color: #561303;
 }
 
 .message--active {
   border: #561303 solid 2px;
-  }
+}
 
 .message--you {
   text-align: right;
@@ -135,5 +134,5 @@ color: #561303;
 
 .message--system {
   align-self: center;
-  background-color: #999;
+  margin-right: 230px;
 }

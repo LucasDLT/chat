@@ -6,6 +6,7 @@ interface MessageItemProps {
   isActive: boolean;
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   myUserId: string;
+  showAuthor?: boolean;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -14,25 +15,29 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   isActive,
   messageRefs,
   myUserId,
+  showAuthor = false,
 }) => {
   const isMine = message.fromId === myUserId;
-  const isSystem = !message.fromId;
+  const isSystem = message.type === "system";
 
   return (
     <div
       className={`
-        message 
+        message
         ${isMine ? "message--you" : "message--other"}
+        ${isSystem ? "message--system" : ""}
         ${isMatch ? "message--match" : ""}
         ${isActive ? "message--active" : ""}
-        ${isSystem ? "message--system" : ""}
       `}
       ref={(el) => {
         messageRefs.current[message.messageId] = el;
       }}
     >
-      {message.msg}
-      {isMine && " (you)"}
+      {showAuthor && !isMine && !isSystem && message.fromNick && (
+        <span className="message__author">{message.fromNick}</span>
+      )}
+
+      <div className="message__body">{message.msg}</div>
     </div>
   );
 };

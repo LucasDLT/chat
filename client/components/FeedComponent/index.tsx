@@ -113,7 +113,7 @@ export const FeedSection: React.FC<FeedProps> = ({
       top: container.scrollHeight,
       behavior: "smooth",
     });
-  }, [messageFeed, messageFeedPriv, privateIdMsg, searchMatches.length]);
+  }, [messageFeed, privateIdMsg, searchMatches.length]);
 
   //funcion de calculo solamente
   const handleToBottom = () => {
@@ -144,6 +144,8 @@ export const FeedSection: React.FC<FeedProps> = ({
     });
     setUnreadCount(0);
   };
+const privateMessages = messageFeedPriv;
+
 
   return (
     <section
@@ -181,7 +183,7 @@ export const FeedSection: React.FC<FeedProps> = ({
             className={` flex flex-col overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPrivate}
           >
-            {messageFeedPriv.map((msg) => {
+            {privateMessages.map((msg) => {
               const isMatch = searchMatches.includes(msg.messageId);
               const isActive = msg.messageId === activeMessageId;
               return (
@@ -192,6 +194,7 @@ export const FeedSection: React.FC<FeedProps> = ({
                   message={msg}
                   messageRefs={messageRefs}
                   myUserId={socketRef.current?.userId ?? ""}
+                  showAuthor={false}
                 />
               );
             })}
@@ -219,7 +222,7 @@ export const FeedSection: React.FC<FeedProps> = ({
             mensaje publico
           </h3>
           <div
-            className={` flex flex-col justify-center overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            className={` flex flex-col overflow-y-auto h-[40vh] xl:h-[84vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPublic}
           >
             {messageFeed.map((msg) => {
@@ -234,6 +237,7 @@ export const FeedSection: React.FC<FeedProps> = ({
                   message={msg}
                   messageRefs={messageRefs}
                   myUserId={socketRef.current?.userId ?? ""}
+                  showAuthor={true}
                 />
               );
             })}
