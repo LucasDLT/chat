@@ -1,4 +1,6 @@
+"use client"
 import { MsgInFeed } from "@/types/types";
+import { use } from "react";
 
 interface MessageItemProps {
   message: MsgInFeed;

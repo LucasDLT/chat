@@ -126,6 +126,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   //referencia para el scroll automatico al mensaje nuevo ingresado al feed
 
+  const nickMapRef = useRef<Record<string, string>>({});
+
+
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
 
@@ -170,6 +173,16 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setInputRegister("");
     }
   };
+  const resolveNick = (fromId?: string ) => {
+  if (!fromId) return undefined;
+
+  if (fromId === socketRef.current?.userId) {
+    return socketRef.current?.nickname;
+  }
+
+  return nickMapRef.current[fromId];
+};
+
   const changeRegisterNick = (event: FormEvent) => {
     const data = event.currentTarget as HTMLInputElement;
     setInputRegister(data.value);
@@ -326,26 +339,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setResSearch([]);
   };
 
-  useEffect(() => {
-    if (!nickConected.length) return;
-
-    setMessageFeed((prev) =>
-      prev.map((m) => {
-        // system o ya resuelto
-        if (!m.fromId || m.fromNick) return m;
-
-        // mi mensaje
-        if (m.fromId === socketRef.current?.userId) {
-          return { ...m, fromNick: socketRef.current?.nickname };
-        }
-
-        // mensaje de otro
-        const nick = nickConected.find((c) => c.userId === m.fromId)?.nick;
-
-        return nick ? { ...m, fromNick: nick } : m;
-      })
-    );
-  }, [nickConected, messageFeed]);
+ 
 
   useEffect(() => {
     try {
@@ -416,11 +410,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             if (msg.type === "snapshot:clients" && msg.payload) {
               const conectedNicks: ClientsConected[] = [];
               for (const c of msg.payload) {
-                let newObj = {
+                nickMapRef.current[c.userId] = c.nickname;
+
+                conectedNicks.push({
                   userId: c.userId,
                   nick: c.nickname,
-                };
-                conectedNicks.push(newObj);
+                });
               }
               resolve({ clients: conectedNicks });
             }
@@ -459,7 +454,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             typeof message.message.text === "string"
           ) {
             const { text, messageId, timestamp, fromId } = message.message;
-            //aca deberia tipar el mensaje publico agregando messageId y timestamp: HACER
+            
+            const fromNick = resolveNick(fromId);
+            console.log("mensaje con nick:", { fromId, fromNick });
+
             setMessageFeed((prevMsg) => [
               ...prevMsg,
               {
@@ -468,6 +466,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                 messageId: messageId,
                 type: "user",
                 fromId,
+                fromNick,
               },
             ]);
           }
