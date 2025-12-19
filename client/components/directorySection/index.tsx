@@ -101,9 +101,9 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
         >
           {visibleContacts.length > 0 ? (
             visibleContacts.map((client) => (
-              <div className="text-black flex justify-evenly items-center bgBlurYellow w-full p-1 my-1 rounded-xs ">
+              <div key={client.userId} className={`text-black flex ${client.totalMessageIn && client.totalMessageIn > 0 ?'justify-evenly':" justify-center" } items-center bgBlurYellow w-full p-1 my-1 rounded-xs `}>
                 <p
-                  key={client.userId}
+                  
                   onClick={() => handleSelectClient(client.userId, client.nick)}
                   className=" mesoninaRegular font-extrabold text-xl hover:cursor-pointer h-6 flex items-center justify-center tracking-widest transition-all duration-1000"
                 >

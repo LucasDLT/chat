@@ -106,15 +106,49 @@ body {
   max-width: 70%;
   padding: 8px 12px;
   border-radius: 12px;
-  margin-right: 14rem;
+  margin-right: 1.6rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  display: block;
+  align-self: flex-end;
+  border: #0a0a0a solid 1px;
+}
+
+.message--you-xl {
+  text-align: right;
+  background-color: #a29714;
+  margin: 10px;
+  width: fit-content;
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-right: 13rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  display: block;
+  align-self: flex-end;
+  border: #0a0a0a solid 1px;
+}
+.message--other {
+  text-align: left;
+  background-color: #a98543;
+  margin: 10px;
+  margin-left: 1.6rem;
+  width: fit-content;
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
 
   display: block;
-  align-self: flex-end;
+  align-self: flex-start;
 }
-.message--other {
+.message--other-xl {
   text-align: left;
   background-color: #a98543;
   margin: 10px;
