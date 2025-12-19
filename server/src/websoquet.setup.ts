@@ -376,11 +376,24 @@ export const websocketSetup = (server: Server) => {
 
     ws.on("close", () => {
       if (process.env.NODE_ENV !== "test") {
-        console.log("conexion finalizada");
+        console.log("conexion finalizada del socket", ws.nickname);
+      }
+      if (ws.nickname) {
+        const msgForClient: SystemMessage = {
+          type: "system",
+          timestamp: Date.now(),
+          payload: {
+            message: `${ws.nickname} salio de la sala`,
+          },
+        };
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN && client !== ws) {
+            client.send(JSON.stringify(msgForClient));
+          }
+        });
       }
       if (ws.userId) {
         registeredClients.delete(ws.userId);
-
         sendSnapshotToSocket();
       }
     });
