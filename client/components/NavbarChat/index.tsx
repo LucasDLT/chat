@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { ChangeNickSection } from "@/components/ChangeNick";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { log } from "console";
 
 interface NabvarProps {
   active: boolean;
@@ -29,9 +30,14 @@ export const NavbarChat: React.FC<NabvarProps> = ({
   socketRef,
   router,
 }) => {
+  
+    const handleToClose = () => {
+      socketRef.current?.close();
+      router.push("/")
+    }
   return (
     <section
-      className={`bg-black flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
+      className={`bg-black z-10 flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
         active === false
           ? "xl:w-15 transition-all duration-100"
           : "xl:w-60 transition-all duration-100"
@@ -104,7 +110,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
           width={20}
           height={20}
           onClick={() => {
-            activeFeed ? setActiveFeed(false) : router.push("/");
+            activeFeed ? setActiveFeed(false) : handleToClose();
           }}
           className="hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300"
         />

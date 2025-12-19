@@ -128,7 +128,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const nickMapRef = useRef<Record<string, string>>({});
 
-
   const pendingNickRef = useRef<Record<string, string>>({});
   const router = useRouter();
 
@@ -173,15 +172,15 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setInputRegister("");
     }
   };
-  const resolveNick = (fromId?: string ) => {
-  if (!fromId) return undefined;
+  const resolveNick = (fromId?: string) => {
+    if (!fromId) return undefined;
 
-  if (fromId === socketRef.current?.userId) {
-    return socketRef.current?.nickname;
-  }
+    if (fromId === socketRef.current?.userId) {
+      return socketRef.current?.nickname;
+    }
 
-  return nickMapRef.current[fromId];
-};
+    return nickMapRef.current[fromId];
+  };
 
   const changeRegisterNick = (event: FormEvent) => {
     const data = event.currentTarget as HTMLInputElement;
@@ -264,16 +263,16 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current?.send(JSON.stringify(message));
       // setMessageFeedPriv((prev) => [...prev, { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },]); 1ER PUNTO CRITICO PARA MSJ PRIVADOS
       setMessageFeedPriv((prev) => [
-  ...prev,
-  {
-    msg: inputMsg,
-    messageId,
-    timestamp: message.timestamp,
-    fromId: socketRef.current?.userId,
-    type: "user",
-    privateId: privateIdMsg,
-  },
-]);
+        ...prev,
+        {
+          msg: inputMsg,
+          messageId,
+          timestamp: message.timestamp,
+          fromId: socketRef.current?.userId,
+          type: "user",
+          privateId: privateIdMsg,
+        },
+      ]);
 
       setNickConected((prev) =>
         prev.map((c) =>
@@ -339,7 +338,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setResSearch([]);
   };
 
- 
 
   useEffect(() => {
     try {
@@ -454,7 +452,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             typeof message.message.text === "string"
           ) {
             const { text, messageId, timestamp, fromId } = message.message;
-            
+
             const fromNick = resolveNick(fromId);
             console.log("mensaje con nick:", { fromId, fromNick });
 
@@ -478,11 +476,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           ) {
             const { text, messageId, timestamp, fromId } = message.message;
 
-            // setMessageFeedPriv((prev) => [...prev, {msg:text, messageId:messageId, timestamp:timestamp }]); PUNTO CRITICO PARA PRIVADOS
-
-            //aca recorde que el estado solo podria modificarlo el setter y no una funcion externa, se puede hacer el set y dentro aplicar un map o lo que querramos, mientras devuelva la variable modificada, en este caso las propiedades del estado que era un objeto se cambiaron.
-            //aca es a donde deberia tipar el mensaje, y agregar messageId y timestamp:HACER
-
             setNickConected((prev) =>
               prev.map((c) =>
                 c.userId === fromId
@@ -505,27 +498,25 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                   : c
               )
             );
-              setMessageFeedPriv((prev) => {
-  // si el feed privado actual es con este usuario, lo agrego
-  if (privateIdMsg === fromId) {
-    return [
-      ...prev,
-      {
-        msg: text,
-        messageId,
-        timestamp,
-        fromId,
-        type: "user",
-        privateId: fromId,
-      },
-    ];
-  }
+            setMessageFeedPriv((prev) => {
+              // si el feed privado actual es con este usuario, lo agrego
+              if (privateIdMsg === fromId) {
+                return [
+                  ...prev,
+                  {
+                    msg: text,
+                    messageId,
+                    timestamp,
+                    fromId,
+                    type: "user",
+                    privateId: fromId,
+                  },
+                ];
+              }
 
-  // si no, no toco el feed activo
-  return prev;
-});
-
-            
+              // si no, no toco el feed activo
+              return prev;
+            });
           }
 
           //datos para el feed de clientes conectados
@@ -539,7 +530,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       });
       socketRef.current.addEventListener("close", (event) => {
         cleanIntervals();
-        console.log("Disconnected from server");
+        console.log(`${socketRef.current?.nickname} sale del chat`);
       });
       socketRef.current.addEventListener("error", (event) => {
         console.log("Error connecting to server");

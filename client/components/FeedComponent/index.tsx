@@ -180,7 +180,7 @@ const privateMessages = messageFeedPriv;
             {clientSelected}
           </h3>
           <div
-            className={` flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[40vh] xl:h-[83.7vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            className={` flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[52.4vh] xl:h-[83.7vh] absolute g-2 top-22 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPrivate}
           >
             {privateMessages.map((msg) => {
@@ -202,7 +202,7 @@ const privateMessages = messageFeedPriv;
           {unreadCount > 0 && !isNearBottom && (
             <button
               onClick={handleGoToBottom}
-              className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
+              className="absolute animate-pulse -right-5 xl:-right-2 bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
             >
               ↓ {unreadCount}
             </button>
@@ -222,7 +222,7 @@ const privateMessages = messageFeedPriv;
             mensaje publico
           </h3>
           <div
-            className={` flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[40vh] xl:h-[83.7vh] absolute g-2 top-14 xl:top-11  w-94 xl:w-[79vw]`}
+            className={` flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[52.4vh] xl:h-[83.7vh] absolute g-2 top-22 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPublic}
           >
             {messageFeed.map((msg) => {
@@ -245,7 +245,7 @@ const privateMessages = messageFeedPriv;
           {unreadCount > 0 && !isNearBottom && (
             <button
               onClick={handleGoToBottom}
-              className="absolute right-5 bottom-0 m-4 rounded-full p-2 hover:cursor-pointer bg-amber-400/80 active:bgYellowActive z-30"
+              className="absolute animate-pulse -right-5 xl:-right-2 bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
             >
               ↓ {unreadCount}
             </button>
