@@ -498,7 +498,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                   : c
               )
             );
-            setMessageFeedPriv((prev) => {
+           /* setMessageFeedPriv((prev) => {
               // si el feed privado actual es con este usuario, lo agrego
               if (privateIdMsg === fromId) {
                 return [
@@ -516,7 +516,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
               // si no, no toco el feed activo
               return prev;
-            });
+            });*/
           }
 
           //datos para el feed de clientes conectados
@@ -543,6 +543,18 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current?.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (!privateIdMsg) {
+      setMessageFeedPriv([])
+      return
+    }
+    
+    const client = nickConected.find(
+      (c) => c.userId === privateIdMsg
+    )
+    setMessageFeedPriv(client?.msgPriv ?? [])
+  }, [nickConected, privateIdMsg]);
 
   const value = {
     socketRef,

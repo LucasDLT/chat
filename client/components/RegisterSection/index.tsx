@@ -1,15 +1,14 @@
 import Image from "next/image";
 interface RegisterSectionProps {
-  hasNickname: boolean;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   onClick: () => void;
   activeRegister: boolean;
+  
 }
 
 export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
-  hasNickname,
   onChange,
   value,
   onSubmit,

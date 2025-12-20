@@ -41,7 +41,8 @@ export default function Chat() {
     inputSearch,
     setInputSearch,
     resSearch,
-    setResSearch
+    setResSearch,
+    setActiveRegister
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -52,7 +53,6 @@ export default function Chat() {
       : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
 
   function changeInputSearch(e: FormEvent<HTMLInputElement>) {
-
     const data = e.currentTarget.value;
     setInputSearch(data);
     const res = nickConected.filter(
@@ -111,6 +111,7 @@ export default function Chat() {
         activeFeed={activeFeed}
         socketRef={socketRef}
         router={router}
+        setActiveRegister={setActiveRegister}
       />
     </main>
   );

@@ -2,7 +2,6 @@
 import Image from "next/image";
 import { ChangeNickSection } from "@/components/ChangeNick";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { log } from "console";
 
 interface NabvarProps {
   active: boolean;
@@ -12,6 +11,7 @@ interface NabvarProps {
   changeRegisterNick: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputRegister: string | undefined;
   registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
+  setActiveRegister:React.Dispatch<React.SetStateAction<boolean>>
   setActiveFeed: React.Dispatch<React.SetStateAction<boolean>>;
   socketRef: React.RefObject<WebSocket | null>;
   activeFeed: boolean;
@@ -29,11 +29,13 @@ export const NavbarChat: React.FC<NabvarProps> = ({
   activeFeed,
   socketRef,
   router,
+  setActiveRegister
 }) => {
   
     const handleToClose = () => {
       socketRef.current?.close();
       router.push("/")
+      setActiveRegister(false)
     }
   return (
     <section
