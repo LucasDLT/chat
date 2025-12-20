@@ -14,6 +14,7 @@ import {
   ChangeNickname,
   ClientsConected,
   MsgInFeed,
+  PersistedState,
   ProcessMsg,
   RegisterNickname,
   SendMessage,
@@ -248,6 +249,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const sendMessagePrivate = (event: FormEvent) => {
     event.preventDefault();
+    if (!socketRef.current?.nickname) return;
     const messageId = nanoid();
     if (privateIdMsg && inputMsg) {
       const message: SendMessage = {
@@ -300,6 +302,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   };
   const sendMessage = (event: FormEvent) => {
     event.preventDefault();
+    if (!socketRef.current?.nickname) return;
+
     const messageId = nanoid();
     if (inputMsg) {
       const message: SendMessage = {
@@ -338,8 +342,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setResSearch([]);
   };
 
-
+  //useeffect para el inicio del socket y estructura de la informacion
   useEffect(() => {
+
     try {
       const socket = new WebSocket(`${port}`);
       socketRef.current = socket;
@@ -498,25 +503,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                   : c
               )
             );
-           /* setMessageFeedPriv((prev) => {
-              // si el feed privado actual es con este usuario, lo agrego
-              if (privateIdMsg === fromId) {
-                return [
-                  ...prev,
-                  {
-                    msg: text,
-                    messageId,
-                    timestamp,
-                    fromId,
-                    type: "user",
-                    privateId: fromId,
-                  },
-                ];
-              }
-
-              // si no, no toco el feed activo
-              return prev;
-            });*/
           }
 
           //datos para el feed de clientes conectados
@@ -544,16 +530,14 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     };
   }, []);
 
+  //este lo hago de prueba para el feed privado
   useEffect(() => {
     if (!privateIdMsg) {
-      setMessageFeedPriv([])
-      return
+      setMessageFeedPriv([]);
+      return;
     }
-    
-    const client = nickConected.find(
-      (c) => c.userId === privateIdMsg
-    )
-    setMessageFeedPriv(client?.msgPriv ?? [])
+    const client = nickConected.find((c) => c.userId === privateIdMsg);
+    setMessageFeedPriv(client?.msgPriv ?? []);
   }, [nickConected, privateIdMsg]);
 
   const value = {

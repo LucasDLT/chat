@@ -1,8 +1,8 @@
-'use client'
+"use client";
 import Image from "next/image";
 import { ChangeNickSection } from "@/components/ChangeNick";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-
+import { useAppContextWs } from "@/context/context";
 interface NabvarProps {
   active: boolean;
   setActive: React.Dispatch<React.SetStateAction<boolean>>;
@@ -11,7 +11,7 @@ interface NabvarProps {
   changeRegisterNick: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputRegister: string | undefined;
   registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
-  setActiveRegister:React.Dispatch<React.SetStateAction<boolean>>
+  setActiveRegister: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveFeed: React.Dispatch<React.SetStateAction<boolean>>;
   socketRef: React.RefObject<WebSocket | null>;
   activeFeed: boolean;
@@ -29,14 +29,20 @@ export const NavbarChat: React.FC<NabvarProps> = ({
   activeFeed,
   socketRef,
   router,
-  setActiveRegister
+  setActiveRegister,
 }) => {
-  
-    const handleToClose = () => {
-      socketRef.current?.close();
-      router.push("/")
-      setActiveRegister(false)
-    }
+  const { setMessageFeed, setMessageFeedPriv, setNickConected, setHasNickname, setPrivateIdMsg, setClientSelected } = useAppContextWs();
+  const handleToClose = () => {
+    setMessageFeed([]);
+    setMessageFeedPriv([]);
+    setNickConected([]);
+    setHasNickname(false);
+    setPrivateIdMsg(undefined);
+    setClientSelected(undefined);
+    setActiveRegister(false);
+    socketRef.current?.close();
+    router.push("/");
+  };
   return (
     <section
       className={`bg-black z-10 flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
@@ -74,7 +80,11 @@ export const NavbarChat: React.FC<NabvarProps> = ({
               setActive(!active);
               setActiveMobile(!activeMobile);
             }}
-            className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 rounded-full ${active === false ? "": "bg-yellow-100 hover:bg-transparent p-p transition-all ease-in-out duration-500 rounded-full"}`}
+            className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 rounded-full ${
+              active === false
+                ? ""
+                : "bg-yellow-100 hover:bg-transparent p-p transition-all ease-in-out duration-500 rounded-full"
+            }`}
           />
 
           {active && (
@@ -88,21 +98,28 @@ export const NavbarChat: React.FC<NabvarProps> = ({
             />
           )}
         </div>
-        <div className={`flex justify-center items-center ${active===false?"bg-yellow-100 rounded-full p-p transition-all ease-in-out duration-500":"hover:bg-yellow-100"}`}>
-          
-        <Image
-          title="ir al chat"
-          alt="icon chat"
-          src={"/icons/chat.png"}
-          width={25}
-          height={25}
-          onClick={() => {
-            router.push("/chat");
-            setActive(false);
-            setActiveMobile(false);
-          }}
-            className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 ${active === false ? "": "xl:top-85 absolute"}`}
-        />
+        <div
+          className={`flex justify-center items-center ${
+            active === false
+              ? "bg-yellow-100 rounded-full p-p transition-all ease-in-out duration-500"
+              : "hover:bg-yellow-100"
+          }`}
+        >
+          <Image
+            title="ir al chat"
+            alt="icon chat"
+            src={"/icons/chat.png"}
+            width={25}
+            height={25}
+            onClick={() => {
+              router.push("/chat");
+              setActive(false);
+              setActiveMobile(false);
+            }}
+            className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 ${
+              active === false ? "" : "xl:top-85 absolute"
+            }`}
+          />
         </div>
 
         <Image

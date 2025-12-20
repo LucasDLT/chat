@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 import { DirectorySection } from "@/components/DirectorySection";
 import { NavbarChat } from "@/components/NavbarChat";
@@ -42,7 +42,8 @@ export default function Chat() {
     setInputSearch,
     resSearch,
     setResSearch,
-    setActiveRegister
+    setActiveRegister,
+    hasNickname
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -62,6 +63,12 @@ export default function Chat() {
     );
     setResSearch(res);
   }
+
+  useEffect(() => {
+  if (!hasNickname) {
+    router.replace("/");
+  }
+}, [hasNickname]);
 
   return (
     <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
