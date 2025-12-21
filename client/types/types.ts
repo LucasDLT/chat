@@ -137,7 +137,7 @@ export interface MsgInFeed {
   privateId?: string;
 }
 
-//tipado para los datos que quiero persistir
+//tipado para los datos que quiero persistir 
 export interface PersistedState {
   nickname?: string;
   messageFeed: MsgInFeed[];
