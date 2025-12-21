@@ -166,7 +166,7 @@ const privateMessages = messageFeedPriv;
 
       {privateIdMsg ? (
         <section
-          className={`h-[65vh] w-95 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-bl-xs rounded-br-xs 
+          className={`h-[60vh] w-94 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-bl-xs rounded-br-xs 
           `}
         >
           <Image
@@ -176,7 +176,7 @@ const privateMessages = messageFeedPriv;
             alt="background feed chat"
             className={`w-full h-full object-cover z-0 rounded-xs`}
           ></Image>
-          <h3 className="absolute top-5 left-25 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
+          <h3 className="absolute top-1 left-18.5 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
             {clientSelected}
           </h3>
           <div
@@ -210,7 +210,7 @@ const privateMessages = messageFeedPriv;
         </section>
       ) : (
         //section para el feed de mensajes publicos
-        <section className=" h-[65vh] w-95 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-sm">
+        <section className=" h-[60vh] w-94 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-sm">
           <Image
             src={"/background-directorio.jpg"}
             width={3000}
@@ -218,7 +218,7 @@ const privateMessages = messageFeedPriv;
             alt="background feed chat"
             className={`w-full h-full object-cover z-0 rounded-xs`}
           ></Image>
-          <h3 className="absolute top-5 left-25 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
+          <h3 className="absolute top-1 left-18.5 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
             mensaje publico
           </h3>
           <div

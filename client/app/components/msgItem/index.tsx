@@ -26,7 +26,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
       className={`
         message
         ${isMine ? "text-right bg-[#a29714] m-2.5 mr-[1.6rem] xl:mr-52 w-fit max-w-[70%] px-3 py-2 rounded-xl wrap-break-word overflow-wrap break-word whitespace-pre-wrap block self-end border border-[#0a0a0a]" : "text-left bg-[#a98543] m-2.5 ml-[1.6rem] xl:ml-56 w-fit max-w-[70%] px-3 py-2 rounded-xl wrap-break-word overflow-wrap break-word whitespace-pre-wrap block self-start"}
-        ${isSystem ? "message--system" : ""}
+        ${isSystem ? "bg-[#c9aa71]" : ""}
         ${isMatch ? "message--match" : ""}
         ${isActive ? "message--active" : ""}
       `}

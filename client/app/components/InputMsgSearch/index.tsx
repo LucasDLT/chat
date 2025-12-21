@@ -16,7 +16,7 @@ setActiveIndex:React.Dispatch<React.SetStateAction<number>>;
 export const InputMsgSearch:React.FC<InputMsgSearchProps> = ({onChange, inputMsgSearch, handleSearchMsg, activeIndex, matches, setActiveIndex}) => {
   return (
     <form
-      className={`z-8 top-62 justify-evenly right-23 w-60 items-center xl:w-56 xl:h-9 flex absolute xl:right-78 xl:top-[5.6px]`}
+      className={`z-11 top-58 justify-evenly right-15.5 w-64 items-center xl:w-56 xl:h-9 flex absolute xl:right-78 xl:top-[5.6px]`}
       onSubmit={handleSearchMsg}
     >
       
@@ -27,7 +27,7 @@ export const InputMsgSearch:React.FC<InputMsgSearchProps> = ({onChange, inputMsg
         value={inputMsgSearch? inputMsgSearch : ""}
       />
      { !inputMsgSearch ? (<Image
-        alt="icon user"
+        alt="icon lupa"
         src={"/icons/lupa.png"}
         width={30}
         height={30}
