@@ -176,7 +176,7 @@ const privateMessages = messageFeedPriv;
             alt="background feed chat"
             className={`w-full h-full object-cover z-0 rounded-xs`}
           ></Image>
-          <h3 className="absolute top-1 left-18.5 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
+          <h3 className="absolute -top-12 left-1 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-44 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
             {clientSelected}
           </h3>
           <div
@@ -218,7 +218,7 @@ const privateMessages = messageFeedPriv;
             alt="background feed chat"
             className={`w-full h-full object-cover z-0 rounded-xs`}
           ></Image>
-          <h3 className="absolute top-1 left-18.5 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-60 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
+          <h3 className="absolute -top-12 left-1 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-44 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
             mensaje publico
           </h3>
           <div
