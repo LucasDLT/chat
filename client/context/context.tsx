@@ -136,7 +136,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     event.preventDefault();
     const messageId = nanoid();
 
-    if (inputRegister && !hasNickname) {
+    if (inputRegister && hasNickname) {
       const registerNick: RegisterNickname = {
         type: "registerNickname",
         timestamp: Date.now(),
@@ -244,7 +244,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco.
     setActiveRegister(!activeRegister);
     setInputRegister("");
-    setHasNickname(false);
+    setHasNickname(!hasNickname);
   };
 
   const sendMessagePrivate = (event: FormEvent) => {
