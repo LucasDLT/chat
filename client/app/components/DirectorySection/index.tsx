@@ -25,7 +25,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
     <section
       className={`
         
-           h-[70vh] w-full xl:flex xl:flex-col  xl:w-60 
+           h-[75vh] w-full xl:flex xl:flex-col  xl:w-60 
            xl:h-[94vh] 
       `}
     >
