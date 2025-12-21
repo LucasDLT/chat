@@ -16,14 +16,14 @@ setActiveIndex:React.Dispatch<React.SetStateAction<number>>;
 export const InputMsgSearch:React.FC<InputMsgSearchProps> = ({onChange, inputMsgSearch, handleSearchMsg, activeIndex, matches, setActiveIndex}) => {
   return (
     <form
-      className={`z-11 top-36 justify-evenly right-6 w-40 items-center xl:w-56 xl:h-9 flex absolute xl:right-78 xl:top-[5.6px]`}
+      className={`z-11 top-36 justify-between right-6 w-40 items-center xl:w-56 xl:h-9 flex absolute xl:right-78 xl:top-[5.6px]`}
       onSubmit={handleSearchMsg}
     >
       
       <input
         onChange={onChange}
         type="text"
-        className=" yellowBg h-6 rounded-xs text-black text-center w-38 xl:w-45 xl:h-7"
+        className=" yellowBg h-6 rounded-xs text-black text-center w-34 xl:w-45 xl:h-7"
         value={inputMsgSearch? inputMsgSearch : ""}
       />
      { !inputMsgSearch ? (<Image

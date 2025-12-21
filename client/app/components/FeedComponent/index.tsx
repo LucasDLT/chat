@@ -180,7 +180,7 @@ const privateMessages = messageFeedPriv;
             {clientSelected}
           </h3>
           <div
-            className={`flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-auto xl:h-[83.7vh] absolute g-2 top-18 xl:top-11  w-94 xl:w-[79vw]`}
+            className={`flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[51.5vh] xl:h-[83.7vh] absolute g-2 top-18 xl:top-11  w-94 xl:w-[79vw]`}
             ref={refMessageInFeedPrivate}
           >
             {privateMessages.map((msg) => {
