@@ -4,7 +4,7 @@ import { InputMsgSearch } from "../InputMsgSearch";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { MsgInFeed } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
-import { MessageItem } from "@/components/msgItem";
+import { MessageItem } from "@/app/components/msgItem";
 
 interface FeedProps {
   activeFeed: boolean;

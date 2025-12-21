@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { ChangeNickSection } from "@/components/ChangeNick";
+import { ChangeNickSection } from "@/app/components/ChangeNick";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppContextWs } from "@/context/context";
 interface NabvarProps {

@@ -1,3 +1,4 @@
+'use client';
 import { ClientsConected } from "@/types/types";
 import Image from "next/image";
 import { FormEvent } from "react";

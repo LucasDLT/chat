@@ -1,5 +1,5 @@
 'use client'
-import { RegisterNickSection } from "@/components/RegisterSection";
+import { RegisterNickSection } from "@/app/components/RegisterSection";
 import { useAppContextWs } from "@/context/context";
 
 

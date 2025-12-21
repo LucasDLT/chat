@@ -1,6 +1,6 @@
 import { ChangeEvent } from "react";
 import Image from "next/image";
-import {ButtonsSearch} from "@/components/ButttonsSearch"
+import {ButtonsSearch} from "@/app/components/ButttonsSearch"
 
 interface InputMsgSearchProps {
 onChange: (e:ChangeEvent<HTMLInputElement>) => void;
