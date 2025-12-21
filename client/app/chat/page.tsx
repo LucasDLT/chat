@@ -2,10 +2,10 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useAppContextWs } from "@/context/context";
-import { DirectorySection } from "@/components/DirectorySection";
-import { NavbarChat } from "@/components/NavbarChat";
-import { FeedSection } from "@/components/FeedComponent";
-import { InputMsgChat } from "@/components/InputMsgChat";
+import { DirectorySection } from "@/components/DirectorySection/index";
+import { NavbarChat } from "@/components/NavbarChat/index";
+import { FeedSection } from "@/components/FeedComponent/index";
+import { InputMsgChat } from "@/components/InputMsgChat/index";
 
 export default function Chat() {
   const router = useRouter();
