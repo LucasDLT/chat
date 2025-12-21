@@ -43,11 +43,11 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
             conectados
           </h2>
           <Image
-            alt="icon user"
+            alt="icon conectados"
             src={"/icons/conectados.png"}
             width={30}
             height={30}
-            className="p-2 rounded-sm xl:p-1 xl:rounded-xs  "
+            className="p-2 rounded-sm xl:p-1 xl:rounded-xs"
           ></Image>
           <p className="p-2 rounded-sm  xl:p-1 xl:rounded-xs  ">
             {conectedCount ? conectedCount : 0}
@@ -65,7 +65,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
             value={inputSearch}
           />
           <Image
-            alt="icon user"
+            alt="icon lupa"
             src={"/icons/lupa.png"}
             width={30}
             height={30}
@@ -73,11 +73,11 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
           />
         </form>
         <Image
-          alt="icon user"
+          alt="bg directory"
           src={"/background-directorio.jpg"}
           width={500}
           height={200}
-          className={`h-150 border rounded-xs object-cover ${
+          className={`h-150 xl:h-150 border rounded-xs object-cover ${
             activeFeed ? "hidden xl:flex" : ""
           } `}
         />

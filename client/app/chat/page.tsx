@@ -71,7 +71,7 @@ export default function Chat() {
 }, [hasNickname]);
 
   return (
-    <main className="yellowBg h-[90vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
+    <main className="yellowBg h-[91vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
       <DirectorySection
         activeFeed={activeFeed}
         conectedCount={conectedCount}

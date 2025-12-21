@@ -88,6 +88,7 @@ body {
 
 .message {
   padding: 6px 10px;
+  
 }
 
 .message--match {
@@ -170,4 +171,11 @@ body {
   align-self: center;
   margin-right: 230px;
   background-color: rgb(82, 82, 59);
+}
+@media (max-width: 639px) {
+  .message--system {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    align-self: center;
+  }
 }
