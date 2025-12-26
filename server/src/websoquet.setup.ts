@@ -46,7 +46,6 @@ export const websocketSetup = (server: Server) => {
       }
     });
   }
-
   //para mandar al socket el resultado de la funcion que cambia map por array, lo pone en el payload. Se usa directamente. Por mas que aun no esta con los datos completos sirve para ver que alguien esta conectado y a la espera de entrar en la sala
   function sendSnapshotToSocket() {
 
@@ -59,8 +58,6 @@ export const websocketSetup = (server: Server) => {
 
 
   }
-
-
   const TTL = 2 * 60 * 1000;
 
   function clearSetIdMsg() {
@@ -124,7 +121,6 @@ export const websocketSetup = (server: Server) => {
 
       ws.send(JSON.stringify("conexion ws establecida"));
     });
-    //aca podria hacer otro on message con un mensaje como el de arriba avisando de la conexion a todos y construir el mensaje
 
     ws.on("message", (data) => {
       try {
@@ -376,14 +372,14 @@ export const websocketSetup = (server: Server) => {
 
     ws.on("close", () => {
       if (process.env.NODE_ENV !== "test") {
-        console.log("conexion finalizada del socket", ws.nickname);
+        console.log("conection close socket", ws.nickname);
       }
       if (ws.nickname) {
         const msgForClient: SystemMessage = {
           type: "system",
           timestamp: Date.now(),
           payload: {
-            message: `${ws.nickname} salio de la sala`,
+            message: `${ws.nickname} get out of the room`,
           },
         };
         wss.clients.forEach((client) => {
@@ -413,16 +409,15 @@ export const websocketSetup = (server: Server) => {
     });
   }, 30000);
 
-  //aca dejamos errores y cierre del servidor websocket, sin ws ya que para esta altura no deberian quedar conexiones activas
   wss.on("error", (error) => {
     console.log(
-      `error en wss. tipo:${error.name}. ubicacion:${error.stack}. mensaje:${error.message} `
+      `error wss. type:${error.name}. ubication:${error.stack}. message:${error.message} `
     );
   });
 
   wss.on("close", () => {
     if (process.env.NODE_ENV !== "test") {
-      console.log("conexion finalizada");
+      console.log("conection close wss");
     }
     clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
@@ -448,7 +443,7 @@ export const websocketSetup = (server: Server) => {
       try {
         wss.close();
       } catch (err) {
-        console.log("error closing wss:", err);
+        console.log("error close wss:", err);
       }
     },
   };
