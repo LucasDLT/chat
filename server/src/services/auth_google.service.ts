@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { ID_CLIENT } from "../envs";
+import { ID_CLIENT } from "../envs/index";
 
 interface dtoServiceToController{
     url:string;
@@ -8,8 +8,9 @@ interface dtoServiceToController{
 
 export const service_auth_google = async (): Promise<dtoServiceToController> => {
     const id_client_google = ID_CLIENT;
+    
     const state = randomUUID();
-    const redirect_uri="http://localhost:3001/auth/google/callback"
+    const redirect_uri="http://localhost:3001/api/auth/google/callback";
     const response_type="code"
     const scope="profile openid email"
     const baseUrl="https://accounts.google.com/o/oauth2/v2/auth"
@@ -30,5 +31,7 @@ export const service_auth_google = async (): Promise<dtoServiceToController> => 
       return response
     }else{
       throw new Error("error al crear url en service auth/google")
+      
+      
     }  
 };
