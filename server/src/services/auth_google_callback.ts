@@ -1,4 +1,7 @@
-import { ID_CLIENT, SECRET_CLIENT } from "../envs";
+import { envs_parse } from "../schemas/env.schema";
+import { payload } from "../schemas/google-payload.schema";
+import { data_schema } from "../schemas/google-token.schema";
+import { GoogleOAuthErrorCode } from "../types/google_auth.error";
 let jwt = require("jsonwebtoken");
 
 interface dtoCallback {
@@ -7,26 +10,15 @@ interface dtoCallback {
   google_id: string;
   token: string;
 }
-interface data {
-  id_token: string;
-  token_type: string;
-  scope: string;
-  expires_in: number;
-  access_token: string;
-}
-interface payload {
-  sub: string;
-  email: string;
-  name: string;
-  aud: string;
-}
-export const service_auth_google_callback = async (code: string) => {
-  if (!code) {
-    throw new Error("No se recibe auth-code en service_callback");
+
+
+export const service_auth_google_callback = async (code: string):Promise<dtoCallback> => {
+if (!code) {
+    throw new GoogleOAuthErrorCode("AUTH_CODE_MISSING","No se recibe auth-code en service_callback");
   }
-  const client_id = ID_CLIENT;
-  const client_secret = SECRET_CLIENT;
-  if (client_id && client_secret) {
+  const client_id = envs_parse.client_id;
+  const client_secret = envs_parse.secret_client;
+  
     const form = new URLSearchParams({
       client_id: client_id,
       client_secret: client_secret,
@@ -42,23 +34,27 @@ export const service_auth_google_callback = async (code: string) => {
       },
       body: form,
     });
-    const data: data = (await response.json()) as data; // esta es la unica asercion permitida ya que json retorna siempre unknow entonces al haber sacado los datos para la interface directo de un log que hice, hago la asercion confiando en esos datos y con esto conecto con mi interface
+    const data = data_schema.parse(await response.json()) 
+    if ("error" in data ) {
+      throw new GoogleOAuthErrorCode("INVALID_GOOGLE_RESPONSE","Error al iniciar sesion con google");
+    }
     const id_token = data.id_token;
     const access_token = data.access_token;
-    if (!id_token) {
-      throw new Error("Error al acceder al id_token");
-    }
 
     const decode = jwt.decode(id_token);
 
     if (!decode || typeof decode !== "object") {
-      throw new Error("error al decodificar el token, no llego un objeto");
+      throw new GoogleOAuthErrorCode("TOKEN_EXCHANGE_FAILED","Error al iniciar sesion con google");
     }
 
-    const { sub, email, name, aud } = decode as payload; //en este caso la asercion esta solo por el destructuring
+    const { sub, email, name, aud } = payload.parse(decode) 
+    if (!sub || !email || !name ) {
+      throw new GoogleOAuthErrorCode("USER_INFO_MISSING","la cuenta no pudo ser autenticada, por favor intenta de nuevo");
+    }
+
     if (client_id !== aud) {
-      throw new Error(
-        "Error en la validacion de aud, llega informacion de otro client_id"
+      throw new GoogleOAuthErrorCode("AUD_MISMATCH",
+        "Error temporal en la autenticacion, por favor intenta de nuevo"
       );
     }
 
@@ -69,5 +65,5 @@ export const service_auth_google_callback = async (code: string) => {
       token: access_token,
     };
     return dataToController;
-  }
+  
 };
