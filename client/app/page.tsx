@@ -13,6 +13,7 @@ export default function Home() {
   } = useAppContextWs();
 
   return (
+
     <div className="flex flex-col justify-between items-center yellowBg h-screen">
       <RegisterNickSection
         onClick={handleActiveRegister}
