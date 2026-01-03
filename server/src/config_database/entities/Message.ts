@@ -1,7 +1,8 @@
+import "reflect-metadata"
 import { Column, PrimaryGeneratedColumn, Entity, ManyToOne } from "typeorm";
 import { User } from "./User";
 
-Entity()
+@Entity()
 export class Message {
     @PrimaryGeneratedColumn()
     id!: number;
@@ -9,8 +10,8 @@ export class Message {
     @Column()
     text!: string;
     
-    @Column({unique: true})
-    craetedAt!: string;
+    @Column()
+    craetedAt!: Date;
 
     @ManyToOne(() => User, user => user.setMessages,{ nullable: false })
     sender!: User;
@@ -18,3 +19,4 @@ export class Message {
     @ManyToOne(() => User, user => user.receivedMessages,{ nullable: true })
     receiver!: User | null;
 }
+//nota sobre relaciones en la entidad User.

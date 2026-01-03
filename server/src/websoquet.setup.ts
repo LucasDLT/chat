@@ -105,6 +105,8 @@ export const websocketSetup = (server: Server) => {
   wss.on("connection", (ws: WebSocket) => {
     ws.isAlive = true;
     ws.userId = crypto.randomUUID();
+    console.log("websocket conectado");
+    
 
     const userData: userData = {
       userId: ws.userId,
