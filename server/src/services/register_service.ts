@@ -1,5 +1,6 @@
 import { userRepository } from "../config_database/data_source";
 import { User } from "../config_database/entities/User";
+import { AuthProvider } from "../domain/enum/auth_provider_enum";
 import { dto_data_user, dto_register_user } from "../types/dtos_user_register";
 import { hash_password } from "../utils/create_hash_password";
 import { create_session } from "../utils/create_session_token";
@@ -27,6 +28,7 @@ export const register_service = async ({
     data_user.name = name;
     data_user.email = email;
     data_user.password = res_password;
+    data_user.provider = AuthProvider.LOCAL
     const register_user = await userRepository.save(data_user);
 
     const session = await create_session(register_user.id);

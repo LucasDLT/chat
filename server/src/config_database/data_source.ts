@@ -16,7 +16,7 @@ export const AppDataSource = new DataSource({
     entities:[User, Message],
     //subscribers:[],
     //migrations:[],
-    //dropSchema:true
+    dropSchema:false
 })
 
 export const userRepository = AppDataSource.getRepository(User)
