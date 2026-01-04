@@ -9,3 +9,5 @@ export const BDD_PORT=process.env.BDD_PORT
 export const BDD_USERNAME=process.env.BDD_USERNAME
 export const BDD_PASSWORD=process.env.BDD_PASSWORD
 export const BDD_DATABASE=process.env.BDD_DATABASE
+
+export const JWT_SECRET=process.env.JWT_SECRET

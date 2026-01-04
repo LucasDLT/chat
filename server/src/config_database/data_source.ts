@@ -18,3 +18,6 @@ export const AppDataSource = new DataSource({
     //migrations:[],
     //dropSchema:true
 })
+
+export const userRepository = AppDataSource.getRepository(User)
+export const messageRepository = AppDataSource.getRepository(Message)

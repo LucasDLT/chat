@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { service_auth_google_callback } from "../services/auth_google_callback";
 import { GoogleOAuthErrorCode } from "../types/google_auth.error";
-import { switch_error } from "../utils";
+import { switch_error } from "../utils/custom_error_google";
 
 export const auth_google_callback = async (req: Request, res: Response) => {
   try {

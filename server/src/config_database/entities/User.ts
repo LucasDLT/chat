@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm"
 import { Message } from "./Message"
-
+import {AuthProvider} from "../../domain/enum/auth_provider_enum"
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -12,12 +12,12 @@ export class User {
     
     @Column({ unique: true })
     email!:string
- 
-    @Column()
-    session!:string
- 
+  
     @Column()
     password!:string
+
+    @Column()
+    provider!:AuthProvider
  
     @OneToMany(() => Message, message => message.sender)
     setMessages!: Message[]
