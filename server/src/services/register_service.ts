@@ -15,12 +15,11 @@ export const register_service = async ({
 
   const res_db = await userRepository
     .createQueryBuilder("user")
-    .where("user.name = :name", { name })
-    .andWhere("user.email = :email", { email })
+    .where("user.email = :email", { email })
     .getOne();
 
   if (res_db) {
-    throw new Error("ya existe un usuario con los datos ingresados");
+    throw new Error("ya existe un usuario con el correo ingresado");
   } else {
     const res_password = await hash_password(password);
 
