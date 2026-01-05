@@ -1,7 +1,7 @@
 import { userRepository } from "../config_database/data_source";
 import { User } from "../config_database/entities/User";
 import { AuthProvider } from "../domain/enum/auth_provider_enum";
-import { dto_data_user, dto_register_user } from "../types/dtos_user_register";
+import { dto_data_user, dto_user } from "../types/dtos_user_register";
 import { hash_password } from "../utils/create_hash_password";
 import { create_session } from "../utils/create_session_token";
 
@@ -9,7 +9,7 @@ export const register_service = async ({
   name,
   email,
   password,
-}: dto_data_user): Promise<dto_register_user> => {
+}: dto_data_user): Promise<dto_user> => {
   if (!name && !email && !password)
     throw new Error("los datos ingresados (nombre y correo) no son validos");
 
@@ -32,7 +32,7 @@ export const register_service = async ({
 
     const session = await create_session(register_user.id);
 
-    const data_to_controller: dto_register_user = {
+    const data_to_controller: dto_user = {
       token: session,
       user: register_user,
     };
@@ -40,4 +40,3 @@ export const register_service = async ({
   }
 };
 
-//acordarse de poner en el dto del login esto:provider:local|google, para identificar que haer luego si auth o consulta bdd directa.

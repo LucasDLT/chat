@@ -6,7 +6,7 @@ export const register_controller = async (req: Request, res: Response) => {
   try {
     const { email, name, password } = req.body;
     if (!email || !name || !password)
-      throw new Error("uno o mas datos de registros no fueron enviados");
+      throw new Error("uno o mas datos de registro no fueron enviados");
 
     const data: dto_data_user = {
       email: email,
@@ -20,12 +20,12 @@ export const register_controller = async (req: Request, res: Response) => {
       sameSite: "lax",
       secure: false,
     });
-    console.log(user);
 
     res.status(200).json({
-      message: "Usuario registrado con éxito.",
+      message: "Usuario registrado con éxito.", 
       user,
     });
+
   } catch (error) {
     res.status(400).json(`Error al registrar usuario:${error}`);
   }

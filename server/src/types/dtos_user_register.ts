@@ -5,8 +5,12 @@ export interface dto_data_user {
   email: string;
   password: string;
 }
+export interface dto_data_login {
+  email: string;
+  password: string;
+}
 
-export interface dto_register_user {
+export interface dto_user {
   token: string;
   user: dto_public_user;
 }
