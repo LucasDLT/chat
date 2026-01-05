@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { Column, PrimaryGeneratedColumn, Entity, ManyToOne } from "typeorm";
-import { User } from "./User";
+import { User } from "./User.js";
 
 @Entity()
 export class Message {

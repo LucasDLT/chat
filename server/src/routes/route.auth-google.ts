@@ -1,6 +1,6 @@
-import { router } from "./router";
-import { auth_google } from "../controllers/auth_google.controller";
-import { auth_google_callback } from "../controllers/auth_google_callback";
+import { router } from "./router.js";
+import { auth_google } from "../controllers/auth_google.controller.js";
+import { auth_google_callback } from "../controllers/auth_google_callback.js";
 
 
 router.get('/auth/google', auth_google)

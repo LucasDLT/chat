@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { login_service } from "../services/login_service";
-import { dto_data_login } from "../types/dtos_user_register";
+import { login_service } from "../services/login_service.js";
+import { dto_data_login } from "../types/dtos_user_register.js";
 
 export const login_controller = async (req: Request, res: Response) => {
   try {

@@ -9,12 +9,12 @@ import type {
   userData,
   PongServer,
   SnapshotClients,
-} from "./types/message.t";
+} from "./types/message.t.js";
 import {
   isSendMessage,
   isChangeNickname,
   isRegisterNickname,
-} from "./guards/index";
+} from "./guards/index.js";
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {

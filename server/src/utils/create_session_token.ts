@@ -1,4 +1,4 @@
-import { envs_parse } from "../schemas/env.schema";
+import { envs_parse } from "../schemas/env.schema.js";
 const jwt = require("jsonwebtoken");
 
 export const create_session = async (id: number): Promise<string> => {

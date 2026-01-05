@@ -1,9 +1,9 @@
-import { userRepository } from "../config_database/data_source";
-import { User } from "../config_database/entities/User";
-import { AuthProvider } from "../domain/enum/auth_provider_enum";
-import { dto_data_user, dto_user } from "../types/dtos_user_register";
-import { hash_password } from "../utils/create_hash_password";
-import { create_session } from "../utils/create_session_token";
+import { userRepository } from "../config_database/data_source.js";
+import { User } from "../config_database/entities/User.js";
+import { AuthProvider } from "../domain/enum/auth_provider_enum.js";
+import { dto_data_user, dto_user } from "../types/dtos_user_register.js";
+import { hash_password } from "../utils/create_hash_password.js";
+import { create_session } from "../utils/create_session_token.js";
 
 export const register_service = async ({
   name,

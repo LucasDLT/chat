@@ -4,7 +4,7 @@ import { Message } from "./entities/Message.js";
 import { User } from "./entities/User.js";
 import { envs_parse } from "../schemas/env.schema.js";
 
-export const AppDataSource = new DataSource({
+const MigrationAppDataSource = new DataSource({
     type:"postgres",
     host:envs_parse.host,
     port:Number(envs_parse.port),
@@ -15,9 +15,7 @@ export const AppDataSource = new DataSource({
     //logging:true,
     entities:[User, Message],
     //subscribers:[],
-    //migrations:["src/migrations/*.ts"],
+    migrations:["src/migrations/*.ts"],
     dropSchema:false
 })
-
-export const userRepository = AppDataSource.getRepository(User)
-export const messageRepository = AppDataSource.getRepository(Message)
+export default MigrationAppDataSource

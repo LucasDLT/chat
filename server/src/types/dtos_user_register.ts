@@ -1,4 +1,4 @@
-import { User } from "../config_database/entities/User";
+import { User } from "../config_database/entities/User.js";
 
 export interface dto_data_user {
   name: string;

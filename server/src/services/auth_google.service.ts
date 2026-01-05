@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { envs_parse
 
- } from "../schemas/env.schema";
+ } from "../schemas/env.schema.js";
 interface dtoServiceToController{
     url:string;
     state:string;

@@ -1,7 +1,7 @@
-import { envs_parse } from "../schemas/env.schema";
-import { payload } from "../schemas/google-payload.schema";
-import { data_schema } from "../schemas/google-token.schema";
-import { GoogleOAuthErrorCode } from "../types/google_auth.error";
+import { envs_parse } from "../schemas/env.schema.js";
+import { payload } from "../schemas/google-payload.schema.js";
+import { data_schema } from "../schemas/google-token.schema.js";
+import { GoogleOAuthErrorCode } from "../types/google_auth.error.js";
 let jwt = require("jsonwebtoken");
 
 interface dtoCallback {

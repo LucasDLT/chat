@@ -7,10 +7,10 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs",
+    "module": "nodenext",
     "target": "es2020",
     "types": ["node"],
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "typeRoots": [
       "./src/types",
       "./node_modules/@types"

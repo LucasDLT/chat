@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { register_service } from "../services/register_service";
-import { dto_data_user } from "../types/dtos_user_register";
+import { register_service } from "../services/register_service.js";
+import { dto_data_user } from "../types/dtos_user_register.js";
 
 export const register_controller = async (req: Request, res: Response) => {
   try {

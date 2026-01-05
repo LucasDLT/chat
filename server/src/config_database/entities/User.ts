@@ -1,7 +1,8 @@
 import "reflect-metadata"
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm"
-import { Message } from "./Message"
-import {AuthProvider} from "../../domain/enum/auth_provider_enum"
+import { Message } from "./Message.js"
+import {AuthProvider} from "../../domain/enum/auth_provider_enum.js"
+
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -13,8 +14,11 @@ export class User {
     @Column({ unique: true })
     email!:string 
   
-    @Column()
-    password!:string
+    @Column({nullable:true})
+    password?:string
+
+    @Column({nullable:true})
+    google_id?:string
 
     @Column()
     provider!:AuthProvider
