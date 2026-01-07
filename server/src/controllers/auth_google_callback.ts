@@ -18,6 +18,7 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       secure: false,
     });
 
+    //por el momento voy a dejar user pero evaluare sacarlo, depende de como escale el front, aunque por ahora no es necesario.
     const { user, token } =
       await service_auth_google_callback(queryCode.toString());
 
