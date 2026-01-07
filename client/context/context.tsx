@@ -218,7 +218,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
       setSearchMatches(res);
       setActiveMatchIndex(0);
-      console.log(res);
+      //console.log(res);
     } else if (messageFeed) {
       const res = messageFeed
         .filter((m) => m.msg.toLowerCase().includes(query))
@@ -226,7 +226,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
       setSearchMatches(res);
       setActiveMatchIndex(0);
-      console.log(res);
+      //console.log(res);
     }
   };
 
@@ -350,7 +350,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current = socket;
       socketRef.current.addEventListener("open", (event) => {
         startHeartbeat(socketRef.current!);
-        console.log("cliente conectado al servidor");
+        //console.log("cliente conectado al servidor");
       });
       socketRef.current.addEventListener("message", async (event) => {
         const parse: ServerToClientMessage = JSON.parse(event.data);
@@ -370,7 +370,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
               client.isAlive = true;
 
               client.nickname = msg.payload.nickname;
-              console.log("nick del socket modificado", client.nickname);
+              //console.log("nick del socket modificado", client.nickname);
             }
             //este en el caso del register que estoy probando captura el mensaje personalizado de que ingreso a la sala y si resuelve la promesa
             if (msg.type === "system" && msg.payload.message) {
@@ -427,7 +427,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
         if (socketRef.current !== null) {
           let message = await handleProcesMsgToFeed(parse, socketRef.current);
-          console.log("listado resuelto", message);
+          //console.log("listado resuelto", message);
           //para el mensaje system hago el id y verifico que este el system
 
           if (
@@ -459,7 +459,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             const { text, messageId, timestamp, fromId } = message.message;
 
             const fromNick = resolveNick(fromId);
-            console.log("mensaje con nick:", { fromId, fromNick });
+            //console.log("mensaje con nick:", { fromId, fromNick });
 
             setMessageFeed((prevMsg) => [
               ...prevMsg,
@@ -516,13 +516,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       });
       socketRef.current.addEventListener("close", (event) => {
         cleanIntervals();
-        console.log(`${socketRef.current?.nickname} sale del chat`);
+       // console.log(`${socketRef.current?.nickname} sale del chat`);
       });
       socketRef.current.addEventListener("error", (event) => {
-        console.log("Error connecting to server");
+       // console.log("Error connecting to server");
       });
     } catch (error) {
-      console.log(`error capturado en catch del useeffect inicial: ${error}`);
+      console.log(`error : ${error}`);
     }
 
     return () => {
