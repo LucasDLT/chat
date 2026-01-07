@@ -8,10 +8,10 @@ import {
 } from "@jest/globals";
 import * as http from "http";
 import type { Server as HttpServer } from "http";
-import { websocketSetup } from "../../websoquet.setup";
-import { waitForMessage } from "../helpers/waitMsg";
+import { websocketSetup } from "../../websoquet.setup.js";
+import { waitForMessage } from "../helpers/waitMsg.js";
 import { WebSocket as WsClient } from "ws";
-import {createClient} from '../helpers/createClientWs'
+import {createClient} from '../helpers/createClientWs.js'
  
 
 describe("WSS integration - Handshake", () => {

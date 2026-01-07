@@ -11,15 +11,33 @@ export const auth_google_callback = async (req: Request, res: Response) => {
 
     if (!myCookie || !queryCookie || !queryCode) return;
     if (myCookie !== queryCookie) return;
-    
-    res.clearCookie("state", { httpOnly: true, sameSite: "lax", secure: false });
 
-    const { email, google_id, name, token } =  await service_auth_google_callback(queryCode.toString());
+    res.clearCookie("state", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+    });
 
+    const { user, token } =
+      await service_auth_google_callback(queryCode.toString());
+
+    res.cookie("login_auth_google", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+    });
+
+{/*    res.status(200).json({
+      message:"usuario registrado con google",
+      user
+    })*/}
+    res.redirect("http://localhost:3000/chat")
+
+     
   } catch (err) {
-if (err instanceof GoogleOAuthErrorCode) {
-      switch_error(err, res)
+    if (err instanceof GoogleOAuthErrorCode) {
+      switch_error(err, res);
+      res.redirect("http://localhost:3000/error")
     }
   }
 };
-

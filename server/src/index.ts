@@ -3,9 +3,9 @@ import { AppDataSource } from "./config_database/data_source.js";
 import { createServer } from "http";
 import { websocketSetup } from "./websoquet.setup.js";
 import { json } from "express";
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const express = require("express");
+import cors from "cors"
+import cookieParser from "cookie-parser"
+import express from "express"
 import auth_google_routes from "./routes/route.auth-google.js"; // anotacion: lo importado es un mero alias que le ponemos a toda la informacion que venga desde el origen de la importacion. De esta forma ahora las rutas que vengan de ahi, estan contenidas en authgoogle_routes.
 import auth_local_routes from "./routes/route_auth-local.js"
 const app = express();

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { isSendMessage, isRegisterNickname, isChangeNickname } from "../guards";
+import { isSendMessage, isRegisterNickname, isChangeNickname } from "../guards/index.js";
 
 describe("isSendMessage guard", () => {
   test("Should return true for a valid public SendMessage", () => {

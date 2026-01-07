@@ -9,7 +9,7 @@
     "test:coverage": "jest --coverage",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon --exec node --loader ts-node/esm src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -28,8 +28,12 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.0",
     "@types/nodemon": "^1.19.6",
     "@types/ws": "^8.18.1",
