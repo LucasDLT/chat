@@ -15,7 +15,8 @@ export default function Home() {
   return (
 
     <div className="flex flex-col justify-between items-center yellowBg h-screen">
-      <RegisterNickSection
+      <a href="http://localhost:3001/auth/google">Google</a>
+      {/*<RegisterNickSection
         onClick={handleActiveRegister}
         activeRegister={activeRegister}
         onChange={changeRegisterNick}
@@ -23,10 +24,10 @@ export default function Home() {
         onSubmit={registerNick}
       />
       <section className="bg-black flex justify-center items-center h-[40vh] w-full xl:h-[40vh] xl:w-full ">
-        <h1 className="animalHunter titleColor font-bold tracking-wider text-7xl xl:text-7xl">
+        <h1 className="mesoninaRegular titleColor font-bold tracking-wider text-7xl xl:text-7xl">
           LIVE CHAT
         </h1>
-      </section>
+      </section>*/}
     </div>
   );
 }
