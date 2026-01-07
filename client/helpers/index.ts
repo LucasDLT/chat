@@ -25,7 +25,7 @@ export function startHeartbeat(ws: WebSocket) {
             timestamp: Date.now(),
           })
         );
-        console.log("envio de ping");
+        //console.log("envio de ping");
       } catch (error) {
         console.log("error enviando ping client to server", error);
       }
