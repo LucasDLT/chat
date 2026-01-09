@@ -8,14 +8,17 @@ export const verify_auth = async (
   next: NextFunction
 ) => {
   const secret = envs_parse.jwt_secret_key;
-  const cookie = req.cookies.login_session;
+  const cookie = req.cookies.login_auth_google;
+
   if (!cookie) {
     throw new Error("Error de conexion al verificar al usuario");
   }
-  const verify = jwt.verify(cookie, secret);
-  const id = Number(verify);
+  const verify = jwt.verify(cookie, secret) as {id:number};//en contra de mi intento de no usar aserciones, la agregamos por que el tipado interno de jwt no es conocido por ts, solo aparece string | JwtPayload
+
+  const id = verify.id
+  
   if (!id) {
-    throw new Error("Error de conexion al verificar al usuario");
+    throw new Error("Error de conexion al verificar al usuario en midd 2");
   } else {
     req.id = id;
     next();

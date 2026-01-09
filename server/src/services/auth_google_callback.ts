@@ -97,7 +97,6 @@ export const service_auth_google_callback = async (
       token:session,
      // user:user
     }
-    console.log(data_to_controller);
     
     return data_to_controller
   

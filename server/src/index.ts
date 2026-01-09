@@ -14,7 +14,7 @@ const server = createServer(app);
 app.use(
   cors({
     origin: ["http://localhost:3000", "https://livechat-ls.vercel.app/"],
-    //credentials: true
+    credentials: true
   })
 );
 app.use(json());
