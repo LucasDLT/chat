@@ -1,5 +1,4 @@
 import { userRepository } from "../config_database/data_source.js";
-import { User } from "../config_database/entities/User.js";
 import { AuthProvider } from "../domain/enum/auth_provider_enum.js";
 import { envs_parse } from "../schemas/env.schema.js";
 import { payload } from "../schemas/google-payload.schema.js";
@@ -96,7 +95,7 @@ export const service_auth_google_callback = async (
     const session = await session_google(user.id)
     const data_to_controller:dto_user_google={
       token:session,
-      user:user
+     // user:user
     }
     console.log(data_to_controller);
     

@@ -16,9 +16,27 @@ export interface dto_user {
 }
 export interface dto_user_google{
   token:string;
-  user:dto_google_auth;
+  //user:dto_google_auth;
 }
-
+export interface req_id{
+  id:number
+}
+export type res_user=Pick<
+User,
+  | "id"
+  | "email"
+  | "name"
+  | "provider"
+>
+export type res_user_relation=Pick<//tipado para cuando traiga las relaciones, le agregamos los mensajes
+User,
+  | "id"
+  | "email"
+  | "name"
+  | "provider"
+  | "receivedMessages"
+  | "setMessages"
+>
 export type dto_google_auth=Pick<
 User,
   | "id"

@@ -19,7 +19,7 @@ export const auth_google_callback = async (req: Request, res: Response) => {
     });
 
     //por el momento voy a dejar user pero evaluare sacarlo, depende de como escale el front, aunque por ahora no es necesario.
-    const { user, token } =
+    const {  token } =
       await service_auth_google_callback(queryCode.toString());
 
     res.cookie("login_auth_google", token, {

@@ -1,23 +1,31 @@
 import { Response, Request, NextFunction } from "express";
 import { envs_parse } from "../schemas/env.schema.js";
-import { userRepository } from "../config_database/data_source.js";
+import jwt from "jsonwebtoken";
 
-export const verify_auth = (
+export const verify_auth = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const secret = envs_parse.jwt_secret_key;
   const cookie = req.cookies.login_session;
-  const verify = cookie.veryfy({ cookie }, secret);
-  if (!verify) {
+  if (!cookie) {
+    throw new Error("Error de conexion al verificar al usuario");
+  }
+  const verify = jwt.verify(cookie, secret);
+  const id = Number(verify);
+  if (!id) {
     throw new Error("Error de conexion al verificar al usuario");
   } else {
-    const decode_id = cookie.decode(cookie);
-    const user = userRepository.findOne({
-      where: { id: decode_id },
-    });
-    req.body = user;
+    req.id = id;
     next();
   }
 };
+
+declare global {
+  namespace Express {
+    interface Request {
+      id?: number;
+    }
+  }
+}
