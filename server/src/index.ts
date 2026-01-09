@@ -31,7 +31,6 @@ server.listen(3001, () => {
 async function initApp() {
   try {
     await AppDataSource.initialize();
-    console.log(AppDataSource);
   } catch (error) {
     console.log(error);
   }

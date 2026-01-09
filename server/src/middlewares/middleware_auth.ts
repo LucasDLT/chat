@@ -8,20 +8,36 @@ export const verify_auth = async (
   next: NextFunction
 ) => {
   const secret = envs_parse.jwt_secret_key;
-  const cookie = req.cookies.login_auth_google;
+  const cookie_auth_google = req.cookies.login_auth_google;
+  const cookie_login_session = req.cookies.login_session;
 
-  if (!cookie) {
+  if (!cookie_auth_google && !cookie_login_session) {
     throw new Error("Error de conexion al verificar al usuario");
   }
-  const verify = jwt.verify(cookie, secret) as {id:number};//en contra de mi intento de no usar aserciones, la agregamos por que el tipado interno de jwt no es conocido por ts, solo aparece string | JwtPayload
 
-  const id = verify.id
-  
-  if (!id) {
-    throw new Error("Error de conexion al verificar al usuario en midd 2");
-  } else {
-    req.id = id;
-    next();
+  if (cookie_auth_google) {
+    const verify = jwt.verify(cookie_auth_google, secret) as { id: number }; //en contra de mi intento de no usar aserciones, la agregamos por que el tipado interno de jwt no es conocido por ts, solo aparece string | JwtPayload
+
+    const id = verify.id;
+
+    if (!id) {
+      throw new Error("Error de conexion al verificar al usuario");
+    } else {
+      req.id = id;
+      next();
+    }
+  }
+  if (cookie_login_session) {
+    const verify = jwt.verify(cookie_login_session, secret) as { id: number }; //en contra de mi intento de no usar aserciones, la agregamos por que el tipado interno de jwt no es conocido por ts, solo aparece string | JwtPayload
+
+    const id = verify.id;
+
+    if (!id) {
+      throw new Error("Error de conexion al verificar al usuario");
+    } else {
+      req.id = id;
+      next();
+    }
   }
 };
 

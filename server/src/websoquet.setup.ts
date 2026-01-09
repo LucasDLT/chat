@@ -15,6 +15,7 @@ import {
   isChangeNickname,
   isRegisterNickname,
 } from "./guards/index.js";
+import { event_bus } from "./events/events.bus.js";
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -208,7 +209,7 @@ export const websocketSetup = (server: Server) => {
             break;
           }
 
-          case "registerNickname": {
+          case "registerNickname": {//el register se hara directo al inicio del httpserver, este lo voy a quitar directamente
             if (!isRegisterNickname(messageData)) return;
             if (mapNicknameId.has(messageData.payload.messageId)) {
               const msgAckError: AckMessage = {
@@ -268,7 +269,7 @@ export const websocketSetup = (server: Server) => {
             break;
           }
 
-          case "changeNickname": {
+          case "changeNickname": {//este case es para quitar para ser escuchado en el emit que voy a colocar
             if (!isChangeNickname(messageData)) return;
 
             if (mapChangeNicknameId.has(messageData.payload.messageId)) {
@@ -364,7 +365,9 @@ export const websocketSetup = (server: Server) => {
         }
       }
     });
+    event_bus.on("Change.nickname", ()=>{
 
+    })
     ws.on("error", (error: Error) => {
       console.log(
         `error de conexion ${error.message}, tipo: ${error.name}, ubucacion-. ${error.stack}`
