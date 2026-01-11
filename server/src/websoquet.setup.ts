@@ -18,6 +18,7 @@ import {
 import { event_bus } from "./events/events.bus.js";
 import { userRepository } from "./config_database/data_source.js";
 import { verify_session } from "./utils/verify_session.js";
+import { log } from "console";
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -103,32 +104,64 @@ export const websocketSetup = (server: Server) => {
     return typeof ws.userId === "number" && Number.isFinite(ws.userId);
   }
   wss.on("connection", async (ws: WebSocket, request) => {
+    //desde aca se comienza a generar el login desde https, y se verificara desde este lado la existencia del token en la cookie, esa verificacion cerrara el socket por cada vez que no la encuentre, dejando pasar al resto de eventos solo cuando la cookie haya sido seteada y hallada en el handshake inicial.
+    //IMPORTANTISIMO EN EL CLIENTE VAMOS A TENER QUE LEVANTAR EL PRIMER PEDIDO DE HANDSHAKE LUEGO DEL LOGIN. SI O SI, SINO LA COOKIE NO LLEGA AL PEDIDO QUE HACEMOS ACA.
+    console.log("wss iniciado esperando autenticar para inciar chat");
     const token = request.headers.cookie;
     if (!token) {
-      ws.close()
+      console.log("error de autenticacion, socket cerrado");
+      ws.close();
       return;
     }
+    console.log("autenticacion en proceso");
     const id_user = await verify_session(token);
-      const user = await userRepository.findOne({
-        where: { id:id_user },
-      });
-      if (!user) {
-        throw new Error("Error de conexion al iniciar el chat");
-      }
-      ws.isAlive = true;
-      ws.userId = user.id;
-      ws.nickname = user.name;   
-      
-      console.log("wss iniciado");
+    const user = await userRepository.findOne({
+      where: { id: id_user },
+    });
+    if (!user) {
+      throw new Error("Error de conexion al iniciar el chat");
+    }
+    console.log("autenticacion finalzada con exito:", user);
 
+    ws.isAlive = true;
+    ws.userId = user.id;
+    ws.nickname = user.name;
+
+    //mapNicknameId no lo vamos a usar por que permitimos desde ahora nicks duplicados. Por ende esa validacion va a estar de mas al igul que la carga del id del mensaje en ese map. El ack del error y del ok login, creo que va a ser innecesario por que eso lo recibo por http desde el login.
+
+    //objeto para el mapa de clientes que snapshoteamos al cliente para la lista de conectados
     const userData: userData = {
       userId: ws.userId as number,
       isAlive: ws.isAlive,
       nickname: ws.nickname ?? null,
     };
 
-    registeredClients.set(userData.userId, userData);
+    //ahora si, el system de que ingrese a la sala si debo armarlo y broadcastearlo
 
+    const login_clients: SystemMessage = {
+      timestamp: Date.now(),
+      type: "system",
+      payload: {
+        message: `${ws.nickname} ingreso a la sala`,
+      },
+    };
+    const login_client: SystemMessage = {
+      timestamp: Date.now(),
+      type: "system",
+      payload: {
+        message: `${ws.nickname} ingresaste a la sala`,
+      },
+    };
+
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(login_client));
+    }
+    wss.clients.forEach((client: WebSocket) => {
+      if (ws !== client && client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(login_clients));
+      }
+    });
+    registeredClients.set(userData.userId, userData);
     sendSnapshotToSocket();
 
     ws.once("message", () => {
@@ -145,83 +178,88 @@ export const websocketSetup = (server: Server) => {
         if (typeof messageData.type !== "string") return;
 
         switch (messageData.type) {
-          case "chat.send": {
-            if (!isSendMessage(messageData)) return;
+          case "chat.send":
+            {
+              if (!isSendMessage(messageData)) return;
 
-            const id = mapMessageId.has(messageData.messageId);
+              const id = mapMessageId.has(messageData.messageId);
 
-            if (id) {
-              const msgAckError: AckMessage = {
-                type: "ack",
-                correlationId: messageData.messageId,
-                timestamp: Date.now(),
-                payload: {
-                  status: "error",
-                  details: "duplicate",
-                },
-              };
-              if (ws.readyState === WebSocket.OPEN) {
-                return ws.send(JSON.stringify(msgAckError));
-              }
-            } else {
-              mapMessageId.set(messageData.messageId, Date.now());
-              const msgAckOk: AckMessage = {
-                type: "ack",
-                correlationId: messageData.messageId,
-                timestamp: Date.now(),
-                payload: {
-                  status: "ok",
-                  details: "message sent",
-                },
-              };
-              if (ws.readyState === WebSocket.OPEN)
-                ws.send(JSON.stringify(msgAckOk));
-
-              if (hasUserId(ws)) {
-                const toIdMsg =
-                  messageData.payload.scope === "chat.public"
-                    ? undefined
-                    : messageData.payload.toId;
-
-                const msgClient: ChatMessage = {
-                  messageId: messageData.messageId,
+              if (id) {
+                const msgAckError: AckMessage = {
+                  type: "ack",
+                  correlationId: messageData.messageId,
                   timestamp: Date.now(),
-                  type: messageData.payload.scope,
                   payload: {
-                    fromId: ws.userId,
-                    toId: toIdMsg,
-                    text: messageData.payload.text,
+                    status: "error",
+                    details: "duplicate",
                   },
                 };
-
-                if (msgClient.type === "chat.public") {
-                  wss.clients.forEach((client: WebSocket) => {
-                    if (client !== ws && client.readyState === WebSocket.OPEN) {
-                      client.send(JSON.stringify(msgClient));
-                    }
-                  });
+                if (ws.readyState === WebSocket.OPEN) {
+                  return ws.send(JSON.stringify(msgAckError));
                 }
-                if (
-                  msgClient.type === "chat.private" &&
-                  typeof msgClient.payload.toId === "string" &&
-                  msgClient.payload.toId
-                ) {
-                  wss.clients.forEach((client: WebSocket) => {
-                    if (
-                      client.readyState === WebSocket.OPEN &&
-                      client !== ws &&
-                      client.userId === msgClient.payload.toId
-                    ) {
-                      client.send(JSON.stringify(msgClient));
-                    }
-                  });
+              } else {
+                mapMessageId.set(messageData.messageId, Date.now());
+                const msgAckOk: AckMessage = {
+                  type: "ack",
+                  correlationId: messageData.messageId,
+                  timestamp: Date.now(),
+                  payload: {
+                    status: "ok",
+                    details: "message sent",
+                  },
+                };
+                if (ws.readyState === WebSocket.OPEN)
+                  ws.send(JSON.stringify(msgAckOk));
+
+                if (hasUserId(ws)) {
+                  const toIdMsg =
+                    messageData.payload.scope === "chat.public"
+                      ? undefined
+                      : messageData.payload.toId;
+
+                  const msgClient: ChatMessage = {
+                    messageId: messageData.messageId,
+                    timestamp: Date.now(),
+                    type: messageData.payload.scope,
+                    payload: {
+                      fromId: ws.userId,
+                      toId: toIdMsg,
+                      text: messageData.payload.text,
+                    },
+                  };
+
+                  if (msgClient.type === "chat.public") {
+                    wss.clients.forEach((client: WebSocket) => {
+                      if (
+                        client !== ws &&
+                        client.readyState === WebSocket.OPEN
+                      ) {
+                        client.send(JSON.stringify(msgClient));
+                      }
+                    });
+                  }
+                  if (
+                    msgClient.type === "chat.private" &&
+                    typeof msgClient.payload.toId === "string" &&
+                    msgClient.payload.toId
+                  ) {
+                    wss.clients.forEach((client: WebSocket) => {
+                      if (
+                        client.readyState === WebSocket.OPEN &&
+                        client !== ws &&
+                        client.userId === msgClient.payload.toId
+                      ) {
+                        client.send(JSON.stringify(msgClient));
+                      }
+                    });
+                  }
                 }
               }
+              break;
             }
-            break;
-          }
 
-        {/*  case "registerNickname": {
+            {
+              /*  case "registerNickname": {
             //el register se hara directo al inicio del httpserver, este lo voy a quitar directamente
             if (!isRegisterNickname(messageData)) return;
             if (mapNicknameId.has(messageData.payload.messageId)) {
@@ -280,9 +318,11 @@ export const websocketSetup = (server: Server) => {
             }
 
             break;
-          }*/}
+          }*/
+            }
 
-          case "changeNickname": {
+            {
+              /*case "changeNickname": {
             //este case es para quitar para ser escuchado en el emit que voy a colocar
             if (!isChangeNickname(messageData)) return;
 
@@ -347,7 +387,8 @@ export const websocketSetup = (server: Server) => {
               });
             }
             break;
-          }
+          }*/
+            }
           case "ping.client": {
             const pongServer: PongServer = {
               type: "pong.server",
@@ -382,16 +423,52 @@ export const websocketSetup = (server: Server) => {
 
     //eventos emitidos por mi servidor debo fijarme y quitar del switch los eventos que ahora entran por aca.
 
-    event_bus.on("Change.nickname", () => {});
-    event_bus.on("logout", () => {});
+    event_bus.on("Change.nickname", async ({ id, new_name }) => {
+      //el mapa changeNickname lo vamos a eliminar no lo necesitamos mas
+      if (id === ws.userId) {
+        const oldNick = ws.nickname;
+        ws.nickname = new_name;
+        userData.nickname = new_name;
+        registeredClients.set(userData.userId, userData);
+        sendSnapshotToSocket();
 
+        const changeNickname: SystemMessage = {
+          type: "system",
+          timestamp: Date.now(),
+          payload: {
+            message: `${oldNick} cambio a ${ws.nickname}`,
+          },
+        };
+        const msgForClient: SystemMessage = {
+          type: "system",
+          timestamp: Date.now(),
+          payload: {
+            message: `${oldNick} cambiaste a ${ws.nickname}`,
+          },
+        };
+        wss.clients.forEach((client) => {
+          if (client === ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(msgForClient));
+          }
+          if (client.readyState === WebSocket.OPEN && client !== ws) {
+            client.send(JSON.stringify(changeNickname));
+          }
+        });
+      }
+    });
+    
     ws.on("error", (error: Error) => {
       console.log(
         `error de conexion ${error.message}, tipo: ${error.name}, ubucacion-. ${error.stack}`
       );
     });
     ws.on("pong", heartbeat);
-
+    //este evento logout lo creamos en el servicio de logout y solo dispara el evento close que esta debajo.
+    event_bus.on("logout", ({ id }) => {
+      if (id === ws.userId) {
+        ws.close(1000, "logout");
+      }
+    });
     ws.on("close", () => {
       if (process.env.NODE_ENV !== "test") {
         console.log("conection close socket", ws.nickname);
