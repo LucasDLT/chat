@@ -16,6 +16,8 @@ import {
   isRegisterNickname,
 } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
+import { userRepository } from "./config_database/data_source.js";
+import { verify_session } from "./utils/verify_session.js";
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -28,7 +30,7 @@ export const websocketSetup = (server: Server) => {
   const mapMessageId = new Map<string, number>();
   const mapNicknameId = new Map<string, number>();
   const mapChangeNicknameId = new Map<string, number>();
-  const registeredClients = new Map<string, userData>(); //map paralelo a clients solo para enviarlo al cliente y tener los conectados
+  const registeredClients = new Map<number, userData>(); //map paralelo a clients solo para enviarlo al cliente y tener los conectados
 
   //para pasar de map a array. No se usa directamente, va dentro de otra fn
   function serializeRegisteredClients() {
@@ -49,15 +51,12 @@ export const websocketSetup = (server: Server) => {
   }
   //para mandar al socket el resultado de la funcion que cambia map por array, lo pone en el payload. Se usa directamente. Por mas que aun no esta con los datos completos sirve para ver que alguien esta conectado y a la espera de entrar en la sala
   function sendSnapshotToSocket() {
-
     broadcastRegisteredClients({
       type: "snapshot:clients",
       payload: serializeRegisteredClients(),
       timestamp: Date.now(),
       count: registeredClients.size,
     });
-
-
   }
   const TTL = 2 * 60 * 1000;
 
@@ -100,17 +99,30 @@ export const websocketSetup = (server: Server) => {
   );
 
   //guard para el ID de usuario
-  function hasUserId(ws: WebSocket): ws is WebSocket & { userId: string } {
-    return typeof ws.userId === "string" && ws.userId.length > 0;
+  function hasUserId(ws: WebSocket): ws is WebSocket & { userId: number } {
+    return typeof ws.userId === "number" && Number.isFinite(ws.userId);
   }
-  wss.on("connection", (ws: WebSocket) => {
-    ws.isAlive = true;
-    ws.userId = crypto.randomUUID();
-    console.log("websocket conectado");
-    
+  wss.on("connection", async (ws: WebSocket, request) => {
+    const token = request.headers.cookie;
+    if (!token) {
+      ws.close()
+      return;
+    }
+    const id_user = await verify_session(token);
+      const user = await userRepository.findOne({
+        where: { id:id_user },
+      });
+      if (!user) {
+        throw new Error("Error de conexion al iniciar el chat");
+      }
+      ws.isAlive = true;
+      ws.userId = user.id;
+      ws.nickname = user.name;   
+      
+      console.log("wss iniciado");
 
     const userData: userData = {
-      userId: ws.userId,
+      userId: ws.userId as number,
       isAlive: ws.isAlive,
       nickname: ws.nickname ?? null,
     };
@@ -192,7 +204,7 @@ export const websocketSetup = (server: Server) => {
                 if (
                   msgClient.type === "chat.private" &&
                   typeof msgClient.payload.toId === "string" &&
-                  msgClient.payload.toId.trim()
+                  msgClient.payload.toId
                 ) {
                   wss.clients.forEach((client: WebSocket) => {
                     if (
@@ -209,7 +221,8 @@ export const websocketSetup = (server: Server) => {
             break;
           }
 
-          case "registerNickname": {//el register se hara directo al inicio del httpserver, este lo voy a quitar directamente
+        {/*  case "registerNickname": {
+            //el register se hara directo al inicio del httpserver, este lo voy a quitar directamente
             if (!isRegisterNickname(messageData)) return;
             if (mapNicknameId.has(messageData.payload.messageId)) {
               const msgAckError: AckMessage = {
@@ -234,7 +247,7 @@ export const websocketSetup = (server: Server) => {
                   status: "ok",
                   details: "register nick ok",
                   fromId: ws.userId,
-                  nickname:messageData.payload.nickname
+                  nickname: messageData.payload.nickname,
                 },
               };
               userData.nickname = messageData.payload.nickname;
@@ -267,9 +280,10 @@ export const websocketSetup = (server: Server) => {
             }
 
             break;
-          }
+          }*/}
 
-          case "changeNickname": {//este case es para quitar para ser escuchado en el emit que voy a colocar
+          case "changeNickname": {
+            //este case es para quitar para ser escuchado en el emit que voy a colocar
             if (!isChangeNickname(messageData)) return;
 
             if (mapChangeNicknameId.has(messageData.payload.messageId)) {
@@ -300,8 +314,8 @@ export const websocketSetup = (server: Server) => {
                 payload: {
                   status: "ok",
                   details: "change nick ok",
-                  nickname:messageData.payload.nickname,
-                  fromId:ws.userId
+                  nickname: messageData.payload.nickname,
+                  fromId: ws.userId,
                 },
               };
               userData.nickname = messageData.payload.nickname;
@@ -325,7 +339,7 @@ export const websocketSetup = (server: Server) => {
               wss.clients.forEach((client) => {
                 if (client === ws && ws.readyState === WebSocket.OPEN) {
                   ws.send(JSON.stringify(msgAckOk));
-                  ws.send(JSON.stringify(msgForClient))
+                  ws.send(JSON.stringify(msgForClient));
                 }
                 if (client.readyState === WebSocket.OPEN && client !== ws) {
                   client.send(JSON.stringify(changeNickname));
@@ -367,15 +381,9 @@ export const websocketSetup = (server: Server) => {
     });
 
     //eventos emitidos por mi servidor debo fijarme y quitar del switch los eventos que ahora entran por aca.
-    event_bus.on("login",()=>{
 
-    })
-    event_bus.on("Change.nickname", ()=>{
-
-    })
-    event_bus.on("logout",()=>{
-
-    })
+    event_bus.on("Change.nickname", () => {});
+    event_bus.on("logout", () => {});
 
     ws.on("error", (error: Error) => {
       console.log(

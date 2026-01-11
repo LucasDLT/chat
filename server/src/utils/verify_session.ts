@@ -19,3 +19,12 @@ export const select_session = async (
   }
   return id
 };
+
+export const verify_session = async (token: string): Promise<number> => {
+  const secret = envs_parse.jwt_secret_key;
+  const verify = jwt.verify(token, secret) as { id: number }
+  if (typeof verify.id !== "number") {
+    throw new Error("Fallo la verificacion de identidad")
+  }
+  return verify.id
+};

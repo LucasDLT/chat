@@ -2,7 +2,7 @@ import "ws";
 
 declare module "ws" {
   interface WebSocket {
-    userId?: string;// lo tengo que generar con cripto uuid
+    userId?: number;// lo tengo que generar con cripto uuid
     isAlive?: boolean;
     nickname?: string;
   }
