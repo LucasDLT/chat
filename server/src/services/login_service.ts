@@ -7,6 +7,9 @@ import {
 } from "../types/dtos_user_register.js";
 import { compare_password } from "../utils/create_hash_password.js";
 import { create_session } from "../utils/create_session_token.js";
+import { event_bus } from "../events/events.bus.js";
+import { emit } from "process";
+
 
 export const login_service = async ({
   password,
@@ -35,6 +38,7 @@ export const login_service = async ({
       token: session,
       user: user,
     };
+    event_bus.emit("login", { id: res_db.id });
     return data_user;
   } else {
     throw new Error("Error al loguearse");

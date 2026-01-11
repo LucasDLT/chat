@@ -365,9 +365,18 @@ export const websocketSetup = (server: Server) => {
         }
       }
     });
+
+    //eventos emitidos por mi servidor debo fijarme y quitar del switch los eventos que ahora entran por aca.
+    event_bus.on("login",()=>{
+
+    })
     event_bus.on("Change.nickname", ()=>{
 
     })
+    event_bus.on("logout",()=>{
+
+    })
+
     ws.on("error", (error: Error) => {
       console.log(
         `error de conexion ${error.message}, tipo: ${error.name}, ubucacion-. ${error.stack}`

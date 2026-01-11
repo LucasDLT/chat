@@ -11,6 +11,7 @@ if (!new_name) {
     throw new Error("Error al recibir el nuevo nombre, intente nuevamente")
 }
 const new_user = await change_nick_service(id, new_name)
+
 res.status(200).json({
     message:"Cambio de nombre exitoso",
     new_user
