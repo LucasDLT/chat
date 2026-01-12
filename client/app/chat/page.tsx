@@ -64,11 +64,26 @@ export default function Chat() {
     setResSearch(res);
   }
 
-  useEffect(() => {
+{/*  useEffect(() => {
   if (!hasNickname) {
     router.replace("/");
   }
-}, [hasNickname]);
+}, [hasNickname]);*/}
+  //agrego este efecto para probar authgoogle
+    const port = process.env.NEXT_PUBLIC_WS_PORT;
+
+    useEffect(() => {
+    const request_me = async () => {
+      const response = await fetch(`${port}/auth/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const res_data = await response.json();
+      console.log(res_data);
+      
+    };
+    request_me()
+  }, []);
 
   return (
     <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">

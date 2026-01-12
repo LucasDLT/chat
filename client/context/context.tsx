@@ -342,9 +342,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setResSearch([]);
   };
 
-  //useeffect para el inicio del socket y estructura de la informacion
-  useEffect(() => {
 
+  //useeffect para el inicio del socket y estructura de la informacion
+
+  useEffect(() => {
     try {
       const socket = new WebSocket(`${port}`);
       socketRef.current = socket;
