@@ -16,9 +16,12 @@ import {
   isRegisterNickname,
 } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
-import { userRepository } from "./config_database/data_source.js";
+import { messageRepository, userRepository } from "./config_database/data_source.js";
 import { verify_session } from "./utils/verify_session.js";
 import { log } from "console";
+import { text } from "stream/consumers";
+import { Message } from "./config_database/entities/Message.js";
+import { User } from "./config_database/entities/User.js";
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -170,7 +173,7 @@ export const websocketSetup = (server: Server) => {
       ws.send(JSON.stringify("conexion ws establecida"));
     });
 
-    ws.on("message", (data) => {
+    ws.on("message", async(data) => {
       try {
         const raw = data instanceof Buffer ? data.toString() : String(data);
         const messageData: ClientToServerMessage = JSON.parse(raw);
@@ -227,6 +230,21 @@ export const websocketSetup = (server: Server) => {
                       text: messageData.payload.text,
                     },
                   };
+                  
+                   interface message_bdd{
+                    text:string,
+                    createdAt:Date,
+                    senderId:number,
+                    receiverId:number | null
+                  }
+                  const message:message_bdd = {
+                    text:msgClient.payload.text,
+                    createdAt:new Date,
+                    senderId:msgClient.payload.fromId,
+                    receiverId:msgClient.payload.toId ?? null
+                  }
+                   await messageRepository.save(message)
+
 
                   if (msgClient.type === "chat.public") {
                     wss.clients.forEach((client: WebSocket) => {
@@ -240,7 +258,7 @@ export const websocketSetup = (server: Server) => {
                   }
                   if (
                     msgClient.type === "chat.private" &&
-                    typeof msgClient.payload.toId === "string" &&
+                    typeof msgClient.payload.toId === "number" &&
                     msgClient.payload.toId
                   ) {
                     wss.clients.forEach((client: WebSocket) => {

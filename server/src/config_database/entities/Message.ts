@@ -19,4 +19,4 @@ export class Message {
     @ManyToOne(() => User, user => user.receivedMessages,{ nullable: true })
     receiver!: User | null;
 }
-//nota sobre relaciones en la entidad User.
+//nota sobre relaciones en la entidad User. 
