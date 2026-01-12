@@ -5,7 +5,6 @@ interface RegisterSectionProps {
   value: string;
   onClick: () => void;
   activeRegister: boolean;
-  
 }
 
 export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
@@ -26,11 +25,17 @@ export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
       />
 
       {activeRegister ? (
-          <form
+        <form
           className="flex flex-col g-1 justify-center items-center backdrop-blur-[2px] absolute h-50 w-60 rounded-sm border borderYellow gap-4"
           onSubmit={onSubmit}
+        >
+          <button
+            type="button"
+            onClick={onClick}
+            className="flex justify-end items-end absolute right-1 top-1 px-2 bgBlurYellow rounded text-gray-200 border borderYellow hover:cursor-pointer"
           >
-          <button type="button" onClick={onClick} className="flex justify-end items-end absolute right-1 top-1 px-2 bgBlurYellow rounded text-gray-200 border borderYellow hover:cursor-pointer">x</button>
+            x
+          </button>
           <label className="mesoninaRegular font-bold tracking-wider text-3xl">
             Nombre
           </label>
@@ -40,12 +45,16 @@ export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
             onChange={onChange}
             value={value}
           />
-          <button type="submit" className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow">
+          <button
+            type="submit"
+            className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow"
+          >
             registrar
           </button>
-          <p className="titleColor mesoninaRegular font-bold tracking-widest">Ya casi terminas</p>
+          <p className="titleColor mesoninaRegular font-bold tracking-widest">
+            Ya casi terminas
+          </p>
         </form>
-        
       ) : (
         <button
           onClick={onClick}
@@ -54,6 +63,10 @@ export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
           INGRESAR
         </button>
       )}
+      <p className="text-center text-white mesoninaRegular font-bold tracking-widest absolute bottom-12 backdrop-blur-[5px]">
+        Nota: el backend corre en Render free tier, por lo que puede requerir
+        unos segundos para activarse en el primer acceso.
+      </p>
     </section>
   );
 };
