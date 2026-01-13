@@ -1,6 +1,6 @@
 import { router } from "./router.js";
 import { auth_google } from "../controllers/auth_google.controller.js";
-import { auth_google_callback } from "../controllers/auth_google_callback.js";
+import { auth_google_callback } from "../controllers/auth_google_callback.js"; 
 import { verify_auth } from "../middlewares/middleware_auth.js";
 import { me_controller } from "../controllers/me_controller.js";
 import { change_nickname_controller } from "../controllers/change_nick.js";
