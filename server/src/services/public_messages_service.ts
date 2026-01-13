@@ -1,9 +1,20 @@
-import { messageRepository } from "../config_database/data_source.js"
+import { messageRepository } from "../config_database/data_source.js";
+import { Message } from "../config_database/entities/Message.js";
 
-export const get_all_public_msg = async (user_id:number, limit:number, offset:number)=>{
+export const get_all_public_msg = async (
+  limit: number,
+  offset: number
+): Promise<Message[]> => {
+  const messages_publics: Message[] = await messageRepository
+    .createQueryBuilder("message")
+    .leftJoinAndSelect("message.sender", "sender")
+    .where("message.receiver is NULL")
+    .orderBy("message.craetedAt", "DESC")
+    .skip(offset)
+    .take(limit)
+    .getMany();
 
-    const messages_publics = await messageRepository.createQueryBuilder(
-    
-    )
+  console.log("resultado", messages_publics);
 
-}
+  return messages_publics;
+};
