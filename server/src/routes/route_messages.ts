@@ -8,5 +8,5 @@ router.get("/public", verify_auth, get_public_messages_controller)
 
 router.get("/private/:id", verify_auth, private_messages_controller) 
 
-router.get("/private/search/:id",verify_auth, search_priv_message )
+router.post("/private/search/:id",verify_auth, search_priv_message )
 export default router
