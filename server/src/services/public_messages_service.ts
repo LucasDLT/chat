@@ -14,7 +14,6 @@ export const get_all_public_msg = async (
     .take(limit)
     .getMany();
 
-  console.log("resultado", messages_publics);
 
   return messages_publics;
 };

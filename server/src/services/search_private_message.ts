@@ -34,8 +34,8 @@ export const search_message_private = async (
         "(message.receiver.id = :receiver_id AND message.sender.id = :sender_id)",
       { sender_id, receiver_id }
     )
-    .andWhere("message.craetedAt >= :fromDate", {
-      fromDate: old_msg?.craetedAt,
+    .andWhere("message.craetedAt >= :from_date", {
+      from_date: old_msg?.craetedAt,
     })
     .orderBy("message.craetedAt", "DESC")
     .getMany();
