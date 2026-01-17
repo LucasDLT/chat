@@ -28,7 +28,7 @@ export const login_service = async ({
     const user: dto_public_user = {
       id: res_db.id,
       email: res_db.email,
-      name: res_db.email,
+      name: res_db.name,
       provider: AuthProvider.LOCAL,
     };
     const session = await create_session(res_db.id);
