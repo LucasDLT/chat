@@ -11,17 +11,13 @@ import React, {
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
-  ChangeNickname,
   ClientsConected,
   MsgInFeed,
-  PersistedState,
   ProcessMsg,
-  RegisterNickname,
   SendMessage,
   ServerToClientMessage,
 } from "@/types/types";
 import { nanoid } from "nanoid";
-import { useRouter } from "next/navigation";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -44,12 +40,8 @@ interface IcontextProps {
   handleActiveRegister: () => void;
   activeRegister: boolean;
   setActiveRegister: React.Dispatch<React.SetStateAction<boolean>>;
-  changeRegisterNick: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  inputRegister: string | undefined;
-  setInputRegister: React.Dispatch<React.SetStateAction<string | undefined>>;
   inputMsg: string | undefined;
   setInputMsg: React.Dispatch<React.SetStateAction<string | undefined>>;
-  registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
   sendMessagePrivate: (e: React.FormEvent<HTMLFormElement>) => void;
   sendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
   changeInputMessage: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -106,9 +98,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [clientSelected, setClientSelected] = useState<string | undefined>(
     undefined
   );
-  const [inputRegister, setInputRegister] = useState<string | undefined>(
-    undefined
-  );
+
   const [inputMsg, setInputMsg] = useState<string | undefined>(undefined);
   const [activeRegister, setActiveRegister] = useState<boolean>(false);
   const [activeFeed, setActiveFeed] = useState<boolean>(false);
@@ -130,49 +120,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const nickMapRef = useRef<Record<string, string>>({});
 
   const pendingNickRef = useRef<Record<string, string>>({});
-  const router = useRouter();
 
-  const registerNick = (event: FormEvent) => {
-    event.preventDefault();
-    const messageId = nanoid();
 
-    if (inputRegister && hasNickname) {
-      const registerNick: RegisterNickname = {
-        type: "registerNickname",
-        timestamp: Date.now(),
-        payload: {
-          messageId: messageId,
-          nickname: inputRegister,
-        },
-      };
-      socketRef.current?.send(JSON.stringify(registerNick));
-      //navegacion a /chat
-      router.push("/chat");
 
-      //limpieza del estado
-      setInputRegister("");
-    }
-    if (inputRegister && hasNickname && socketRef.current?.userId) {
-      const changeNickname: ChangeNickname = {
-        type: "changeNickname",
-        timestamp: Date.now(),
-        payload: {
-          messageId: messageId,
-          nickname: inputRegister,
-          userId: socketRef.current?.userId,
-        },
-      };
-      socketRef.current?.send(JSON.stringify(changeNickname));
-      pendingNickRef.current[messageId] = inputRegister; //con corchetes asigno la key para que el value sea inputRegister. Dejo esto para el yo de mañana por que ahora tengo sueño
 
-      //navegacion a /chat
-      if (socketRef.current?.nickname === inputRegister) {
-        router.push("/chat");
-      }
-      //limpieza del estado
-      setInputRegister("");
-    }
-  };
   const resolveNick = (fromId?: string) => {
     if (!fromId) return undefined;
 
@@ -183,10 +134,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     return nickMapRef.current[fromId];
   };
 
-  const changeRegisterNick = (event: FormEvent) => {
-    const data = event.currentTarget as HTMLInputElement;
-    setInputRegister(data.value);
-  };
+
   const handleSelectClient = (userId: string, nick: string) => {
     setActiveFeed(true);
     setPrivateIdMsg(userId);
@@ -243,7 +191,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const handleActiveRegister = () => {
     //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco.
     setActiveRegister(!activeRegister);
-    setInputRegister("");
+    //setInputRegister("");
     setHasNickname(!hasNickname);
   };
 
@@ -341,7 +289,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputSearch("");
     setResSearch([]);
   };
-
 
   //useeffect para el inicio del socket y estructura de la informacion
 
@@ -561,12 +508,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     handleActiveRegister,
     activeRegister,
     setActiveRegister,
-    changeRegisterNick,
-    inputRegister,
-    setInputRegister,
     inputMsg,
     setInputMsg,
-    registerNick,
     sendMessagePrivate,
     sendMessage,
     changeInputMessage,

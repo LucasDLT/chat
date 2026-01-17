@@ -33,19 +33,17 @@ export interface ErrorMessage extends BaseMessage {
 } //tipado basico para mensaje de error luego desestrucuraremos para hacer el envelope del msg diciendo que es un error, el numero del codigo y detalles si hay.
 
 export interface SystemMessage extends BaseMessage {
-  timestamp:number;
+  timestamp: number;
   type: "system";
   payload: {
     message: string;
   };
 } //de momento este tipado lo dejamos para los mensajes del sistema, como conectado, desconectado etc.
 
-export interface RegisterNickname extends BaseMessage {
-  type: "registerNickname";
-  payload: {
-    messageId: string;
-    nickname: string;
-  };
+export interface Register {
+  name: string;
+  email: string;
+  password: string;
 } //tipado para el cambio de nickname, viene con el id del usuario para evitar errores y validar, tambien que usuario cambio el nickname y el nuevo nickname.
 
 export interface ChangeNickname extends BaseMessage {
@@ -94,8 +92,8 @@ export interface ProcessMsg {
     text: string;
     toId?: string;
     fromId?: string;
-    messageId:string;
-    timestamp:number
+    messageId: string;
+    timestamp: number;
   };
   clients?: ClientsConected[];
   count?: number;
@@ -120,7 +118,7 @@ export type ServerToClientMessage =
   | SnapshotClients;
 
 export type ClientToServerMessage =
-  | RegisterNickname
+  | Register
   | SendMessage
   | ChangeNickname
   | PingClient;
@@ -137,9 +135,23 @@ export interface MsgInFeed {
   privateId?: string;
 }
 
-//tipado para los datos que quiero persistir 
+//tipado para los datos que quiero persistir
 export interface PersistedState {
   nickname?: string;
   messageFeed: MsgInFeed[];
-  
+}
+
+
+
+//TIPADOS PARA FORMULARIOS REFACTORIZADOS
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  provider: AuthProvider;
+}
+
+export enum AuthProvider {
+  LOCAL = "LOCAL",
+  GOOGLE = "GOOGLE",
 }

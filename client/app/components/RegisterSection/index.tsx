@@ -1,20 +1,43 @@
 import Image from "next/image";
-interface RegisterSectionProps {
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  value: string;
-  onClick: () => void;
-  activeRegister: boolean;
-  
-}
+import { useAppContextWs } from "@/context/context";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { Register } from "@/types/types";
+import { resolve_register } from "@/helpers/register";
+import { useRouter } from "next/navigation";
+export const RegisterNickSection = () => {
+  //contexto
+  const { handleActiveRegister, activeRegister } = useAppContextWs();
 
-export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
-  onChange,
-  value,
-  onSubmit,
-  activeRegister,
-  onClick,
-}) => {
+  //estados
+  const [inputRegister, setInputRegister] = useState<Register>({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  //instancia router
+  const router = useRouter();
+
+  //onchange
+  const changeRegisterNick = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    const key = event.currentTarget.name;
+
+    setInputRegister((prev) => ({ ...prev, [key]: value }));
+    //eventualmente voy a tener que poner el control de errores aca. Por ahora no lo hago
+  };
+
+  //submit
+  const registerNick = async (event: FormEvent) => {
+    event.preventDefault();
+    const { name, email, password } = inputRegister;
+    const data_user = await resolve_register(name, email, password);
+    if (!data_user) {
+      throw new Error("error al recibir informacion del resolve login");
+    }
+    setInputRegister({ name: "", email: "", password: "" });
+    router.push("/chat");
+  };
   return (
     <section className="flex flex-col justify-center items-center relative h-[60vh]">
       <Image
@@ -26,29 +49,61 @@ export const RegisterNickSection: React.FC<RegisterSectionProps> = ({
       />
 
       {activeRegister ? (
-          <form
+        <form
           className="flex flex-col g-1 justify-center items-center backdrop-blur-[2px] absolute h-50 w-60 rounded-sm border borderYellow gap-4"
-          onSubmit={onSubmit}
+          onSubmit={registerNick}
+        >
+          <button
+            type="button"
+            onClick={handleActiveRegister}
+            className="flex justify-end items-end absolute right-1 top-1 px-2 bgBlurYellow rounded text-gray-200 border borderYellow hover:cursor-pointer"
           >
-          <button type="button" onClick={onClick} className="flex justify-end items-end absolute right-1 top-1 px-2 bgBlurYellow rounded text-gray-200 border borderYellow hover:cursor-pointer">x</button>
+            x
+          </button>
           <label className="mesoninaRegular font-bold tracking-wider text-3xl">
             Nombre
           </label>
           <input
             type="text"
+            name="name"
             className="bgBlurYellow rounded"
-            onChange={onChange}
-            value={value}
+            onChange={changeRegisterNick}
+            value={inputRegister.name}
           />
-          <button type="submit" className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow">
+          <label className="mesoninaRegular font-bold tracking-wider text-3xl">
+            email
+          </label>
+          <input
+            type="text"
+            name="email"
+            className="bgBlurYellow rounded"
+            onChange={changeRegisterNick}
+            value={inputRegister.email}
+          />
+          <label className="mesoninaRegular font-bold tracking-wider text-3xl">
+            password
+          </label>
+          <input
+            type="password"
+            name="password"
+            className="bgBlurYellow rounded"
+            onChange={changeRegisterNick}
+            value={inputRegister.password}
+          />
+
+          <button
+            type="submit"
+            className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow"
+          >
             registrar
           </button>
-          <p className="titleColor mesoninaRegular font-bold tracking-widest">Ya casi terminas</p>
+          <p className="titleColor mesoninaRegular font-bold tracking-widest">
+            Ya casi terminas
+          </p>
         </form>
-        
       ) : (
         <button
-          onClick={onClick}
+          onClick={handleActiveRegister}
           className=" text-center w-28 rounded p-2 m-1 absolute text-black bg-yellow-200/60 backdrop-blur-[1px] hover:cursor-pointer mesoninaRegular font-extrabold tracking-[5px]"
         >
           INGRESAR
