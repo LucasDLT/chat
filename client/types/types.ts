@@ -40,11 +40,6 @@ export interface SystemMessage extends BaseMessage {
   };
 } //de momento este tipado lo dejamos para los mensajes del sistema, como conectado, desconectado etc.
 
-export interface Register {
-  name: string;
-  email: string;
-  password: string;
-} //tipado para el cambio de nickname, viene con el id del usuario para evitar errores y validar, tambien que usuario cambio el nickname y el nuevo nickname.
 
 export interface ChangeNickname extends BaseMessage {
   type: "changeNickname";
@@ -142,6 +137,7 @@ export interface PersistedState {
 }
 
 
+//***************************NUEVOS TIPADOS**************************//
 
 //TIPADOS PARA FORMULARIOS REFACTORIZADOS
 export interface User {
@@ -155,3 +151,14 @@ export enum AuthProvider {
   LOCAL = "LOCAL",
   GOOGLE = "GOOGLE",
 }
+
+
+export interface Register {
+  name: string;
+  email: string;
+  password: string;
+} 
+export interface Login {
+  email: string;
+  password: string;
+} 

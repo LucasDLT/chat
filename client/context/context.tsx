@@ -37,9 +37,9 @@ interface IcontextProps {
   clientSelected: string | undefined;
   setClientSelected: React.Dispatch<React.SetStateAction<string | undefined>>;
   handleSelectClient: (userId: string, nick: string) => void;
-  handleActiveRegister: () => void;
-  activeRegister: boolean;
-  setActiveRegister: React.Dispatch<React.SetStateAction<boolean>>;
+  handleActiveUser: () => void;
+  activeUser: boolean;
+  setActiveUser: React.Dispatch<React.SetStateAction<boolean>>;
   inputMsg: string | undefined;
   setInputMsg: React.Dispatch<React.SetStateAction<string | undefined>>;
   sendMessagePrivate: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -83,7 +83,6 @@ export function useAppContextWs(): IcontextProps {
   return contextWs;
 }
 
-//HACER EL CONTEXTO CON EL CUSTOM HOOK QUE VIMOS, PARA ELIMINAR ERRORES
 export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
@@ -100,7 +99,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   );
 
   const [inputMsg, setInputMsg] = useState<string | undefined>(undefined);
-  const [activeRegister, setActiveRegister] = useState<boolean>(false);
+  const [activeUser, setActiveUser] = useState<boolean>(false);
   const [activeFeed, setActiveFeed] = useState<boolean>(false);
   const [inputMsgSearch, setInputMsgSearch] = useState<string | undefined>(
     undefined
@@ -120,6 +119,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const nickMapRef = useRef<Record<string, string>>({});
 
   const pendingNickRef = useRef<Record<string, string>>({});
+
 
 
 
@@ -188,9 +188,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     }
   };
 
-  const handleActiveRegister = () => {
+  const handleActiveUser = () => {
     //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco.
-    setActiveRegister(!activeRegister);
+    setActiveUser(!activeUser);
     //setInputRegister("");
     setHasNickname(!hasNickname);
   };
@@ -505,9 +505,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     clientSelected,
     setClientSelected,
     handleSelectClient,
-    handleActiveRegister,
-    activeRegister,
-    setActiveRegister,
+    handleActiveUser,
+    activeUser,
+    setActiveUser,
     inputMsg,
     setInputMsg,
     sendMessagePrivate,

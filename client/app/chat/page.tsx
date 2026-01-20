@@ -6,6 +6,8 @@ import { DirectorySection } from "@/app/components/DirectorySection/index";
 import { NavbarChat } from "@/app/components/NavbarChat/index";
 import { FeedSection } from "@/app/components/FeedComponent/index";
 import { InputMsgChat } from "@/app/components/InputMsgChat/index";
+import { resolve_logout } from "@/helpers/logout";
+import { resolve_request_me } from "@/helpers/me";
 
 export default function Chat() {
   const router = useRouter();
@@ -15,9 +17,7 @@ export default function Chat() {
     conectedCount,
     nickConected,
     handleSelectClient,
-    changeRegisterNick,
-    inputRegister,
-    registerNick,
+
     socketRef,
     activeFeed,
     setActiveFeed,
@@ -42,8 +42,8 @@ export default function Chat() {
     setInputSearch,
     resSearch,
     setResSearch,
-    setActiveRegister,
-    hasNickname
+    setActiveUser,
+    hasNickname,
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -59,32 +59,18 @@ export default function Chat() {
     const res = nickConected.filter(
       (nick) =>
         nick.userId !== socketRef.current?.userId &&
-        nick.nick?.trim().toLowerCase().includes(data.trim().toLowerCase())
+        nick.nick?.trim().toLowerCase().includes(data.trim().toLowerCase()),
     );
     setResSearch(res);
   }
 
-{/*  useEffect(() => {
-  if (!hasNickname) {
-    router.replace("/");
-  }
-}, [hasNickname]);*/}
   //agrego este efecto para probar authgoogle
-    const port = process.env.NEXT_PUBLIC_WS_PORT;
+  //agregar una verificacion para saber si el inicio es por google, de lo contrario esta funcion nos arroja error, por que el login local no genera doble verificacion como Oauth
 
-    useEffect(() => {
-    const request_me = async () => {
-      const response = await fetch(`${port}/auth/me`, {
-        method: "GET",
-        credentials: "include",
-      });
-      const res_data = await response.json();
-      console.log(res_data);
-      
-    };
-    request_me()
+ { /*useEffect(() => {
+    resolve_request_me();
   }, []);
-
+*/}
   return (
     <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
       <DirectorySection
@@ -126,14 +112,11 @@ export default function Chat() {
         activeMobile={activeMobile}
         setActive={setActive}
         setActiveMobile={setActiveMobile}
-        changeRegisterNick={changeRegisterNick}
-        inputRegister={inputRegister}
-        registerNick={registerNick}
         setActiveFeed={setActiveFeed}
         activeFeed={activeFeed}
         socketRef={socketRef}
         router={router}
-        setActiveRegister={setActiveRegister}
+        setActiveUser={setActiveUser}
       />
     </main>
   );

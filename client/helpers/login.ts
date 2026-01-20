@@ -1,19 +1,18 @@
 import { User } from "@/types/types";
 
-export const resolve_register = async (
-  name: string,
+export const resolve_login = async (
   email: string,
   password: string
 ): Promise<User> => {
   try {
-    const register_enpoint = process.env.NEXT_PUBLIC_WS_REGISTER;
-    const response = await fetch(`${register_enpoint}`, {
+    const login_enpoint = process.env.NEXT_PUBLIC_WS_LOGIN;
+    const response = await fetch(`${login_enpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "Application/json",
       },
-      //credentials: "include",
-      body: JSON.stringify({ name, email, password }),
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
     });
 
     const data: User = await response.json();

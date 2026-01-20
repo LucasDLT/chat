@@ -1,17 +1,14 @@
 "use client";
 import Image from "next/image";
-import { ChangeNickSection } from "@/app/components/ChangeNick";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppContextWs } from "@/context/context";
+import { EditForm } from "../Forms/Edit";
 interface NabvarProps {
   active: boolean;
   setActive: React.Dispatch<React.SetStateAction<boolean>>;
   activeMobile: boolean;
   setActiveMobile: React.Dispatch<React.SetStateAction<boolean>>;
-  changeRegisterNick: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  inputRegister: string | undefined;
-  registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
-  setActiveRegister: React.Dispatch<React.SetStateAction<boolean>>;
+  setActiveUser: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveFeed: React.Dispatch<React.SetStateAction<boolean>>;
   socketRef: React.RefObject<WebSocket | null>;
   activeFeed: boolean;
@@ -22,14 +19,12 @@ export const NavbarChat: React.FC<NabvarProps> = ({
   activeMobile,
   setActive,
   setActiveMobile,
-  changeRegisterNick,
-  inputRegister,
-  registerNick,
+ 
   setActiveFeed,
   activeFeed,
   socketRef,
   router,
-  setActiveRegister,
+  setActiveUser,
 }) => {
   const { setMessageFeed, setMessageFeedPriv, setNickConected, setHasNickname, setPrivateIdMsg, setClientSelected } = useAppContextWs();
   const handleToClose = () => {
@@ -39,7 +34,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
     setHasNickname(false);
     setPrivateIdMsg(undefined);
     setClientSelected(undefined);
-    setActiveRegister(false);
+    setActiveUser(false);
     socketRef.current?.close();
     router.push("/");
   };
@@ -88,13 +83,8 @@ export const NavbarChat: React.FC<NabvarProps> = ({
           />
 
           {active && (
-            <ChangeNickSection
-              onChange={changeRegisterNick}
-              value={inputRegister ? inputRegister : ""}
-              onSubmit={registerNick}
-              name={
-                socketRef.current?.nickname ? socketRef.current.nickname : ""
-              }
+            <EditForm
+
             />
           )}
         </div>
