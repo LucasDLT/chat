@@ -12,16 +12,11 @@ import type {
 } from "./types/message.t.js";
 import {
   isSendMessage,
-  isChangeNickname,
-  isRegisterNickname,
 } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
 import { messageRepository, userRepository } from "./config_database/data_source.js";
 import { verify_session } from "./utils/verify_session.js";
-import { log } from "console";
-import { text } from "stream/consumers";
-import { Message } from "./config_database/entities/Message.js";
-import { User } from "./config_database/entities/User.js";
+
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -274,138 +269,6 @@ export const websocketSetup = (server: Server) => {
                 }
               }
               break;
-            }
-
-            {
-              /*  case "registerNickname": {
-            //el register se hara directo al inicio del httpserver, este lo voy a quitar directamente
-            if (!isRegisterNickname(messageData)) return;
-            if (mapNicknameId.has(messageData.payload.messageId)) {
-              const msgAckError: AckMessage = {
-                correlationId: messageData.payload.messageId,
-                timestamp: Date.now(),
-                type: "ack",
-                payload: {
-                  status: "error",
-                  details: "req register nick duplicate, is processing",
-                },
-              };
-              if (ws.readyState === WebSocket.OPEN) {
-                return ws.send(JSON.stringify(msgAckError));
-              }
-            } else {
-              mapNicknameId.set(messageData.payload.messageId, Date.now());
-              const msgAckOk: AckMessage = {
-                correlationId: messageData.payload.messageId,
-                timestamp: Date.now(),
-                type: "ack",
-                payload: {
-                  status: "ok",
-                  details: "register nick ok",
-                  fromId: ws.userId,
-                  nickname: messageData.payload.nickname,
-                },
-              };
-              userData.nickname = messageData.payload.nickname;
-              registeredClients.set(userData.userId, userData);
-              sendSnapshotToSocket();
-              ws.nickname = messageData.payload.nickname;
-              const registerNicknamePublic: SystemMessage = {
-                type: "system",
-                timestamp: Date.now(),
-                payload: {
-                  message: `${ws.nickname} ingreso a la sala`,
-                },
-              };
-              const registerNicknamePrivate: SystemMessage = {
-                type: "system",
-                timestamp: Date.now(),
-                payload: {
-                  message: `${ws.nickname} ingresaste a la sala`,
-                },
-              };
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(msgAckOk));
-                ws.send(JSON.stringify(registerNicknamePrivate));
-              }
-              wss.clients.forEach((client: WebSocket) => {
-                if (ws !== client && client.readyState === WebSocket.OPEN) {
-                  client.send(JSON.stringify(registerNicknamePublic));
-                }
-              });
-            }
-
-            break;
-          }*/
-            }
-
-            {
-              /*case "changeNickname": {
-            //este case es para quitar para ser escuchado en el emit que voy a colocar
-            if (!isChangeNickname(messageData)) return;
-
-            if (mapChangeNicknameId.has(messageData.payload.messageId)) {
-              const msgAckError: AckMessage = {
-                type: "ack",
-                timestamp: Date.now(),
-                correlationId: messageData.payload.messageId,
-                payload: {
-                  status: "error",
-                  details: "duplicate request - changeNickname in progress",
-                },
-              };
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(msgAckError));
-              }
-              return;
-            } else {
-              mapChangeNicknameId.set(
-                messageData.payload.messageId,
-                Date.now()
-              );
-              const oldNick = ws.nickname ?? "unknown";
-              ws.nickname = messageData.payload.nickname;
-              const msgAckOk: AckMessage = {
-                correlationId: messageData.payload.messageId,
-                timestamp: Date.now(),
-                type: "ack",
-                payload: {
-                  status: "ok",
-                  details: "change nick ok",
-                  nickname: messageData.payload.nickname,
-                  fromId: ws.userId,
-                },
-              };
-              userData.nickname = messageData.payload.nickname;
-              registeredClients.set(userData.userId, userData);
-              sendSnapshotToSocket();
-              const changeNickname: SystemMessage = {
-                type: "system",
-                timestamp: Date.now(),
-                payload: {
-                  message: `${oldNick} cambio a ${messageData.payload.nickname}`,
-                },
-              };
-              const msgForClient: SystemMessage = {
-                type: "system",
-                timestamp: Date.now(),
-                payload: {
-                  message: `${oldNick} cambiaste a ${messageData.payload.nickname}`,
-                },
-              };
-
-              wss.clients.forEach((client) => {
-                if (client === ws && ws.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify(msgAckOk));
-                  ws.send(JSON.stringify(msgForClient));
-                }
-                if (client.readyState === WebSocket.OPEN && client !== ws) {
-                  client.send(JSON.stringify(changeNickname));
-                }
-              });
-            }
-            break;
-          }*/
             }
           case "ping.client": {
             const pongServer: PongServer = {

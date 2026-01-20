@@ -30,7 +30,7 @@ export const login_service = async ({
       email: res_db.email,
       name: res_db.name,
       provider: AuthProvider.LOCAL,
-    };
+    }; 
     const session = await create_session(res_db.id);
     const data_user: dto_user = {
       token: session,

@@ -18,9 +18,7 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       secure: false,
     });
 
-    //por el momento voy a dejar user pero evaluare sacarlo, depende de como escale el front, aunque por ahora no es necesario.
-    const {  token } =
-      await service_auth_google_callback(queryCode.toString());
+    const { token } = await service_auth_google_callback(queryCode.toString());
 
     res.cookie("login_auth_google", token, {
       httpOnly: true,
@@ -28,17 +26,11 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       secure: false,
     });
 
-{/*    res.status(200).json({
-      message:"usuario registrado con google",
-      user
-    })*/}
-    res.redirect("http://localhost:3000/chat")
-
-     
+    res.redirect("http://localhost:3000/chat");
   } catch (err) {
     if (err instanceof GoogleOAuthErrorCode) {
       switch_error(err, res);
-      res.redirect("http://localhost:3000/error")
+      res.redirect("http://localhost:3000/error");
     }
   }
 };

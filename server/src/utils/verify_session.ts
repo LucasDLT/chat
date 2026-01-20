@@ -1,8 +1,8 @@
 import { envs_parse } from "../schemas/env.schema.js";
 import jwt from "jsonwebtoken";
 export const select_session = async (
-  cookie_auth_google: string,
-  cookie_login_session: string
+  cookie_auth_google: string | undefined,
+  cookie_login_session: string | undefined
 ): Promise<number> => {
   const secret = envs_parse.jwt_secret_key;
   let id;
