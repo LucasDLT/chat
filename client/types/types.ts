@@ -152,7 +152,6 @@ export enum AuthProvider {
   GOOGLE = "GOOGLE",
 }
 
-
 export interface Register {
   name: string;
   email: string;
@@ -162,3 +161,4 @@ export interface Login {
   email: string;
   password: string;
 } 
+

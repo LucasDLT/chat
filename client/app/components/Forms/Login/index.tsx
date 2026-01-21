@@ -1,13 +1,13 @@
 import Image from "next/image";
 import { useAppContextWs } from "@/context/context";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { Login } from "@/types/types";
+import { Login, User } from "@/types/types";
 import { resolve_login } from "@/helpers/login";
 import { useRouter } from "next/navigation";
 import { resolve_logout } from "@/helpers/logout";
 export const FormLogin = () => {
   //contexto
-  const { handleActiveUser, activeUser } = useAppContextWs();
+  const { handleActiveUser, user, setUser } = useAppContextWs();
 
   //estados
   const [inputLogin, setInputLogin] = useState<Login>({
@@ -35,6 +35,8 @@ export const FormLogin = () => {
     if (!data_user) {
       throw new Error("error al recibir informacion del resolve login");
     }
+
+    setUser(data_user)
     handleActiveUser()
     setInputLogin({ email: "", password: "" });
 

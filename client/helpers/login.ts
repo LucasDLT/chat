@@ -2,7 +2,7 @@ import { User } from "@/types/types";
 
 export const resolve_login = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<User> => {
   try {
     const login_enpoint = process.env.NEXT_PUBLIC_WS_LOGIN;
@@ -15,14 +15,20 @@ export const resolve_login = async (
       body: JSON.stringify({ email, password }),
     });
 
-    const data: User = await response.json();
-
-    if (!data) {
+    const {user} = await response.json();
+    
+    if (!user) {
       throw new Error("error en respuesta del login");
     }
+    const new_data: User = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      provider: user.provider,
+    };
 
-    console.log(data);
-    return data;
+    console.log(new_data);
+    return new_data;
   } catch (error) {
     console.log(error);
     throw new Error("error en respuesta del login");

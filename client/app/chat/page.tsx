@@ -17,7 +17,6 @@ export default function Chat() {
     conectedCount,
     nickConected,
     handleSelectClient,
-
     socketRef,
     activeFeed,
     setActiveFeed,

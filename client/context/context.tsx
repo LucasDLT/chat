@@ -11,11 +11,13 @@ import React, {
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
+  AuthProvider,
   ClientsConected,
   MsgInFeed,
   ProcessMsg,
   SendMessage,
   ServerToClientMessage,
+  User,
 } from "@/types/types";
 import { nanoid } from "nanoid";
 
@@ -63,6 +65,11 @@ interface IcontextProps {
   setInputSearch: React.Dispatch<React.SetStateAction<string>>;
   resSearch: ClientsConected[];
   setResSearch: React.Dispatch<React.SetStateAction<ClientsConected[]>>;
+
+
+  //estados compartidos en refactos
+  user: User;
+  setUser: React.Dispatch<React.SetStateAction<User>>;
 }
 
 interface ContextProviderProps {
@@ -115,6 +122,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   //referencia para el scroll automatico al mensaje filtrado activo
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   //referencia para el scroll automatico al mensaje nuevo ingresado al feed
+
+  const [user, setUser]= useState<User>( {
+    id: 0,
+    email: "",
+    name: "",
+    provider: AuthProvider.LOCAL
+  })
 
   const nickMapRef = useRef<Record<string, string>>({});
 
@@ -291,7 +305,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   };
 
   //useeffect para el inicio del socket y estructura de la informacion
-
+{/*
   useEffect(() => {
     try {
       const socket = new WebSocket(`${port}`);
@@ -487,6 +501,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const client = nickConected.find((c) => c.userId === privateIdMsg);
     setMessageFeedPriv(client?.msgPriv ?? []);
   }, [nickConected, privateIdMsg]);
+*/}
 
   const value = {
     socketRef,
@@ -531,6 +546,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputSearch,
     resSearch,
     setResSearch,
+
+    //nueos estados
+    user,
+    setUser,
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 
