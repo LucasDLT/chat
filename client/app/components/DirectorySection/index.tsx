@@ -1,26 +1,42 @@
-'use client';
+"use client";
 import { ClientsConected } from "@/types/types";
 import Image from "next/image";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
+import { useAppContextWs } from "@/context/context";
 
-interface DirectoryProps {
-  activeFeed: boolean;
-  conectedCount: number;
-  onChange: (e: FormEvent<HTMLInputElement>) => void;
-  inputSearch: string | undefined;
-  visibleContacts: ClientsConected[];
-  handleSelectClient: (userId: string, nick: string) => void;
-  onClick: () => void;
-}
-export const DirectorySection: React.FC<DirectoryProps> = ({
-  activeFeed,
-  conectedCount,
-  onChange,
-  inputSearch,
-  visibleContacts,
-  handleSelectClient,
-  onClick,
-}) => {
+
+export const DirectorySection = () => {
+  const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
+
+  const {
+    activeFeed,
+    conectedCount,
+    inputSearch,
+    handleSelectClient,
+    socketRef,
+    nickConected,
+    setInputSearch,
+    returnToGroup
+  } = useAppContextWs();
+
+  const myId = socketRef.current?.userId;
+
+  //esta constante toma un estado tipado con clientsconected, verifica su length y si es mayor a 0 retornar el estado que ya esta cargado con usuarios, pero como no se setea nunca eso no sucede, y siempre termina pasando la segunda opcion, por lo que se filtra nickconected para que se muestren todos los que tienen nick menos mi user.
+  const visibleContacts =
+    resSearch.length > 0
+      ? resSearch
+      : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
+
+  function changeInputSearch(e: FormEvent<HTMLInputElement>) {
+    const data = e.currentTarget.value;
+    setInputSearch(data);
+    const res = nickConected.filter(
+      (nick) =>
+        nick.userId !== socketRef.current?.userId &&
+        nick.nick?.trim().toLowerCase().includes(data.trim().toLowerCase()),
+    );
+    setResSearch(res);
+  }
   return (
     <section
       className={`
@@ -59,7 +75,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
           } absolute w-90 h-9 top-14 left-2 flex flex-row items-center justify-center blackDeg py-py rounded-xs g-1 xl:w-54 xl:top-24`}
         >
           <input
-            onChange={onChange}
+            onChange={changeInputSearch}
             type="text"
             className=" yellowBg h-6 rounded-xs text-black px-px text-center w-full mx-1 xl:w-45 xl:h-7"
             value={inputSearch}
@@ -86,7 +102,7 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
             className={`absolute top-30 xl:top-40 left-2 p-1 my-1 bgBlurYellow  w-90 xl:w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest ${
               activeFeed ? "hidden xl:flex" : ""
             }`}
-            onClick={onClick}
+            onClick={returnToGroup}
           >
             mensaje publico
           </button>
@@ -102,9 +118,11 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
         >
           {visibleContacts.length > 0 ? (
             visibleContacts.map((client) => (
-              <div key={client.userId} className={`text-black flex ${client.totalMessageIn && client.totalMessageIn > 0 ?'justify-evenly':" justify-center" } items-center bgBlurYellow w-full p-1 my-1 rounded-xs `}>
+              <div
+                key={client.userId}
+                className={`text-black flex ${client.totalMessageIn && client.totalMessageIn > 0 ? "justify-evenly" : " justify-center"} items-center bgBlurYellow w-full p-1 my-1 rounded-xs `}
+              >
                 <p
-                  
                   onClick={() => handleSelectClient(client.userId, client.nick)}
                   className=" mesoninaRegular font-extrabold text-xl hover:cursor-pointer h-6 flex items-center justify-center tracking-widest transition-all duration-1000"
                 >
@@ -112,7 +130,8 @@ export const DirectorySection: React.FC<DirectoryProps> = ({
                 </p>
                 <p
                   className={`rounded-full yellowBg w-6 h-6 flex items-center justify-center transition-all duration-300 ease-in-out
-                   ${ client.messageIn ? "opacity-100 scale-100" : "opacity-0 scale-0 pointer-events-none"}`}>
+                   ${client.messageIn ? "opacity-100 scale-100" : "opacity-0 scale-0 pointer-events-none"}`}
+                >
                   {client.totalMessageIn || ""}
                 </p>
               </div>

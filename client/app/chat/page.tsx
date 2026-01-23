@@ -24,7 +24,6 @@ export default function Chat() {
     clientSelected,
     messageFeed,
     messageFeedPriv,
-    returnToGroup,
     changeInputMessage,
     inputMsg,
     sendMessage,
@@ -38,40 +37,22 @@ export default function Chat() {
     setActiveMatchIndex,
     messageRefs,
     inputSearch,
-    setInputSearch,
-    resSearch,
-    setResSearch,
+    activeUser,
     setActiveUser,
     hasNickname,
     user,
     setUser,
   } = useAppContextWs();
 
-  const myId = socketRef.current?.userId;
 
-  const visibleContacts =
-    resSearch.length > 0
-      ? resSearch
-      : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
-
-  function changeInputSearch(e: FormEvent<HTMLInputElement>) {
-    const data = e.currentTarget.value;
-    setInputSearch(data);
-    const res = nickConected.filter(
-      (nick) =>
-        nick.userId !== socketRef.current?.userId &&
-        nick.nick?.trim().toLowerCase().includes(data.trim().toLowerCase()),
-    );
-    setResSearch(res);
-  }
 
   const veryfy_user = async () => {
     try {
-      const user: User = await resolve_request_me();
-      console.log(user, "en verify");
+      const user_refresh: User = await resolve_request_me();
+      console.log(user_refresh, "en verify");
 
-      if (user !== null) {
-        setUser(user);
+      if (user_refresh !== null) {
+        setUser(user_refresh);
       }
     } catch (error) {
       console.log(error);
@@ -83,19 +64,10 @@ export default function Chat() {
 
     veryfy_user();
   }, [user]);
-  console.log(user, "fuera del efecto");
-
+  
   return (
     <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
-      <DirectorySection
-        activeFeed={activeFeed}
-        conectedCount={conectedCount}
-        onChange={changeInputSearch}
-        inputSearch={inputSearch}
-        visibleContacts={visibleContacts}
-        handleSelectClient={handleSelectClient}
-        onClick={returnToGroup}
-      />
+      <DirectorySection/>
 
       <FeedSection
         activeFeed={activeFeed}

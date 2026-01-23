@@ -11,7 +11,6 @@ import React, {
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
-  AuthProvider,
   ClientsConected,
   MsgInFeed,
   ProcessMsg,
@@ -63,9 +62,6 @@ interface IcontextProps {
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   inputSearch: string;
   setInputSearch: React.Dispatch<React.SetStateAction<string>>;
-  resSearch: ClientsConected[];
-  setResSearch: React.Dispatch<React.SetStateAction<ClientsConected[]>>;
-
 
   //estados compartidos en refactos
   user: User | null;
@@ -84,7 +80,7 @@ export function useAppContextWs(): IcontextProps {
   const contextWs = useContext(ContextApp);
   if (!contextWs) {
     throw new Error(
-      "Error al intentar ingresar al contexto, en este momento en null o estas intentando accerder fuera del dominio de su provider"
+      "Error al intentar ingresar al contexto, en este momento en null o estas intentando accerder fuera del dominio de su provider",
     );
   }
   return contextWs;
@@ -99,21 +95,20 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [nickConected, setNickConected] = useState<ClientsConected[]>([]);
   const [conectedCount, setConectedCount] = useState<number>(0);
   const [privateIdMsg, setPrivateIdMsg] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [clientSelected, setClientSelected] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   const [inputMsg, setInputMsg] = useState<string | undefined>(undefined);
   const [activeUser, setActiveUser] = useState<boolean>(false);
   const [activeFeed, setActiveFeed] = useState<boolean>(false);
   const [inputMsgSearch, setInputMsgSearch] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
   const [inputSearch, setInputSearch] = useState<string>("");
-  const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
 
   //estado para el filtrado tipo wp
   const [searchMatches, setSearchMatches] = useState<string[]>([]);
@@ -123,15 +118,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   //referencia para el scroll automatico al mensaje nuevo ingresado al feed
 
-  const [user, setUser]= useState<User | null>( null);
+  //estado de user guardado en bdd.
+  const [user, setUser] = useState<User | null>(null);
 
   const nickMapRef = useRef<Record<string, string>>({});
 
   const pendingNickRef = useRef<Record<string, string>>({});
-
-
-
-
 
   const resolveNick = (fromId?: string) => {
     if (!fromId) return undefined;
@@ -142,7 +134,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
     return nickMapRef.current[fromId];
   };
-
 
   const handleSelectClient = (userId: string, nick: string) => {
     setActiveFeed(true);
@@ -157,8 +148,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
     setNickConected((prev) =>
       prev.map((c) =>
-        c.userId === userId ? { ...c, messageIn: false, totalMessageIn: 0 } : c
-      )
+        c.userId === userId ? { ...c, messageIn: false, totalMessageIn: 0 } : c,
+      ),
     );
   };
   const handleSearchMsg = (e: FormEvent<HTMLFormElement>) => {
@@ -199,9 +190,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const handleActiveUser = () => {
     //esta funcion cambia tres estados que manejan la visibilidad del formulario de ingreso/registro del nick. Ademas limpia los inputs y el booleano que controla si el nick esta registrado, asi cuando aparezca el boton "X" y cerras el fomulario ademas de ir atras, limpias todo para que el boton diga nuevamente "registrar" y el input este el blanco.
-    setActiveUser(!activeUser);
+    setActiveUser(true);
     //setInputRegister("");
-    setHasNickname(!hasNickname);
+    //setHasNickname(!hasNickname);
   };
 
   const sendMessagePrivate = (event: FormEvent) => {
@@ -251,8 +242,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                   },
                 ],
               }
-            : c
-        )
+            : c,
+        ),
       );
       setInputMsg("");
     }
@@ -296,15 +287,18 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setClientSelected("");
     setActiveFeed(true);
     setInputSearch("");
-    setResSearch([]);
+    //    setResSearch([]);
   };
 
   //useeffect para el inicio del socket y estructura de la informacion
 
   useEffect(() => {
-    if (activeUser === false) {
-      return
+    if (user === null) {
+      console.log("intento para ver por que no sale", user);
+
+      return;
     }
+
     try {
       const socket = new WebSocket(`${port}`);
       socketRef.current = socket;
@@ -317,7 +311,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         // console.log("lo que llega del servidor antes de la funcion normalizadora", parse);
         const handleProcesMsgToFeed = (
           msg: ServerToClientMessage,
-          client: WebSocket
+          client: WebSocket,
         ): Promise<ProcessMsg> => {
           return new Promise((resolve, reject) => {
             //este if cubre el registro donde el servidor me devuelve el id del cliente creado una vez que verifica que el messageId no esta duplicado
@@ -460,8 +454,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
                         },
                       ],
                     }
-                  : c
-              )
+                  : c,
+              ),
             );
           }
 
@@ -488,7 +482,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     return () => {
       socketRef.current?.close();
     };
-  }, []);
+  }, [user]);
 
   //este lo hago de prueba para el feed privado
   useEffect(() => {
@@ -499,7 +493,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const client = nickConected.find((c) => c.userId === privateIdMsg);
     setMessageFeedPriv(client?.msgPriv ?? []);
   }, [nickConected, privateIdMsg]);
-
 
   const value = {
     socketRef,
@@ -542,8 +535,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     messageRefs,
     inputSearch,
     setInputSearch,
-    resSearch,
-    setResSearch,
 
     //nueos estados
     user,
