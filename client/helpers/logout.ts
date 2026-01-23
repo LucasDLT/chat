@@ -6,6 +6,7 @@ export const resolve_logout = async () => {
       credentials: "include",
     });
     const data =  await response.json();    
+    console.log(data.message);
     
   } catch (error) {
     console.log(error);

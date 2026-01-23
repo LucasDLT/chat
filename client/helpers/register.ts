@@ -1,11 +1,9 @@
-import { User } from "@/types/types";
 
 export const resolve_register = async (
   name: string,
   email: string,
   password: string
-): Promise<User> => {
-  try {
+): Promise<string> => {
     const register_enpoint = process.env.NEXT_PUBLIC_WS_REGISTER;
     const response = await fetch(`${register_enpoint}`, {
       method: "POST",
@@ -16,16 +14,13 @@ export const resolve_register = async (
       body: JSON.stringify({ name, email, password }),
     });
 
-    const data: User = await response.json();
+    const {message} = await response.json();
 
-    if (!data) {
-      throw new Error("error en respuesta del login");
+    if (!message) {
+      throw new Error("error al registrar usuario");
     }
 
-    console.log(data);
-    return data;
-  } catch (error) {
-    console.log(error);
-    throw new Error("error en respuesta del login");
-  }
+    console.log(message);
+    return message;
+      
 };

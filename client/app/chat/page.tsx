@@ -43,6 +43,7 @@ export default function Chat() {
     setResSearch,
     setActiveUser,
     hasNickname,
+    user
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -63,13 +64,13 @@ export default function Chat() {
     setResSearch(res);
   }
 
-  //agrego este efecto para probar authgoogle
-  //agregar una verificacion para saber si el inicio es por google, de lo contrario esta funcion nos arroja error, por que el login local no genera doble verificacion como Oauth
+ 
 
- { /*useEffect(() => {
+ useEffect(() => {
+  if(user !== null) return
     resolve_request_me();
   }, []);
-*/}
+
   return (
     <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
       <DirectorySection

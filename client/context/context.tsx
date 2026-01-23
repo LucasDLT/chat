@@ -305,8 +305,11 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   };
 
   //useeffect para el inicio del socket y estructura de la informacion
-{/*
+
   useEffect(() => {
+    if (activeUser === false) {
+      return
+    }
     try {
       const socket = new WebSocket(`${port}`);
       socketRef.current = socket;
@@ -501,7 +504,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const client = nickConected.find((c) => c.userId === privateIdMsg);
     setMessageFeedPriv(client?.msgPriv ?? []);
   }, [nickConected, privateIdMsg]);
-*/}
+
 
   const value = {
     socketRef,

@@ -1,16 +1,26 @@
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { Register } from "@/types/types";
+import { FormsErrors, Register } from "@/types/types";
 import { resolve_register } from "@/helpers/register";
 import { useRouter } from "next/navigation";
+import { Register_UI } from "@/app/ui/Register";
+import { catch_errors_register } from "@/helpers/errors";
+import { LoadingModal } from "../../LoadingModal";
 export const FormRegister = () => {
-
   //estados
   const [inputRegister, setInputRegister] = useState<Register>({
     name: "",
     email: "",
     password: "",
   });
+
+  const [errors, setErrors] = useState<FormsErrors>({
+    email: "",
+    name: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   //instancia router
   const router = useRouter();
@@ -20,20 +30,38 @@ export const FormRegister = () => {
     const value = event.currentTarget.value;
     const key = event.currentTarget.name;
 
-    setInputRegister((prev) => ({ ...prev, [key]: value }));
-    //eventualmente voy a tener que poner el control de errores aca. Por ahora no lo hago
+    const update_form: Register = { ...inputRegister, [key]: value };
+
+    setInputRegister(update_form);
+    setErrors(catch_errors_register(update_form));
   };
 
   //submit
   const handleRegisterNick = async (event: FormEvent) => {
     event.preventDefault();
-    const { name, email, password } = inputRegister;
-    const data_user = await resolve_register(name, email, password);
-    if (!data_user) {
-      throw new Error("error al recibir informacion del resolve login");
+    setLoading(true);
+    try {
+      const validate_errors = catch_errors_register(inputRegister);
+      const has_error = Object.keys(validate_errors).some((err) => err !== "");
+
+      if (has_error) {
+        return;
+      }
+
+      const { name, email, password } = inputRegister;
+      const data_user = await resolve_register(name, email, password);
+      
+      if (!data_user) {
+        throw new Error("error al recibir informacion de registro");
+      }
+      
+      setInputRegister({ name: "", email: "", password: "" });
+      //aca iria ese estado que cambia el valor booleano y hace que se vea el formulario de login.
+    } catch (error) {
+      console.log(error);
+    }finally{
+      setLoading(false)
     }
-    setInputRegister({ name: "", email: "", password: "" });
-    router.push("/chat");
   };
   return (
     <section className="flex flex-col justify-center items-center relative h-[60vh]">
@@ -45,53 +73,13 @@ export const FormRegister = () => {
         className="h-full w-full object-cover xl:h-80 xl:rounded-sm xl:mt-10 xl:mb-10 "
       />
 
-      <form
-        className="flex flex-col g-1 justify-center items-center backdrop-blur-[2px] absolute h-50 w-60 rounded-sm border borderYellow gap-4"
+      <Register_UI
+        onChange={onChangeRegisterNick}
         onSubmit={handleRegisterNick}
-      >
-        <label className="mesoninaRegular font-bold tracking-wider text-3xl">
-          Nombre
-        </label>
-        <input
-          type="text"
-          name="name"
-          className="bgBlurYellow rounded"
-          onChange={onChangeRegisterNick}
-          value={inputRegister.name}
-        />
-        <label className="mesoninaRegular font-bold tracking-wider text-3xl">
-          email
-        </label>
-        <input
-          type="text"
-          name="email"
-          className="bgBlurYellow rounded"
-          onChange={onChangeRegisterNick}
-          value={inputRegister.email}
-        />
-        <label className="mesoninaRegular font-bold tracking-wider text-3xl">
-          password
-        </label>
-        <input
-          type="password"
-          name="password"
-          className="bgBlurYellow rounded"
-          onChange={onChangeRegisterNick}
-          value={inputRegister.password}
-        />
-
-        <button
-          type="submit"
-          className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow"
-        >
-          registrar
-        </button>
-        <p className="titleColor mesoninaRegular font-bold tracking-widest">
-          Ya casi terminas
-        </p>
-      </form>
-
-      <button onClick={() => router.push("/login")}>ir al login</button>
+        errors={errors}
+        inputRegister={inputRegister}
+      />
+      {loading && <LoadingModal message="...procesando" />}
     </section>
   );
 };

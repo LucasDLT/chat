@@ -161,4 +161,13 @@ export interface Login {
   email: string;
   password: string;
 } 
+export interface FormsErrors {
+  name?:string;
+  email: string;
+  password: string;
+} 
+
+export interface ModalProps {
+  message: string;
+}
 
