@@ -68,8 +68,8 @@ interface IcontextProps {
 
 
   //estados compartidos en refactos
-  user: User;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 interface ContextProviderProps {
@@ -123,12 +123,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   //referencia para el scroll automatico al mensaje nuevo ingresado al feed
 
-  const [user, setUser]= useState<User>( {
-    id: 0,
-    email: "",
-    name: "",
-    provider: AuthProvider.LOCAL
-  })
+  const [user, setUser]= useState<User | null>( null);
 
   const nickMapRef = useRef<Record<string, string>>({});
 

@@ -19,7 +19,6 @@ export const NavbarChat: React.FC<NabvarProps> = ({
   activeMobile,
   setActive,
   setActiveMobile,
- 
   setActiveFeed,
   activeFeed,
   socketRef,

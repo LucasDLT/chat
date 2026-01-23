@@ -28,7 +28,7 @@ export const EditForm = () => {
       onSubmit={onSubmitChangeNick}
     >
       <label className="mesoninaRegular text-black font-bold tracking-wider text-xl">
-        {user.name}
+        {user?.name}
       </label>
       <input
         type="text"

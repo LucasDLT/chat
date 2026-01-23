@@ -6,8 +6,8 @@ import { DirectorySection } from "@/app/components/DirectorySection/index";
 import { NavbarChat } from "@/app/components/NavbarChat/index";
 import { FeedSection } from "@/app/components/FeedComponent/index";
 import { InputMsgChat } from "@/app/components/InputMsgChat/index";
-import { resolve_logout } from "@/helpers/logout";
 import { resolve_request_me } from "@/helpers/me";
+import { User } from "@/types/types";
 
 export default function Chat() {
   const router = useRouter();
@@ -43,7 +43,8 @@ export default function Chat() {
     setResSearch,
     setActiveUser,
     hasNickname,
-    user
+    user,
+    setUser,
   } = useAppContextWs();
 
   const myId = socketRef.current?.userId;
@@ -64,12 +65,25 @@ export default function Chat() {
     setResSearch(res);
   }
 
- 
+  const veryfy_user = async () => {
+    try {
+      const user: User = await resolve_request_me();
+      console.log(user, "en verify");
 
- useEffect(() => {
-  if(user !== null) return
-    resolve_request_me();
-  }, []);
+      if (user !== null) {
+        setUser(user);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (user !== null) return; //verifico si usuario es diferente a null quiere decir que posee datos, no necesitamos verificarlos con /me y corto la ejecucion del efecto
+
+    veryfy_user();
+  }, [user]);
+  console.log(user, "fuera del efecto");
 
   return (
     <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
