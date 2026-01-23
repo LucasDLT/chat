@@ -23,7 +23,7 @@ export const register_controller = async (req: Request, res: Response) => {
 
     res.status(200).json({
       message: "Usuario registrado con éxito.", 
-      user,
+      //user, comente hoy 22/1. ya que note que en el registro no deberia enviar los datos al cliente en el servicio ya cumpli con el objetivo, guardarlo en la bdd y nada mas, desde alli no deberia retornarlo directamente. 
     });
 
   } catch (error) {
