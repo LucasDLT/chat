@@ -16,6 +16,7 @@ import {
 import { event_bus } from "./events/events.bus.js";
 import { messageRepository, userRepository } from "./config_database/data_source.js";
 import { verify_session } from "./utils/verify_session.js";
+import cookie from "cookie";
 
 
 //funcion que saque de la documentacion en github, para el ping-pong
@@ -105,7 +106,11 @@ export const websocketSetup = (server: Server) => {
     //desde aca se comienza a generar el login desde https, y se verificara desde este lado la existencia del token en la cookie, esa verificacion cerrara el socket por cada vez que no la encuentre, dejando pasar al resto de eventos solo cuando la cookie haya sido seteada y hallada en el handshake inicial.
     //IMPORTANTISIMO EN EL CLIENTE VAMOS A TENER QUE LEVANTAR EL PRIMER PEDIDO DE HANDSHAKE LUEGO DEL LOGIN. SI O SI, SINO LA COOKIE NO LLEGA AL PEDIDO QUE HACEMOS ACA.
     console.log("wss iniciado esperando autenticar para inciar chat");
-    const token = request.headers.cookie;
+    const cookies = cookie.parse(request.headers.cookie || "")
+    const cookie_login_session = cookies.login_session;
+    const cookie_auth_google = cookies.login_auth_google;
+    const token = cookie_login_session || cookie_auth_google;
+    console.log(token, "token");
     if (!token) {
       console.log("error de autenticacion, socket cerrado");
       ws.close();
