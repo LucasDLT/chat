@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppContextWs } from "@/context/context";
-import { EditForm } from "../Forms/Edit";
+import { Section_Edit_Form } from "../Forms/Edit";
 interface NabvarProps {
   active: boolean;
   setActive: React.Dispatch<React.SetStateAction<boolean>>;
@@ -82,7 +82,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
           />
 
           {active && (
-            <EditForm
+            <Section_Edit_Form
 
             />
           )}

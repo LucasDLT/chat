@@ -1,17 +1,15 @@
-import { User } from "@/types/types";
-
 export interface Edit_UI_Props {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   value: string;
-  user: User;
+  current_name: string | undefined;
 }
 
 export const Form_Edit_UI: React.FC<Edit_UI_Props> = ({
   onChange,
   onSubmit,
   value,
-  user,
+  current_name,
 }) => {
   return (
     <form
@@ -19,7 +17,7 @@ export const Form_Edit_UI: React.FC<Edit_UI_Props> = ({
       onSubmit={onSubmit}
     >
       <label className="mesoninaRegular text-black font-bold tracking-wider text-xl">
-        {user?.name}
+        {current_name}
       </label>
       <input
         type="text"
