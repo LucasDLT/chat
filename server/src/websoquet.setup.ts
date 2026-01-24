@@ -10,14 +10,14 @@ import type {
   PongServer,
   SnapshotClients,
 } from "./types/message.t.js";
-import {
-  isSendMessage,
-} from "./guards/index.js";
+import { isSendMessage } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
-import { messageRepository, userRepository } from "./config_database/data_source.js";
+import {
+  messageRepository,
+  userRepository,
+} from "./config_database/data_source.js";
 import { verify_session } from "./utils/verify_session.js";
 import cookie from "cookie";
-
 
 //funcion que saque de la documentacion en github, para el ping-pong
 function heartbeat(this: WebSocket) {
@@ -28,8 +28,6 @@ function heartbeat(this: WebSocket) {
 export const websocketSetup = (server: Server) => {
   const wss = new WebSocketServer({ server });
   const mapMessageId = new Map<string, number>();
-  const mapNicknameId = new Map<string, number>();
-  const mapChangeNicknameId = new Map<string, number>();
   const registeredClients = new Map<number, userData>(); //map paralelo a clients solo para enviarlo al cliente y tener los conectados
 
   //para pasar de map a array. No se usa directamente, va dentro de otra fn
@@ -68,34 +66,10 @@ export const websocketSetup = (server: Server) => {
       }
     }
   }
-  function clearSetIdNick() {
-    const now = Date.now();
-    for (const [id, timeStamp] of mapNicknameId.entries()) {
-      if (now - timeStamp > TTL) {
-        mapNicknameId.delete(id);
-      }
-    }
-  }
-  function clearSetIdChangeNick() {
-    const now = Date.now();
-    for (const [id, timeStamp] of mapChangeNicknameId.entries()) {
-      if (now - timeStamp > TTL) {
-        mapChangeNicknameId.delete(id);
-      }
-    }
-  }
 
-  const clearIntervalChangeNick: NodeJS.Timeout = setInterval(
-    clearSetIdChangeNick,
-    60 * 1000
-  );
-  const clearIntervalNicks: NodeJS.Timeout = setInterval(
-    clearSetIdNick,
-    60 * 1000
-  );
   const clearIntervalIdMsg: NodeJS.Timeout = setInterval(
     clearSetIdMsg,
-    60 * 1000
+    60 * 1000,
   );
 
   //guard para el ID de usuario
@@ -106,7 +80,7 @@ export const websocketSetup = (server: Server) => {
     //desde aca se comienza a generar el login desde https, y se verificara desde este lado la existencia del token en la cookie, esa verificacion cerrara el socket por cada vez que no la encuentre, dejando pasar al resto de eventos solo cuando la cookie haya sido seteada y hallada en el handshake inicial.
     //IMPORTANTISIMO EN EL CLIENTE VAMOS A TENER QUE LEVANTAR EL PRIMER PEDIDO DE HANDSHAKE LUEGO DEL LOGIN. SI O SI, SINO LA COOKIE NO LLEGA AL PEDIDO QUE HACEMOS ACA.
     console.log("wss iniciado esperando autenticar para inciar chat");
-    const cookies = cookie.parse(request.headers.cookie || "")
+    const cookies = cookie.parse(request.headers.cookie || "");
     const cookie_login_session = cookies.login_session;
     const cookie_auth_google = cookies.login_auth_google;
     const token = cookie_login_session || cookie_auth_google;
@@ -173,7 +147,7 @@ export const websocketSetup = (server: Server) => {
       ws.send(JSON.stringify("conexion ws establecida"));
     });
 
-    ws.on("message", async(data) => {
+    ws.on("message", async (data) => {
       try {
         const raw = data instanceof Buffer ? data.toString() : String(data);
         const messageData: ClientToServerMessage = JSON.parse(raw);
@@ -181,100 +155,95 @@ export const websocketSetup = (server: Server) => {
         if (typeof messageData.type !== "string") return;
 
         switch (messageData.type) {
-          case "chat.send":
-            {
-              if (!isSendMessage(messageData)) return;
+          case "chat.send": {
+            if (!isSendMessage(messageData)) return;
 
-              const id = mapMessageId.has(messageData.messageId);
+            const id = mapMessageId.has(messageData.messageId);
 
-              if (id) {
-                const msgAckError: AckMessage = {
-                  type: "ack",
-                  correlationId: messageData.messageId,
+            if (id) {
+              const msgAckError: AckMessage = {
+                type: "ack",
+                correlationId: messageData.messageId,
+                timestamp: Date.now(),
+                payload: {
+                  status: "error",
+                  details: "duplicate",
+                },
+              };
+              if (ws.readyState === WebSocket.OPEN) {
+                return ws.send(JSON.stringify(msgAckError));
+              }
+            } else {
+              mapMessageId.set(messageData.messageId, Date.now());
+              const msgAckOk: AckMessage = {
+                type: "ack",
+                correlationId: messageData.messageId,
+                timestamp: Date.now(),
+                payload: {
+                  status: "ok",
+                  details: "message sent",
+                },
+              };
+              if (ws.readyState === WebSocket.OPEN)
+                ws.send(JSON.stringify(msgAckOk));
+
+              if (hasUserId(ws)) {
+                const toIdMsg =
+                  messageData.payload.scope === "chat.public"
+                    ? undefined
+                    : messageData.payload.toId;
+
+                const msgClient: ChatMessage = {
+                  messageId: messageData.messageId,
                   timestamp: Date.now(),
+                  type: messageData.payload.scope,
                   payload: {
-                    status: "error",
-                    details: "duplicate",
+                    fromId: ws.userId,
+                    toId: toIdMsg,
+                    text: messageData.payload.text,
                   },
                 };
-                if (ws.readyState === WebSocket.OPEN) {
-                  return ws.send(JSON.stringify(msgAckError));
+
+                interface message_bdd {
+                  text: string;
+                  createdAt: Date;
+                  senderId: number;
+                  receiverId: number | null;
                 }
-              } else {
-                mapMessageId.set(messageData.messageId, Date.now());
-                const msgAckOk: AckMessage = {
-                  type: "ack",
-                  correlationId: messageData.messageId,
-                  timestamp: Date.now(),
-                  payload: {
-                    status: "ok",
-                    details: "message sent",
-                  },
+                const message: message_bdd = {
+                  text: msgClient.payload.text,
+                  createdAt: new Date(),
+                  senderId: msgClient.payload.fromId,
+                  receiverId: msgClient.payload.toId ?? null,
                 };
-                if (ws.readyState === WebSocket.OPEN)
-                  ws.send(JSON.stringify(msgAckOk));
+                await messageRepository.save(message);
 
-                if (hasUserId(ws)) {
-                  const toIdMsg =
-                    messageData.payload.scope === "chat.public"
-                      ? undefined
-                      : messageData.payload.toId;
-
-                  const msgClient: ChatMessage = {
-                    messageId: messageData.messageId,
-                    timestamp: Date.now(),
-                    type: messageData.payload.scope,
-                    payload: {
-                      fromId: ws.userId,
-                      toId: toIdMsg,
-                      text: messageData.payload.text,
-                    },
-                  };
-                  
-                   interface message_bdd{
-                    text:string,
-                    createdAt:Date,
-                    senderId:number,
-                    receiverId:number | null
-                  }
-                  const message:message_bdd = {
-                    text:msgClient.payload.text,
-                    createdAt:new Date,
-                    senderId:msgClient.payload.fromId,
-                    receiverId:msgClient.payload.toId ?? null
-                  }
-                   await messageRepository.save(message)
-
-
-                  if (msgClient.type === "chat.public") {
-                    wss.clients.forEach((client: WebSocket) => {
-                      if (
-                        client !== ws &&
-                        client.readyState === WebSocket.OPEN
-                      ) {
-                        client.send(JSON.stringify(msgClient));
-                      }
-                    });
-                  }
-                  if (
-                    msgClient.type === "chat.private" &&
-                    typeof msgClient.payload.toId === "number" &&
-                    msgClient.payload.toId
-                  ) {
-                    wss.clients.forEach((client: WebSocket) => {
-                      if (
-                        client.readyState === WebSocket.OPEN &&
-                        client !== ws &&
-                        client.userId === msgClient.payload.toId
-                      ) {
-                        client.send(JSON.stringify(msgClient));
-                      }
-                    });
-                  }
+                if (msgClient.type === "chat.public") {
+                  wss.clients.forEach((client: WebSocket) => {
+                    if (client !== ws && client.readyState === WebSocket.OPEN) {
+                      client.send(JSON.stringify(msgClient));
+                    }
+                  });
+                }
+                if (
+                  msgClient.type === "chat.private" &&
+                  typeof msgClient.payload.toId === "number" &&
+                  msgClient.payload.toId
+                ) {
+                  wss.clients.forEach((client: WebSocket) => {
+                    if (
+                      client.readyState === WebSocket.OPEN &&
+                      client !== ws &&
+                      client.userId === msgClient.payload.toId
+                    ) {
+                      client.send(JSON.stringify(msgClient));
+                    }
+                  });
                 }
               }
-              break;
             }
+            break;
+          }
           case "ping.client": {
             const pongServer: PongServer = {
               type: "pong.server",
@@ -342,10 +311,10 @@ export const websocketSetup = (server: Server) => {
         });
       }
     });
-    
+
     ws.on("error", (error: Error) => {
       console.log(
-        `error de conexion ${error.message}, tipo: ${error.name}, ubucacion-. ${error.stack}`
+        `error de conexion ${error.message}, tipo: ${error.name}, ubucacion-. ${error.stack}`,
       );
     });
     ws.on("pong", heartbeat);
@@ -396,7 +365,7 @@ export const websocketSetup = (server: Server) => {
 
   wss.on("error", (error) => {
     console.log(
-      `error wss. type:${error.name}. ubication:${error.stack}. message:${error.message} `
+      `error wss. type:${error.name}. ubication:${error.stack}. message:${error.message} `,
     );
   });
 
@@ -406,25 +375,12 @@ export const websocketSetup = (server: Server) => {
     }
     clearInterval(interval);
     clearInterval(clearIntervalIdMsg);
-    clearInterval(clearIntervalNicks);
-    clearInterval(clearIntervalChangeNick);
-    mapChangeNicknameId.clear();
-    mapMessageId.clear();
-    mapNicknameId.clear();
   });
 
   return {
     wss,
     close: () => {
       clearInterval(interval);
-      clearInterval(clearIntervalNicks);
-      clearInterval(clearIntervalIdMsg);
-      clearInterval(clearIntervalChangeNick);
-
-      mapChangeNicknameId.clear();
-      mapMessageId.clear();
-      mapNicknameId.clear();
-
       try {
         wss.close();
       } catch (err) {
