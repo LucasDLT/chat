@@ -3,7 +3,7 @@ import Image from "next/image";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppContextWs } from "@/context/context";
 import { Section_Edit_Form } from "../Forms/Edit";
-import { Logout_Button } from "@/app/ui/Logout_Button";
+import { Logout_Button } from "@/app/components/Logout_Button";
 interface NabvarProps {
   active: boolean;
   setActive: React.Dispatch<React.SetStateAction<boolean>>;
