@@ -8,7 +8,7 @@ import { MessageItem } from "@/app/components/msgItem";
 
 interface FeedProps {
   activeFeed: boolean;
-  privateIdMsg: string | undefined;
+  privateIdMsg: number | undefined;
   messageFeed: MsgInFeed[];
   messageFeedPriv: MsgInFeed[];
   clientSelected: string | undefined;
@@ -193,7 +193,7 @@ const privateMessages = messageFeedPriv;
                   isMatch={isMatch}
                   message={msg}
                   messageRefs={messageRefs}
-                  myUserId={socketRef.current?.userId ?? ""}
+                  myUserId={socketRef.current!.userId }
                   showAuthor={false}
                 />
               );
@@ -236,7 +236,7 @@ const privateMessages = messageFeedPriv;
                   isMatch={isMatch}
                   message={msg}
                   messageRefs={messageRefs}
-                  myUserId={socketRef.current?.userId ?? ""}
+                  myUserId={socketRef.current?.userId }
                   showAuthor={true}
                 />
               );

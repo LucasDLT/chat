@@ -2,7 +2,7 @@ import { FormEvent } from "react";
 import Image from "next/image";
 
 interface InputMsgChatProps {
-  privateIdMsg: string | undefined;
+  privateIdMsg: number | undefined;
   sendMessagePrivate: (e: React.FormEvent<HTMLFormElement>) => void;
   sendMessage: (e: React.FormEvent<HTMLFormElement>) => void;
   changeInputMessage: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -19,6 +19,8 @@ export const InputMsgChat: React.FC<InputMsgChatProps> = ({
 }) => {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+        console.log(inputMsg), "en submit";
+
     //funcion para elegir que funcion se activa, si msg privado o publico, la tuve que hacer de esta forma por los tipados diferentes del event de la funcion de cada una, antes tenia el ternario en el mismo onsubmit, pero al tipar todo ya no me dejo hacer eso typescript
     if (privateIdMsg && inputMsg) {
       sendMessagePrivate (e);

@@ -6,7 +6,7 @@ interface MessageItemProps {
   isMatch: boolean;
   isActive: boolean;
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
-  myUserId: string;
+  myUserId: number | undefined;
   showAuthor?: boolean;
 }
 

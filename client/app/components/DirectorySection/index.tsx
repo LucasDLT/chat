@@ -37,6 +37,7 @@ export const DirectorySection = () => {
     );
     setResSearch(res);
   }
+
   return (
     <section
       className={`

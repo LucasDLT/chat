@@ -7,8 +7,8 @@ export interface ChatMessage extends BaseMessage {
   type: "chat.public" | "chat.private";
   messageId: string;
   payload: {
-    fromId: string;
-    toId?: string | undefined;
+    fromId: number;
+    toId?: number | undefined;
     text: string;
   };
 } //primer tipo de mensajes que a su vez tiene un subtipo publico y privado. Tiene desde que a que id va el mensaje, y un id unico para identificarlo y evitar duplicados.
@@ -18,7 +18,7 @@ export interface SendMessage extends BaseMessage {
   messageId: string; // este lo tengo que crear desde el cliente con cripto uuid, es decir viene desde el frontend
   payload: {
     scope: "chat.public" | "chat.private";
-    toId?: string;
+    toId?: number;
     text: string;
   };
 } // tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
@@ -45,7 +45,7 @@ export interface ChangeNickname extends BaseMessage {
   type: "changeNickname";
   payload: {
     messageId: string;
-    userId: string;
+    userId: number;
     nickname: string;
   };
 }
@@ -64,7 +64,7 @@ export interface AckMessage extends BaseMessage {
   payload: {
     status: "ok" | "error";
     details?: string;
-    fromId?: string | undefined;
+    fromId?:  number | undefined;
     nickname?: string;
   };
 } //tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
@@ -77,7 +77,7 @@ export interface SnapshotClients {
 }
 
 export interface userData {
-  userId: string;
+  userId: number;
   nickname: string;
   isAlive?: boolean;
 }
@@ -85,8 +85,8 @@ export interface ProcessMsg {
   message?: {
     type: "chat.public" | "chat.private";
     text: string;
-    toId?: string;
-    fromId?: string;
+    toId?: number;
+    fromId?: number;
     messageId: string;
     timestamp: number;
   };
@@ -99,7 +99,7 @@ export interface ClientsConected {
   messageIn?: boolean;
   totalMessageIn?: number;
   msgPriv?: MsgInFeed[];
-  userId: string;
+  userId: number;
   nick: string;
 }
 
@@ -121,13 +121,13 @@ export type ClientToServerMessage =
 //tipado para los mensajes en feeds privados y publicos
 
 export interface MsgInFeed {
-  fromId?: string;
+  fromId?: number;
   msg: string;
   messageId: string;
   timestamp: number;
   type: "user" | "system";
   fromNick?: string;
-  privateId?: string;
+  privateId?: number;
 }
 
 //tipado para los datos que quiero persistir
@@ -171,3 +171,9 @@ export interface ModalProps {
   message: string;
 }
 
+//enum para el container de formularios
+
+export enum forms {
+  login = "login",
+  register = "register",
+}

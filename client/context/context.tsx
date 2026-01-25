@@ -19,6 +19,7 @@ import {
   User,
 } from "@/types/types";
 import { nanoid } from "nanoid";
+import { resolve_private_messages } from "@/helpers/private_msg";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -33,11 +34,11 @@ interface IcontextProps {
   setMessageFeedPriv: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
   conectedCount: number;
   setConectedCount: React.Dispatch<React.SetStateAction<number>>;
-  privateIdMsg: string | undefined;
-  setPrivateIdMsg: React.Dispatch<React.SetStateAction<string | undefined>>;
+  privateIdMsg: number | undefined;
+  setPrivateIdMsg: React.Dispatch<React.SetStateAction<number | undefined>>;
   clientSelected: string | undefined;
   setClientSelected: React.Dispatch<React.SetStateAction<string | undefined>>;
-  handleSelectClient: (userId: string, nick: string) => void;
+  handleSelectClient: (userId: number, nick: string) => void;
   handleActiveUser: () => void;
   activeUser: boolean;
   setActiveUser: React.Dispatch<React.SetStateAction<boolean>>;
@@ -94,7 +95,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [hasNickname, setHasNickname] = useState<boolean>(false);
   const [nickConected, setNickConected] = useState<ClientsConected[]>([]);
   const [conectedCount, setConectedCount] = useState<number>(0);
-  const [privateIdMsg, setPrivateIdMsg] = useState<string | undefined>(
+  const [privateIdMsg, setPrivateIdMsg] = useState<number | undefined>(
     undefined,
   );
   const [clientSelected, setClientSelected] = useState<string | undefined>(
@@ -125,7 +126,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const pendingNickRef = useRef<Record<string, string>>({});
 
-  const resolveNick = (fromId?: string) => {
+  const resolveNick = (fromId?: number) => {
     if (!fromId) return undefined;
 
     if (fromId === socketRef.current?.userId) {
@@ -135,22 +136,33 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     return nickMapRef.current[fromId];
   };
 
-  const handleSelectClient = (userId: string, nick: string) => {
+  
+  const [offset, setOffset] = useState <number>(0)
+  const [limit, setLimit]= useState <number>(20)
+
+  //toda esta funcion es para lo privado al seleccionar un usuario del directorio
+  const handleSelectClient = async (userId: number, nick: string) => {
+try{    console.log("se activo la funcion handle select client");
+    
     setActiveFeed(true);
     setPrivateIdMsg(userId);
     setClientSelected(nick);
+    const id= Number(userId)
 
+    const messages = await resolve_private_messages(id, offset, limit)
+    console.log(messages, "lo que llega al contexto");
+
+    
     const client = nickConected.find((id) => id.userId === userId);
     if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {
       setMessageFeedPriv([...client.msgPriv]);
     }
-    //replique la funcion para pushear con el setter el objeto dentro del estado con sus propiedades resteadas
     //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
     setNickConected((prev) =>
       prev.map((c) =>
         c.userId === userId ? { ...c, messageIn: false, totalMessageIn: 0 } : c,
       ),
-    );
+    )}catch(err){console.log(err)}
   };
   const handleSearchMsg = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -197,6 +209,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const sendMessagePrivate = (event: FormEvent) => {
     event.preventDefault();
+    
     if (!socketRef.current?.nickname) return;
     const messageId = nanoid();
     if (privateIdMsg && inputMsg) {
@@ -210,6 +223,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           toId: privateIdMsg,
         },
       };
+      console.log(message, "mensaje que enviaremos");
+      
       socketRef.current?.send(JSON.stringify(message));
       // setMessageFeedPriv((prev) => [...prev, { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },]); 1ER PUNTO CRITICO PARA MSJ PRIVADOS
       setMessageFeedPriv((prev) => [
@@ -279,11 +294,11 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   };
 
   const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const data = event.currentTarget;
+    const data = event.currentTarget;    
     setInputMsg(data.value);
   };
   const returnToGroup = () => {
-    setPrivateIdMsg("");
+    setPrivateIdMsg(undefined);
     setClientSelected("");
     setActiveFeed(true);
     setInputSearch("");

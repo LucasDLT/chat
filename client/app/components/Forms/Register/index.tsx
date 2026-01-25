@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Register_UI } from "@/app/ui/Register";
 import { catch_errors_register } from "@/helpers/errors";
 import { LoadingModal } from "../../LoadingModal";
-export const FormRegister = () => {
+export const Register_Section = () => {
   //estados
   const [inputRegister, setInputRegister] = useState<Register>({
     name: "",

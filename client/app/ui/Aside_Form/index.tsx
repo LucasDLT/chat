@@ -1,17 +1,31 @@
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { forms } from "@/types/types";
 
 export interface Aside_Message_Props {
-  router: AppRouterInstance;
+  setter: React.Dispatch<React.SetStateAction<forms>>;
+  activeForm: forms;
 }
-export const Aside_Message: React.FC<Aside_Message_Props> = ({ router }) => {
+export const Aside_Message: React.FC<Aside_Message_Props> = ({
+  activeForm,
+  setter,
+}) => {
   const google_endpoint = process.env.NEXT_PUBLIC_WS_INITCALLBACK;
+
   return (
     <aside>
       <a href={google_endpoint}>iniciar con Google?</a>
-      <p>¿aun no estas registrado?</p>
-      <div>
-        <button onClick={() => router.push("/login")}>¿crear cuenta?</button>
-      </div>
+        {activeForm === forms.register ? (
+          <div>
+            <p>¿estas registrado?</p>
+            <button onClick={() => setter(forms.login)}>ingresar</button>
+          </div>
+        ) : (
+          <div>
+            <p>¿aun no estas registrado?</p>
+            <button onClick={() => setter(forms.register)}>
+              crear cuenta
+            </button>
+          </div>
+        )}
     </aside>
   );
 };
