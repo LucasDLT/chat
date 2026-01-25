@@ -14,7 +14,7 @@ export const private_messages_controller = async (
         message: "limit y offset deben ser números válidos",
       });
     }
-    if (!sender_id) {
+    if (!sender_id) { 
       throw new Error("Error de autenticacion");
     }
     const receiver_id = Number(req.params.id);

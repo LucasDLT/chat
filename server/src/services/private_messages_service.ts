@@ -15,8 +15,8 @@ export const get_private_messages = async (
     .leftJoinAndSelect("message.sender", "sender")
     .leftJoinAndSelect("message.receiver", "receiver")
     .where(
-      "(message.sender.id = :sender_id AND message.receiver.id = :receiver_id) OR " +
-        "(message.receiver.id = :receiver_id AND message.sender.id = :sender_id)",
+      "(sender.id = :sender_id AND receiver.id = :receiver_id) OR " +
+        "(sender.id = :receiver_id AND receiver.id = :sender_id)",
       { sender_id, receiver_id }
     )
     .orderBy("message.craetedAt", "ASC")

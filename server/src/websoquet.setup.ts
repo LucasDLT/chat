@@ -9,6 +9,7 @@ import type {
   userData,
   PongServer,
   SnapshotClients,
+  ServerToClientMessage,
 } from "./types/message.t.js";
 import { isSendMessage } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
@@ -112,6 +113,18 @@ export const websocketSetup = (server: Server) => {
       isAlive: ws.isAlive,
       nickname: ws.nickname ?? null,
     };
+    const msgAckOk: AckMessage = {
+      type: "ack",
+      correlationId: "login",
+      timestamp: Date.now(),
+      payload: {
+        status: "ok",
+        fromId: ws.userId,
+        nickname: ws.nickname ?? null,
+      },
+    };
+    //prueba para login
+    ws.send(JSON.stringify(msgAckOk));
 
     //ahora si, el system de que ingrese a la sala si debo armarlo y broadcastearlo
 
@@ -156,7 +169,7 @@ export const websocketSetup = (server: Server) => {
 
         switch (messageData.type) {
           case "chat.send": {
-            if (!isSendMessage(messageData)) return;
+            //  if (!isSendMessage(messageData)) return;
 
             const id = mapMessageId.has(messageData.messageId);
 
@@ -203,20 +216,19 @@ export const websocketSetup = (server: Server) => {
                     text: messageData.payload.text,
                   },
                 };
-
-                interface message_bdd {
-                  text: string;
-                  createdAt: Date;
-                  senderId: number;
-                  receiverId: number | null;
-                }
-                const message: message_bdd = {
+// esta parte es nueva la uso para no tener que llamar a la clase de la entidad o crear una nueva interface, directamente creo el mensaje para guardarlo a partir del repositorio de los mensajes a donde luego lo voy a mandar
+                const message = await messageRepository.create({
                   text: msgClient.payload.text,
-                  createdAt: new Date(),
-                  senderId: msgClient.payload.fromId,
-                  receiverId: msgClient.payload.toId ?? null,
-                };
-                await messageRepository.save(message);
+                  craetedAt: new Date(msgClient.timestamp),
+                  sender: { id: msgClient.payload.fromId },
+                  receiver: msgClient.payload.toId
+                    ? { id: msgClient.payload.toId }
+                    : null,
+                }); 
+                
+               const saver= await messageRepository.save(message);
+               console.log(saver);
+               
 
                 if (msgClient.type === "chat.public") {
                   wss.clients.forEach((client: WebSocket) => {
