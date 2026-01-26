@@ -20,6 +20,9 @@ import {
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { resolve_private_messages } from "@/helpers/private_msg";
+import { resolve_public_messages } from "@/helpers/public_msg";
+import { resolve_search_public_messages } from "@/helpers/search_public_msg";
+import { resolve_search_private_messages } from "@/helpers/search_private_msg";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -136,42 +139,49 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     return nickMapRef.current[fromId];
   };
 
-  
-  const [offset, setOffset] = useState <number>(0)
-  const [limit, setLimit]= useState <number>(20)
+  const [offset, setOffset] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(20);
 
   //toda esta funcion es para lo privado al seleccionar un usuario del directorio
   const handleSelectClient = async (userId: number, nick: string) => {
-try{    console.log("se activo la funcion handle select client");
-    
-    setActiveFeed(true);
-    setPrivateIdMsg(userId);
-    setClientSelected(nick);
-    const id= Number(userId)
+    try {
+      console.log("se activo la funcion handle select client");
 
-    const messages = await resolve_private_messages(id, offset, limit)
-    console.log(messages, "lo que llega al contexto");
+      setActiveFeed(true);
+      setPrivateIdMsg(userId);
+      setClientSelected(nick);
+      const id = Number(userId);
 
-    
-    const client = nickConected.find((id) => id.userId === userId);
-    if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {
-      setMessageFeedPriv([...client.msgPriv]);
+      const messages = await resolve_private_messages(id, offset, limit);
+      console.log(messages, "lo que llega al contexto");
+
+      const client = nickConected.find((id) => id.userId === userId);
+      if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {
+        setMessageFeedPriv([...client.msgPriv]);
+      }
+      //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
+      setNickConected((prev) =>
+        prev.map((c) =>
+          c.userId === userId
+            ? { ...c, messageIn: false, totalMessageIn: 0 }
+            : c,
+        ),
+      );
+    } catch (err) {
+      console.log(err);
     }
-    //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
-    setNickConected((prev) =>
-      prev.map((c) =>
-        c.userId === userId ? { ...c, messageIn: false, totalMessageIn: 0 } : c,
-      ),
-    )}catch(err){console.log(err)}
   };
-  const handleSearchMsg = (e: FormEvent<HTMLFormElement>) => {
+  const handleSearchMsg = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!inputMsgSearch) return;
 
     const query = inputMsgSearch.trim().toLowerCase();
-
+    
     if (clientSelected && privateIdMsg) {
+      //aca deberia poner el helper para la busqueda de mensajes privados
+      const history_msg = await resolve_search_private_messages(query, privateIdMsg);
+      //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const res = messageFeedPriv
         .filter((m) => m.msg.toLowerCase().includes(query))
         .map((m) => m.messageId);
@@ -180,6 +190,9 @@ try{    console.log("se activo la funcion handle select client");
       setActiveMatchIndex(0);
       console.log(res);
     } else if (messageFeed) {
+      //aca deberia poner el helper para la busqueda de mensajes publicos
+      const history_msg = await resolve_search_public_messages(query);
+      //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const res = messageFeed
         .filter((m) => m.msg.toLowerCase().includes(query))
         .map((m) => m.messageId);
@@ -209,7 +222,7 @@ try{    console.log("se activo la funcion handle select client");
 
   const sendMessagePrivate = (event: FormEvent) => {
     event.preventDefault();
-    
+
     if (!socketRef.current?.nickname) return;
     const messageId = nanoid();
     if (privateIdMsg && inputMsg) {
@@ -224,7 +237,7 @@ try{    console.log("se activo la funcion handle select client");
         },
       };
       console.log(message, "mensaje que enviaremos");
-      
+
       socketRef.current?.send(JSON.stringify(message));
       // setMessageFeedPriv((prev) => [...prev, { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },]); 1ER PUNTO CRITICO PARA MSJ PRIVADOS
       setMessageFeedPriv((prev) => [
@@ -294,14 +307,23 @@ try{    console.log("se activo la funcion handle select client");
   };
 
   const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const data = event.currentTarget;    
+    const data = event.currentTarget;
     setInputMsg(data.value);
   };
-  const returnToGroup = () => {
+
+  const [limitPublic, setLimitPublic] = useState<number>(20);
+  const [offsetPublic, setOffsetPublic] = useState<number>(0);
+
+  //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
+  const returnToGroup = async () => {
+    const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
+    console.log(public_msg);
+
     setPrivateIdMsg(undefined);
     setClientSelected("");
     setActiveFeed(true);
     setInputSearch("");
+
     //    setResSearch([]);
   };
 
