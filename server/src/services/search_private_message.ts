@@ -1,15 +1,16 @@
 import { messageRepository } from "../config_database/data_source.js";
-import { Message } from "../config_database/entities/Message.js";
 import { Brackets } from "typeorm";
+import { PrivateMessage } from "../types/messageToClient.t.js";
 export const search_message_private = async (
   sender_id: number,
   receiver_id: number,
   search_data: string,
-): Promise<Message[]> => {
-  const matches: Message[] = await messageRepository
+): Promise< PrivateMessage[] > => {
+  const matches:  PrivateMessage[]  = await messageRepository
     .createQueryBuilder("message")
-    .leftJoinAndSelect("message.sender", "sender")
-    .leftJoinAndSelect("message.receiver", "receiver")
+    .select(["message.id", "message.text", "message.craetedAt", "sender.id", "sender.name", "receiver.id", "receiver.name"])
+    .leftJoin("message.sender", "sender")
+    .leftJoin("message.receiver", "receiver")
     .where(
       "((sender.id = :sender_id AND receiver.id = :receiver_id) OR " +
         "(sender.id = :receiver_id AND receiver.id = :sender_id))",
@@ -30,10 +31,11 @@ export const search_message_private = async (
 
   //aca va a dar un error si no hay ningun match y por ahora no tenemos mensajes cargados para probar
 
-  const history_messages: Message[] = await messageRepository
+  const history_messages: PrivateMessage[] = await messageRepository
     .createQueryBuilder("message")
-    .leftJoinAndSelect("message.sender", "sender")
-    .leftJoinAndSelect("message.receiver", "receiver")
+    .select(["message.id", "message.text", "message.craetedAt", "sender.id", "sender.name", "receiver.id", "receiver.name"])
+    .leftJoin("message.sender", "sender")
+    .leftJoin("message.receiver", "receiver")
     .where(
       new Brackets((qb) => {
         qb.where(
