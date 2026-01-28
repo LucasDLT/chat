@@ -27,6 +27,9 @@ export const DirectorySection = () => {
       ? resSearch
       : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
 
+      
+      
+
   function changeInputSearch(e: FormEvent<HTMLInputElement>) {
     const data = e.currentTarget.value;
     setInputSearch(data);

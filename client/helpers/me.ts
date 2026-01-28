@@ -1,4 +1,6 @@
-export const resolve_request_me = async () => {
+import { User } from "@/types/types";
+
+export const resolve_request_me = async (): Promise<User> => {
   
     const me_endpoint = process.env.NEXT_PUBLIC_WS_ME;
     const response = await fetch(`${me_endpoint}`, {
@@ -6,7 +8,6 @@ export const resolve_request_me = async () => {
       credentials: "include",
     });
     const {user} = await response.json();
-    console.log(user, "HELPER");
     if (!user) {
       throw new Error("error en la verificacion de usuario");
     }

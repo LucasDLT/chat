@@ -154,6 +154,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
       const messages = await resolve_private_messages(id, offset, limit);
       console.log(messages, "lo que llega al contexto");
+      
+      //en este espacio hay que: recibir los mensajes tipados, despues actualizar los mensajes, despues actualizar el offset al numero actual duplicando el primero, y limpiar bien el estado que maneja la notificacion por que ahi teniamos un bug
 
       const client = nickConected.find((id) => id.userId === userId);
       if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {

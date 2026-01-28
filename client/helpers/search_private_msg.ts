@@ -1,17 +1,23 @@
-export const resolve_search_private_messages = async ( text: string, id: number ) => {
-  const endpoint_search_private_message = process.env.NEXT_PUBLIC_WS_SEARCH_MESSAGES_PRIVATE;
+import { PrivateMessage } from "@/types/types";
 
-    console.log( text, "lo llega al helper para buscar");
+export const resolve_search_private_messages = async (
+  text: string,
+  id: number,
+): Promise<PrivateMessage[]> => {
+  const endpoint_search_private_message =
+    process.env.NEXT_PUBLIC_WS_SEARCH_MESSAGES_PRIVATE;
 
-  const response = await fetch(`${endpoint_search_private_message}/${id}`,{
-    method:"POST",
-    credentials:"include",
+  console.log(text, "lo llega al helper para buscar");
+
+  const response = await fetch(`${endpoint_search_private_message}/${id}`, {
+    method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "Application/json",
     },
     body: JSON.stringify({ text }),
-  })    
-  const res_search = await response.json()
-  console.log(res_search, "resultado de helper");
-  //nota importante, deberia sacar desde aca, tipado el retorno para recibirlo limpio en el contexto
+  });
+  const res = await response.json();
+  const private_messages: PrivateMessage[] = res.private_messages;
+  return private_messages;
 };
