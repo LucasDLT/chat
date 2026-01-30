@@ -14,4 +14,3 @@ export const resolve_request_me = async (): Promise<User> => {
     
     return user
 };
-//esta funcion es solo para los ingresos con google que necesitan doble verificacion desde el servidor y envian la cookie

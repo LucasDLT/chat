@@ -2,15 +2,15 @@
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { MsgInFeed } from "@/types/types";
+import { MsgInFeed, PrivateMessage, PublicMessage } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
-import { MessageItem } from "@/app/components/msgItem";
+import { MessageItem, MessageItemPrivate } from "@/app/components/msgItem";
 
 interface FeedProps {
   activeFeed: boolean;
   privateIdMsg: number | undefined;
-  messageFeed: MsgInFeed[];
-  messageFeedPriv: MsgInFeed[];
+  messageFeed: PublicMessage[];
+  messageFeedPriv: PrivateMessage[];
   clientSelected: string | undefined;
   resMsgSearch: MsgInFeed[] | undefined;
   socketRef: React.RefObject<WebSocket | null>;
@@ -184,11 +184,11 @@ const privateMessages = messageFeedPriv;
             ref={refMessageInFeedPrivate}
           >
             {privateMessages.map((msg) => {
-              const isMatch = searchMatches.includes(msg.messageId);
-              const isActive = msg.messageId === activeMessageId;
+              const isMatch = searchMatches.includes(msg.id);
+              const isActive = msg.id === activeMessageId;
               return (
-                <MessageItem
-                  key={msg.messageId}
+                <MessageItemPrivate 
+                  key={msg.id}
                   isActive={isActive}
                   isMatch={isMatch}
                   message={msg}
@@ -226,12 +226,12 @@ const privateMessages = messageFeedPriv;
             ref={refMessageInFeedPublic}
           >
             {messageFeed.map((msg) => {
-              const isMatch = searchMatches.includes(msg.messageId);
-              const isActive = msg.messageId === activeMessageId;
+              const isMatch = searchMatches.includes(msg.id);
+              const isActive = msg.id === activeMessageId;
               
               return (
                 <MessageItem
-                  key={msg.messageId}
+                  key={msg.id}
                   isActive={isActive}
                   isMatch={isMatch}
                   message={msg}
