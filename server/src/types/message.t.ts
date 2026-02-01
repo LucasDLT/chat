@@ -1,10 +1,10 @@
 export interface BaseMessage{
-    timestamp:number
+    timestamp:Date
 }// mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
 
 export interface ChatMessage extends BaseMessage{
     type: "chat.public" | "chat.private"; 
-    messageId:string;
+    messageId:number;
     payload:{
         fromId:number;
         toId?:number | undefined; 
