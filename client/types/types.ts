@@ -1,9 +1,9 @@
+/********************************************************TIPADOS PARA EVENTOS DE SOCKETS***********************************************************/
 export interface BaseMessage {
   timestamp: number;
-} // mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
+} 
 
 export interface ChatMessage extends BaseMessage {
-  //esta interfaz la voy a usar para el filtrado de mensajes al estilo WP
   type: "chat.public" | "chat.private";
   messageId: string;
   payload: {
@@ -11,18 +11,16 @@ export interface ChatMessage extends BaseMessage {
     toId?: number | undefined;
     text: string;
   };
-} //primer tipo de mensajes que a su vez tiene un subtipo publico y privado. Tiene desde que a que id va el mensaje, y un id unico para identificarlo y evitar duplicados.
-
+} 
 export interface SendMessage extends BaseMessage {
   type: "chat.send";
-  messageId: string; // este lo tengo que crear desde el cliente con cripto uuid, es decir viene desde el frontend
-  payload: {
+  messageId: string; 
+    payload: {
     scope: "chat.public" | "chat.private";
     toId?: number;
     text: string;
   };
-} // tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
-
+} 
 export interface ErrorMessage extends BaseMessage {
   type: "error";
   payload: {
@@ -30,25 +28,23 @@ export interface ErrorMessage extends BaseMessage {
     message: string;
     details?: string;
   };
-} //tipado basico para mensaje de error luego desestrucuraremos para hacer el envelope del msg diciendo que es un error, el numero del codigo y detalles si hay.
-
+} 
 export interface SystemMessage extends BaseMessage {
   timestamp: number;
   type: "system";
   payload: {
     message: string;
   };
-} //de momento este tipado lo dejamos para los mensajes del sistema, como conectado, desconectado etc.
+} 
 
-
-export interface ChangeNickname extends BaseMessage {
+{/*export interface ChangeNickname extends BaseMessage {
   type: "changeNickname";
   payload: {
     messageId: string;
     userId: number;
     nickname: string;
   };
-}
+}*/}
 
 export interface PongServer extends BaseMessage {
   type: "pong.server";
@@ -60,14 +56,14 @@ export interface PingClient extends BaseMessage {
 
 export interface AckMessage extends BaseMessage {
   type: "ack";
-  correlationId: string; // aca iria el id del mensaje que llega en el sendmessage
+  correlationId: string; 
   payload: {
     status: "ok" | "error";
     details?: string;
     fromId?:  number | undefined;
     nickname?: string;
   };
-} //tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
+} 
 
 export interface SnapshotClients {
   type: "snapshot:clients";
@@ -75,6 +71,10 @@ export interface SnapshotClients {
   timestamp: number;
   count: number;
 }
+
+
+
+/**************************************************************************************************************************************************/
 
 export interface userData {
   userId: number;
@@ -102,8 +102,7 @@ export interface ClientsConected {
   userId: number;
   nick: string;
 }
-
-//uniones de tipos para que el switch me tome varios tipos desde una sola interface
+/***************************************************DESCRIMINATED UNIONS DE SOCKETS EVENTS*********************************************************/
 export type ServerToClientMessage =
   | ChatMessage
   | ErrorMessage
@@ -113,12 +112,14 @@ export type ServerToClientMessage =
   | SnapshotClients;
 
 export type ClientToServerMessage =
-  | Register
+  //| Register
   | SendMessage
-  | ChangeNickname
+  //| ChangeNickname
   | PingClient;
 
-//tipado para los mensajes en feeds privados y publicos
+
+
+/***************************************************TIPADO NORMALIZADOR DE MESSAGES PARA FEED******************************************************/
 
 export interface MsgInFeed {
   fromId?: number;
@@ -130,14 +131,9 @@ export interface MsgInFeed {
   privateId?: number;
 }
 
-//tipado para los datos que quiero persistir
-export interface PersistedState {
-  nickname?: string;
-  messageFeed: MsgInFeed[];
-}
 
 
-//***************************NUEVOS TIPADOS**************************//
+//**************************************************NUEVOS TIPADOS************************************************************/
 
 //TIPADOS PARA FORMULARIOS REFACTORIZADOS
 export interface User {

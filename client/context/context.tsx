@@ -69,7 +69,7 @@ interface IcontextProps {
   inputSearch: string;
   setInputSearch: React.Dispatch<React.SetStateAction<string>>;
 
-  //estados compartidos en refactos
+  //estados compartidos en refactor
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
@@ -162,11 +162,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setMessageFeedPriv( (prev)=> [...prev, ...messages])
       console.log(messageFeedPriv, "estado lalala");
       
-  {/* comentado momentaneamente   
-     const client = nickConected.find((id) => id.userId === userId);
-      if (Array.isArray(client?.msgPriv) && client.msgPriv !== undefined) {
-        setMessageFeedPriv([...client.msgPriv]);
-      }*/}
+
       //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
       setNickConected((prev) =>
         prev.map((c) =>
@@ -193,7 +189,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       const res = messageFeedPriv
         .filter((m) => m.text.toLowerCase().includes(query))
         .map((m) => m.id);
-
+//NOTA IMPORTATE SOBRE SEARCH MATCHES, ANTES ERA STRING POR QUE LOS ID LO ERAN, PERO AHORA SON NUMERICOS AL VENIR DE LA BDD. 
       setSearchMatches(res);
       setActiveMatchIndex(0);
       console.log(res);
@@ -248,41 +244,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       console.log(message, "mensaje que enviaremos");
 
       socketRef.current?.send(JSON.stringify(message));
-      // setMessageFeedPriv((prev) => [...prev, { msg: inputMsg, messageId: messageId, timestamp: message.timestamp },]); 1ER PUNTO CRITICO PARA MSJ PRIVADOS
-{  /*    setMessageFeedPriv((prev) => [
-        ...prev,
-        {
-          msg: inputMsg,
-          messageId,
-          timestamp: message.timestamp,
-          fromId: socketRef.current?.userId,
-          type: "user",
-          privateId: privateIdMsg,
-        },
-      ]);*/}
-
-      {/*setNickConected((prev) =>
-        prev.map((c) =>
-          c.userId === privateIdMsg
-            ? {
-                ...c,
-
-                msgPriv: [
-                  ...(c.msgPriv ?? []),
-                  {
-                    text: inputMsg,
-                    id: messageId,
-                    craetedAt: message.timestamp,
-                    fromId: socketRef.current?.userId,
-                    toId: privateIdMsg,
-                    type: "user",
-                  },
-                ],
-              }
-            : c,
-        ),
-      );
-    */}
+      //actualizacion de estados
       setInputMsg("");
     }
   };
@@ -303,16 +265,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       };
       socketRef.current?.send(JSON.stringify(message));
       setInputMsg("");
-{/*      setMessageFeed((prev) => [
-        ...prev,
-        {
-          messageId: messageId,
-          msg: inputMsg,
-          timestamp: message.timestamp,
-          type: "user",
-          fromId: socketRef.current?.userId,
-        },
-      ]);*/}
+      //actualizacion de estados
+
     }
   };
 

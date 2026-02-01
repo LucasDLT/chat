@@ -1,32 +1,27 @@
 "use client";
 import Image from "next/image";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppContextWs } from "@/context/context";
 import { Section_Edit_Form } from "../Forms/Edit";
 import { Logout_Button } from "@/app/components/Logout_Button";
-interface NabvarProps {
-  active: boolean;
-  setActive: React.Dispatch<React.SetStateAction<boolean>>;
-  activeMobile: boolean;
-  setActiveMobile: React.Dispatch<React.SetStateAction<boolean>>;
-  setActiveUser: React.Dispatch<React.SetStateAction<boolean>>;
-  setActiveFeed: React.Dispatch<React.SetStateAction<boolean>>;
-  socketRef: React.RefObject<WebSocket | null>;
-  activeFeed: boolean;
-  router: AppRouterInstance;
-}
-export const NavbarChat: React.FC<NabvarProps> = ({
-  active,
-  activeMobile,
-  setActive,
-  setActiveMobile,
-  setActiveFeed,
-  activeFeed,
-  socketRef,
-  router,
-  setActiveUser,
-}) => {
-  const { setMessageFeed, setMessageFeedPriv, setNickConected, setHasNickname, setPrivateIdMsg, setClientSelected } = useAppContextWs();
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export const NavbarChat = () => {
+  const router = useRouter();
+  const [active, setActive] = useState<boolean>(false);
+  const [activeMobile, setActiveMobile] = useState<boolean>(false);
+  const {
+    setMessageFeed,
+    setMessageFeedPriv,
+    setNickConected,
+    setHasNickname,
+    setPrivateIdMsg,
+    setClientSelected,
+    setActiveFeed,
+    activeFeed,
+    socketRef,
+    setActiveUser,
+  } = useAppContextWs();
   const handleToClose = () => {
     setMessageFeed([]);
     setMessageFeedPriv([]);
@@ -82,11 +77,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
             }`}
           />
 
-          {active && (
-            <Section_Edit_Form
-
-            />
-          )}
+          {active && <Section_Edit_Form />}
         </div>
         <div
           className={`flex justify-center items-center ${

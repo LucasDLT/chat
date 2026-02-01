@@ -1,5 +1,5 @@
 interface ButtonsSearchProps {
-  matches: string[];
+  matches: number[];
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
   activeIndex: number;
 }

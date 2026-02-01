@@ -9,7 +9,7 @@ interface InputMsgSearchProps {
 
   //props para los buttons
   activeIndex: number;
-  matches: string[];
+  matches: number[];
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 

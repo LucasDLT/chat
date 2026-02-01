@@ -6,43 +6,23 @@ import { MsgInFeed, PrivateMessage, PublicMessage } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem, MessageItemPrivate } from "@/app/components/msgItem";
 
-interface FeedProps {
-  activeFeed: boolean;
-  privateIdMsg: number | undefined;
-  messageFeed: PublicMessage[];
-  messageFeedPriv: PrivateMessage[];
-  clientSelected: string | undefined;
-  resMsgSearch: MsgInFeed[] | undefined;
-  socketRef: React.RefObject<WebSocket | null>;
 
-  //props para el inputsearchmsg
-  inputMsgSearch: string | undefined;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
 
-  //props para el filtrado WP
-  matches: string[];
-  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  activeIndex: number;
-  messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
-}
-
-export const FeedSection: React.FC<FeedProps> = ({
-  activeFeed,
-  privateIdMsg,
-  messageFeed,
-  messageFeedPriv,
-  clientSelected,
-  inputMsgSearch,
-  onChange,
-  handleSearchMsg,
-  matches,
-  setActiveIndex,
-  activeIndex,
-  messageRefs,
-  socketRef
-}) => {
-  const { searchMatches, activeMatchIndex } = useAppContextWs();
+export const FeedSection = () => {
+  const { activeFeed,
+privateIdMsg,
+messageFeed,
+messageFeedPriv,
+clientSelected,
+inputMsgSearch,
+onChangeSearchMsgFeed,
+handleSearchMsg,
+resMsgSearch,
+activeMatchIndex,
+searchMatches,
+setActiveMatchIndex,
+messageRefs,
+socketRef } = useAppContextWs();
   const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
   const refMessageInFeedPublic = useRef<HTMLDivElement | null>(null);
   const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
@@ -157,11 +137,11 @@ const privateMessages = messageFeedPriv;
     >
       <InputMsgSearch
         inputMsgSearch={inputMsgSearch}
-        onChange={onChange}
+        onChange={onChangeSearchMsgFeed}
         handleSearchMsg={handleSearchMsg}
-        activeIndex={activeIndex}
-        matches={matches}
-        setActiveIndex={setActiveIndex}
+        activeIndex={activeMatchIndex}
+        matches={searchMatches}
+        setActiveIndex={setActiveMatchIndex}
       />
 
       {privateIdMsg ? (
