@@ -12,19 +12,20 @@ import React, {
 import { cleanIntervals, startHeartbeat } from "@/helpers";
 import {
   ClientsConected,
-  MsgInFeed,
-  ProcessMsg,
   PublicMessage,
   PrivateMessage,
   SendMessage,
   ServerToClientMessage,
   User,
+  DispatchContext,
+  FeedMessage,
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { resolve_private_messages } from "@/helpers/private_msg";
 import { resolve_public_messages } from "@/helpers/public_msg";
 import { resolve_search_public_messages } from "@/helpers/search_public_msg";
 import { resolve_search_private_messages } from "@/helpers/search_private_msg";
+import { dispatcher_ws_event } from "@/helpers/ws_handles";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -131,6 +132,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const pendingNickRef = useRef<Record<string, string>>({});
 
+
+  //ESTADO PARA EL STORE DEL FEED UNIFICADO
+  const [feed, setFeed] = useState<FeedMessage[]>([])
+
+
+
   const resolveNick = (fromId?: number) => {
     if (!fromId) return undefined;
 
@@ -232,7 +239,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const messageId = nanoid();
     if (privateIdMsg && inputMsg) {
       const message: SendMessage = {
-        timestamp: Date.now(),
+        timestamp: new Date().toLocaleTimeString(),
         type: "chat.send",
         messageId: messageId,
         payload: {
@@ -255,7 +262,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const messageId = nanoid();
     if (inputMsg) {
       const message: SendMessage = {
-        timestamp: Date.now(),
+        timestamp: new Date().toLocaleTimeString(),
         type: "chat.send",
         messageId: messageId,
         payload: {
@@ -310,78 +317,28 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       });
       socketRef.current.addEventListener("message", async (event) => {
         const parse: ServerToClientMessage = JSON.parse(event.data);
-        // console.log("lo que llega del servidor antes de la funcion normalizadora", parse);
-        const handleProcesMsgToFeed = (
-          msg: ServerToClientMessage,
-          client: WebSocket,
-        ): Promise<ProcessMsg> => {
-          return new Promise((resolve, reject) => {
-            //este if cubre el registro donde el servidor me devuelve el id del cliente creado una vez que verifica que el messageId no esta duplicado
-            if (
-              msg.type === "ack" &&
-              msg.payload.status === "ok" &&
-              msg.payload.fromId
-            ) {
-              client.userId = msg.payload.fromId;
-              client.isAlive = true;
 
-              client.nickname = msg.payload.nickname;
-              console.log("nick del socket modificado", client.nickname);
-            }
-            //este en el caso del register que estoy probando captura el mensaje personalizado de que ingreso a la sala y si resuelve la promesa
-            if (msg.type === "system" && msg.payload.message) {
-              resolve({
-                systemMessage: {
-                  type: msg.type,
-                  timestamp: msg.timestamp,
-                  payload: { message: msg.payload.message },
-                },
-              });
-            }
-            //con este el mensaje publico
-            if (msg.type === "chat.public" && msg.payload.text) {
-              resolve({
-                message: {
-                  type: msg.type,
-                  text: msg.payload.text,
-                  messageId: msg.messageId,
-                  timestamp: msg.timestamp,
-                  fromId: msg.payload.fromId,
-                },
-              });
-            }
-            if (
-              msg.type === "chat.private" &&
-              msg.payload.text &&
-              msg.payload.toId
-            ) {
-              resolve({
-                message: {
-                  type: msg.type,
-                  text: msg.payload.text,
-                  toId: msg.payload.toId,
-                  fromId: msg.payload.fromId,
-                  messageId: msg.messageId,
-                  timestamp: msg.timestamp,
-                },
-              });
-            }
-            if (msg.type === "snapshot:clients" && msg.payload) {
-              const conectedNicks: ClientsConected[] = [];
-              for (const c of msg.payload) {
-                nickMapRef.current[c.userId] = c.nickname;
 
-                conectedNicks.push({
-                  userId: c.userId,
-                  nick: c.nickname,
-                });
-              }
-              resolve({ clients: conectedNicks });
-            }
-          });
-        };
 
+         const controller:DispatchContext={
+           addMessage:(parse)=>{
+            
+           },
+           addMessageSystem:(parse)=>{
+            
+           },
+           handleAck:(parse)=>{
+
+           },
+           setClients:(parse)=>{
+
+           }
+        }
         if (socketRef.current !== null) {
+
+        dispatcher_ws_event(parse, controller)
+
+
           let message = await handleProcesMsgToFeed(parse, socketRef.current);
           console.log("listado resuelto", message);
           //para el mensaje system hago el id y verifico que este el system

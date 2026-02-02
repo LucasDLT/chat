@@ -1,5 +1,5 @@
 "use client"
-import { MsgInFeed, PrivateMessage, PublicMessage } from "@/types/types";
+import {  PrivateMessage, PublicMessage } from "@/types/types";
 
 interface MessageItemProps {
   message: PublicMessage;

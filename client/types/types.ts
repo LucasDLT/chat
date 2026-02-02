@@ -1,11 +1,11 @@
 /********************************************************TIPADOS PARA EVENTOS DE SOCKETS***********************************************************/
 export interface BaseMessage {
-  timestamp: number;
+  timestamp: string;
 } 
 
 export interface ChatMessage extends BaseMessage {
   type: "chat.public" | "chat.private";
-  messageId: string;
+  messageId: number;
   payload: {
     fromId: number;
     toId?: number | undefined;
@@ -30,7 +30,6 @@ export interface ErrorMessage extends BaseMessage {
   };
 } 
 export interface SystemMessage extends BaseMessage {
-  timestamp: number;
   type: "system";
   payload: {
     message: string;
@@ -98,7 +97,7 @@ export interface ProcessMsg {
 export interface ClientsConected {
   messageIn?: boolean;
   totalMessageIn?: number;
-  msgPriv?: MsgInFeed[];
+  msgPriv?: FeedMessage[];
   userId: number;
   nick: string;
 }
@@ -121,17 +120,39 @@ export type ClientToServerMessage =
 
 /***************************************************TIPADO NORMALIZADOR DE MESSAGES PARA FEED******************************************************/
 
-export interface MsgInFeed {
-  fromId?: number;
-  msg: string;
-  messageId: string;
+type FeedScope = "public" | "private" | "system";
+
+export interface FeedMessage {
+  id: string | number;
+  scope: FeedScope;
+  kind: "user" | "system";
+
+  text: string;
   timestamp: number;
-  type: "user" | "system";
+
+  fromId?: number;
   fromNick?: string;
-  privateId?: number;
+  toId?: number;
 }
 
 
+
+export interface SystemFeedMessage {
+  id: string;
+  scope: "system";
+  timestamp: number;
+  message: string;
+}
+
+
+/***************************************************TIPADO PARA EL CONTROLLER DEL CTX*******************/
+
+export interface DispatchContext{
+    addMessage(message: FeedMessage): void,
+    addMessageSystem(message: FeedMessage): void,
+    setClients(message: ClientsConected[]): void,
+    handleAck(userId: number, nickname: string): void    
+}
 
 //**************************************************NUEVOS TIPADOS************************************************************/
 

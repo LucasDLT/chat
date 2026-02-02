@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { MsgInFeed, PrivateMessage, PublicMessage } from "@/types/types";
+import { PrivateMessage, PublicMessage } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem, MessageItemPrivate } from "@/app/components/msgItem";
 
