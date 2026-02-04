@@ -128,15 +128,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   //estado de user guardado en bdd.
   const [user, setUser] = useState<User | null>(null);
 
-  const nickMapRef = useRef<Record<string, string>>({});
+  const nickMapRef = useRef<Record<number, string>>({});
 
   const pendingNickRef = useRef<Record<string, string>>({});
 
-
   //ESTADO PARA EL STORE DEL FEED UNIFICADO
-  const [feed, setFeed] = useState<FeedMessage[]>([])
-
-
+  const [feed, setFeed] = useState<FeedMessage[]>([]);
 
   const resolveNick = (fromId?: number) => {
     if (!fromId) return undefined;
@@ -161,14 +158,17 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setClientSelected(nick);
       const id = Number(userId);
 
-      const messages:PrivateMessage[] = await resolve_private_messages(id, offset, limit);
+      const messages: PrivateMessage[] = await resolve_private_messages(
+        id,
+        offset,
+        limit,
+      );
       console.log(messages, "lo que llega al contexto");
-      
+
       //en este espacio hay que: recibir los mensajes tipados, despues actualizar los mensajes, despues actualizar el offset al numero actual duplicando el primero, y limpiar bien el estado que maneja la notificacion por que ahi teniamos un bug
 
-      setMessageFeedPriv( (prev)=> [...prev, ...messages])
+      setMessageFeedPriv((prev) => [...prev, ...messages]);
       console.log(messageFeedPriv, "estado lalala");
-      
 
       //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
       setNickConected((prev) =>
@@ -182,21 +182,25 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       console.log(err);
     }
   };
-  const handleSearchMsg = async (e: FormEvent<HTMLFormElement>) => {//busqueda de mensajes
+  const handleSearchMsg = async (e: FormEvent<HTMLFormElement>) => {
+    //busqueda de mensajes
     e.preventDefault();
 
     if (!inputMsgSearch) return;
 
     const query = inputMsgSearch.trim().toLowerCase();
-    
+
     if (clientSelected && privateIdMsg) {
       //aca deberia poner el helper para la busqueda de mensajes privados
-      const history_msg = await resolve_search_private_messages(query, privateIdMsg);
+      const history_msg = await resolve_search_private_messages(
+        query,
+        privateIdMsg,
+      );
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const res = messageFeedPriv
         .filter((m) => m.text.toLowerCase().includes(query))
         .map((m) => m.id);
-//NOTA IMPORTATE SOBRE SEARCH MATCHES, ANTES ERA STRING POR QUE LOS ID LO ERAN, PERO AHORA SON NUMERICOS AL VENIR DE LA BDD. 
+      //NOTA IMPORTATE SOBRE SEARCH MATCHES, ANTES ERA STRING POR QUE LOS ID LO ERAN, PERO AHORA SON NUMERICOS AL VENIR DE LA BDD.
       setSearchMatches(res);
       setActiveMatchIndex(0);
       console.log(res);
@@ -204,7 +208,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       //aca deberia poner el helper para la busqueda de mensajes publicos
       const history_msg = await resolve_search_public_messages(query);
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
-      setMessageFeed((prev)=>[...prev, ...history_msg])
+      setMessageFeed((prev) => [...prev, ...history_msg]);
       const res = messageFeed
         .filter((m) => m.text.toLowerCase().includes(query))
         .map((m) => m.id);
@@ -273,7 +277,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current?.send(JSON.stringify(message));
       setInputMsg("");
       //actualizacion de estados
-
     }
   };
 
@@ -289,7 +292,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const returnToGroup = async () => {
     const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
     console.log(public_msg);
-    setMessageFeed((prev)=>[...prev, ...public_msg])
+    setMessageFeed((prev) => [...prev, ...public_msg]);
 
     setPrivateIdMsg(undefined);
     setClientSelected("");
@@ -318,26 +321,31 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current.addEventListener("message", async (event) => {
         const parse: ServerToClientMessage = JSON.parse(event.data);
 
-
-
-         const controller:DispatchContext={
-           addMessage:(parse)=>{
-            
-           },
-           addMessageSystem:(parse)=>{
-            
-           },
-           handleAck:(parse)=>{
-
-           },
-           setClients:(parse)=>{
-
-           }
-        }
+        const controller: DispatchContext = {
+          addMessage: (parse) => {
+            setFeed((prev) => [...prev, parse]);
+            const fromNick = resolveNick(parse.fromId);
+          },
+          addMessageSystem: (parse) => {
+            if (parse.text.includes("ingresaste")) {
+              setHasNickname(true);
+            }
+            setFeed((prev) => [...prev, parse]);
+          },
+          handleAck: (parse, socket) => {
+            socket.isAlive = true;
+            socket.nickname = parse.payload.nickname;
+            socket.userId = parse.payload.fromId;
+          },
+          setClients: (parse) => {
+            for (const c of parse) {
+              nickMapRef.current[c.userId] = c.nick;
+            }
+            setNickConected(parse);
+          },
+        };
         if (socketRef.current !== null) {
-
-        dispatcher_ws_event(parse, controller)
-
+          dispatcher_ws_event(parse, controller, socketRef.current);
 
           let message = await handleProcesMsgToFeed(parse, socketRef.current);
           console.log("listado resuelto", message);
@@ -350,7 +358,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           ) {
             const { timestamp, payload } = message.systemMessage;
             const messageIdSystem = nanoid();
-//ACA HAY QUE ACTUALIZAR EL ESTADO LO BORRE APROPOSITO POR LA DIFERENCIA DE TIPOS LO QUE NOTE ES QUE EL MENSAJE QUE VIENE DESDE EL SOCKET SERVER, VIENE CON OTRAS PROPIEDADES, ASI QUE HAY QUE HACER UNA NORMALIZACION
+            //ACA HAY QUE ACTUALIZAR EL ESTADO LO BORRE APROPOSITO POR LA DIFERENCIA DE TIPOS LO QUE NOTE ES QUE EL MENSAJE QUE VIENE DESDE EL SOCKET SERVER, VIENE CON OTRAS PROPIEDADES, ASI QUE HAY QUE HACER UNA NORMALIZACION
 
             if (message.systemMessage?.payload.message.includes("ingresaste")) {
               setHasNickname(true);
@@ -367,7 +375,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
             const fromNick = resolveNick(fromId);
             console.log("mensaje con nick:", { fromId, fromNick });
 
-//ACA HAY QUE ACTUALIZAR EL ESTADO LO BORRE APROPOSITO POR LA DIFERENCIA DE TIPOS
+            //ACA HAY QUE ACTUALIZAR EL ESTADO LO BORRE APROPOSITO POR LA DIFERENCIA DE TIPOS
           }
 
           //datos para los chats privados
@@ -432,7 +440,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setMessageFeedPriv([]);
       return;
     }
-   //aca tengo que hacer una actualizacion del estado que guarda los estados de mensajes
+    //aca tengo que hacer una actualizacion del estado que guarda los estados de mensajes
   }, [nickConected, privateIdMsg]);
 
   const value = {

@@ -36,15 +36,6 @@ export interface SystemMessage extends BaseMessage {
   };
 } 
 
-{/*export interface ChangeNickname extends BaseMessage {
-  type: "changeNickname";
-  payload: {
-    messageId: string;
-    userId: number;
-    nickname: string;
-  };
-}*/}
-
 export interface PongServer extends BaseMessage {
   type: "pong.server";
 }
@@ -80,24 +71,8 @@ export interface userData {
   nickname: string;
   isAlive?: boolean;
 }
-export interface ProcessMsg {
-  message?: {
-    type: "chat.public" | "chat.private";
-    text: string;
-    toId?: number;
-    fromId?: number;
-    messageId: string;
-    timestamp: number;
-  };
-  clients?: ClientsConected[];
-  count?: number;
-  systemMessage?: SystemMessage;
-}
 
 export interface ClientsConected {
-  messageIn?: boolean;
-  totalMessageIn?: number;
-  msgPriv?: FeedMessage[];
   userId: number;
   nick: string;
 }
@@ -109,6 +84,7 @@ export type ServerToClientMessage =
   | AckMessage
   | PongServer
   | SnapshotClients;
+  
 
 export type ClientToServerMessage =
   //| Register
@@ -151,7 +127,7 @@ export interface DispatchContext{
     addMessage(message: FeedMessage): void,
     addMessageSystem(message: FeedMessage): void,
     setClients(message: ClientsConected[]): void,
-    handleAck(userId: number, nickname: string): void    
+    handleAck(message: AckMessage, socket: WebSocket ): void   
 }
 
 //**************************************************NUEVOS TIPADOS************************************************************/
@@ -220,3 +196,6 @@ interface PrivateUser {
   id: number;
   name: string;
 }
+
+/****************************TIPADO PARA EL STORE DEL USER*******************************/
+

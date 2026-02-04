@@ -6,22 +6,9 @@ import {
   FeedMessage,
   ServerToClientMessage,
   SnapshotClients,
-  SystemFeedMessage,
   SystemMessage,
 } from "@/types/types";
 
-export const handle_ack_init = (msg: AckMessage, socket: WebSocket) => {
-  if (msg.type !== "ack" || msg.payload.status === "error") {
-    throw new Error("error de verificacion");
-  }
-  if (msg.payload.status === "ok") {
-    socket.isAlive = true;
-    socket.nickname = msg.payload.nickname;
-    socket.userId = msg.payload.fromId;
-  }
-};
-
-//handle_ack_init: recibe msg y socket, representan el mensaje recibido por el socket y el cliente mismo. Luego de las verificaciones pertinentes para evitar filtrar errores a otra capa, se mutan las propiedades del socket para que el mismo ahora posea nick, id y su boolean en true. Por nuevo modelo ahora quitamos el map diretamente le sacamos esa responsabilidad al handle y dejamos solo el return del array
 
 export const handle_resolve_snapshot = (
   msg: SnapshotClients,
@@ -68,7 +55,7 @@ export const handle_normalize_system_msg=(msg:SystemMessage):FeedMessage=>{
 //handle_normalize_msg: recibe msg (informacion que llega desde el servidor) y se transforma en un objeto FeedMessage.
 
 
-export const dispatcher_ws_event =(msg:ServerToClientMessage, controller:DispatchContext)=>{
+export const  dispatcher_ws_event =(msg:ServerToClientMessage, controller:DispatchContext, socket:WebSocket)=>{
 switch (msg.type) {
     case "chat.public":
     case "chat.private":
@@ -78,11 +65,13 @@ switch (msg.type) {
         controller.addMessageSystem(handle_normalize_system_msg(msg));
         break;
     case "snapshot:clients":
-        controller.setClients(handle_resolve_snapshot(msg));
+        const clients = handle_resolve_snapshot(msg);
+        controller.setClients(clients);
         break;
     case "ack":
-        controller.handleAck(msg.payload.fromId!, msg.payload.nickname!);
+        controller.handleAck(msg, socket);
         break;
 }
+
 }
 
