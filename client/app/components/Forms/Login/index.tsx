@@ -2,9 +2,9 @@ import Image from "next/image";
 import { useAppContextWs } from "@/context/context";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Login, FormsErrors } from "@/types/types";
-import { resolve_login } from "@/helpers/login";
+import { resolve_login } from "@/helpers/forms/login";
 import { useRouter } from "next/navigation";
-import { catch_errors_login } from "@/helpers/errors";
+import { catch_errors_login } from "@/helpers/forms/errors";
 import { LoadingModal } from "../../LoadingModal";
 import { Login_UI } from "@/app/ui/Login";
 export const Login_Section = () => {

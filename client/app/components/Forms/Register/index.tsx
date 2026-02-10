@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { FormsErrors, Register } from "@/types/types";
-import { resolve_register } from "@/helpers/register";
+import { resolve_register } from "@/helpers/forms/register";
 import { useRouter } from "next/navigation";
 import { Register_UI } from "@/app/ui/Register";
-import { catch_errors_register } from "@/helpers/errors";
+import { catch_errors_register } from "@/helpers/forms/errors";
 import { LoadingModal } from "../../LoadingModal";
 export const Register_Section = () => {
   //estados

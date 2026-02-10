@@ -1,4 +1,4 @@
-import { resolve_logout } from "@/helpers/logout";
+import { resolve_logout } from "@/helpers/forms/logout";
 import { useAppContextWs } from "@/context/context";
 import { useRouter } from "next/navigation";
 

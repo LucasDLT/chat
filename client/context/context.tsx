@@ -9,7 +9,7 @@ import React, {
   FormEvent,
   ChangeEvent,
 } from "react";
-import { cleanIntervals, startHeartbeat } from "@/helpers";
+import { cleanIntervals, startHeartbeat } from "@/helpers/sockets_fn";
 import {
   ClientsConected,
   PublicMessage,
@@ -19,13 +19,16 @@ import {
   User,
   DispatchContext,
   FeedMessage,
+  AppStore,
+  INITIAL_STATE,
 } from "@/types/types";
 import { nanoid } from "nanoid";
-import { resolve_private_messages } from "@/helpers/private_msg";
-import { resolve_public_messages } from "@/helpers/public_msg";
-import { resolve_search_public_messages } from "@/helpers/search_public_msg";
-import { resolve_search_private_messages } from "@/helpers/search_private_msg";
-import { dispatcher_ws_event } from "@/helpers/ws_handles";
+import { resolve_private_messages } from "@/helpers/messages/private_msg";
+import { resolve_public_messages } from "@/helpers/messages/public_msg";
+import { resolve_search_public_messages } from "@/helpers/messages/search_public_msg";
+import { resolve_search_private_messages } from "@/helpers/messages/search_private_msg";
+import { dispatcher_ws_event } from "@/helpers/sockets_fn/ws_handles";
+import { uptadeInboxUser } from "@/helpers/app_store/app_store_actions";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -134,6 +137,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   //ESTADO PARA EL STORE DEL FEED UNIFICADO
   const [feed, setFeed] = useState<FeedMessage[]>([]);
+  //ESTADO PARA EL APPSTORE
+  const [appStore, setAppStore] = useState<AppStore>(INITIAL_STATE);
 
   const resolveNick = (fromId?: number) => {
     if (!fromId) return undefined;
@@ -321,8 +326,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current.addEventListener("message", async (event) => {
         const parse: ServerToClientMessage = JSON.parse(event.data);
 
+        //CONTROLLER DE SETTERS
         const controller: DispatchContext = {
-          addMessage: (parse) => {
+          addMessage: (parse) => { 
+            uptadeInboxUser(setAppStore, parse);
             setFeed((prev) => [...prev, parse]);
             const fromNick = resolveNick(parse.fromId);
           },
@@ -408,7 +415,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
               ),
             );
           }
-
+//PARA MODIFICAR ESTO DE ACA ABAJO TENGO QUE TOCAR EL APP STORE Y BORRAMOS LOS ESTADOS Y SETTERS
           //datos para el feed de clientes conectados
           if (Array.isArray(message.clients)) {
             const nicks = message.clients;

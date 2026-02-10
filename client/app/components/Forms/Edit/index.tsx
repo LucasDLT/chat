@@ -1,6 +1,6 @@
 import { Form_Edit_UI } from "@/app/ui/Edit";
 import { useAppContextWs } from "@/context/context";
-import { resolve_edit } from "@/helpers/edit";
+import { resolve_edit } from "@/helpers/forms/edit";
 import { ChangeEvent, FormEvent, useState } from "react";
 export const Section_Edit_Form = () => {
   const { user, setUser } = useAppContextWs();
