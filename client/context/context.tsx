@@ -8,6 +8,7 @@ import React, {
   useContext,
   FormEvent,
   ChangeEvent,
+  useMemo,
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers/sockets_fn";
 import {
@@ -18,7 +19,6 @@ import {
   ServerToClientMessage,
   User,
   DispatchContext,
-  FeedMessage,
   AppStore,
   INITIAL_STATE,
 } from "@/types/types";
@@ -28,7 +28,12 @@ import { resolve_public_messages } from "@/helpers/messages/public_msg";
 import { resolve_search_public_messages } from "@/helpers/messages/search_public_msg";
 import { resolve_search_private_messages } from "@/helpers/messages/search_private_msg";
 import { dispatcher_ws_event } from "@/helpers/sockets_fn/ws_handles";
-import { uptadeInboxUser } from "@/helpers/app_store/app_store_actions";
+import {
+  updateDataSnapshot,
+  updateDataUser,
+  uptadeInboxSystem,
+  uptadeInboxUser,
+} from "@/helpers/app_store/app_store_actions";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
@@ -63,8 +68,8 @@ interface IcontextProps {
   setInputMsgSearch: React.Dispatch<React.SetStateAction<string | undefined>>;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
   onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
-  resMsgSearch: MsgInFeed[];
-  setResMsgSearch: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
+  // resMsgSearch: MsgInFeed[];
+  //setResMsgSearch: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
   searchMatches: number[];
   setSearchMatches: React.Dispatch<React.SetStateAction<number[]>>;
   activeMatchIndex: number;
@@ -117,7 +122,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [inputMsgSearch, setInputMsgSearch] = useState<string | undefined>(
     undefined,
   );
-  const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
+  //const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
   const [inputSearch, setInputSearch] = useState<string>("");
 
   //estado para el filtrado tipo wp
@@ -133,25 +138,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   const nickMapRef = useRef<Record<number, string>>({});
 
-  const pendingNickRef = useRef<Record<string, string>>({});
-
-  //ESTADO PARA EL STORE DEL FEED UNIFICADO
-  const [feed, setFeed] = useState<FeedMessage[]>([]);
   //ESTADO PARA EL APPSTORE
   const [appStore, setAppStore] = useState<AppStore>(INITIAL_STATE);
 
-  const resolveNick = (fromId?: number) => {
-    if (!fromId) return undefined;
-
-    if (fromId === socketRef.current?.userId) {
-      return socketRef.current?.nickname;
-    }
-
-    return nickMapRef.current[fromId];
-  };
 
   const [offset, setOffset] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(20);
+  const [limit, setLimit] = useState<number>(20); //acordate que esto lo tenes que sacar del appstore
 
   //toda esta funcion es para lo privado al seleccionar un usuario del directorio
   const handleSelectClient = async (userId: number, nick: string) => {
@@ -291,7 +283,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   };
 
   const [limitPublic, setLimitPublic] = useState<number>(20);
-  const [offsetPublic, setOffsetPublic] = useState<number>(0);
+  const [offsetPublic, setOffsetPublic] = useState<number>(0); //acordate que esto tambien vive dentro del appstore por eso tener que borrar este estado luego
 
   //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
   const returnToGroup = async () => {
@@ -307,12 +299,38 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     //    setResSearch([]);
   };
 
+  //CONTROLLER DE SETTERS
+  const controller = useMemo<DispatchContext>(
+    () => ({
+      addMessage: (parse) => {
+        uptadeInboxUser(setAppStore, parse);
+      },
+      addMessageSystem: (parse) => {
+        if (parse.text.includes("ingresaste")) {
+          setHasNickname(true);
+        }
+        uptadeInboxSystem(parse, setAppStore);
+      },
+      handleAck: (parse, socket) => {
+        socket.isAlive = true;
+        socket.nickname = parse.payload.nickname;
+        socket.userId = parse.payload.id;
+        updateDataUser(parse, setAppStore);
+      },
+      setClients: (parse) => {
+        for (const c of parse) {
+          nickMapRef.current[c.userId] = c.nick;
+        }
+        updateDataSnapshot(parse, setAppStore);
+      },
+    }),
+    [],
+  );
   //useeffect para el inicio del socket y estructura de la informacion
 
   useEffect(() => {
     if (user === null) {
       console.log("intento para ver por que no sale", user);
-
       return;
     }
 
@@ -326,103 +344,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current.addEventListener("message", async (event) => {
         const parse: ServerToClientMessage = JSON.parse(event.data);
 
-        //CONTROLLER DE SETTERS
-        const controller: DispatchContext = {
-          addMessage: (parse) => { 
-            uptadeInboxUser(setAppStore, parse);
-            setFeed((prev) => [...prev, parse]);
-            const fromNick = resolveNick(parse.fromId);
-          },
-          addMessageSystem: (parse) => {
-            if (parse.text.includes("ingresaste")) {
-              setHasNickname(true);
-            }
-            setFeed((prev) => [...prev, parse]);
-          },
-          handleAck: (parse, socket) => {
-            socket.isAlive = true;
-            socket.nickname = parse.payload.nickname;
-            socket.userId = parse.payload.fromId;
-          },
-          setClients: (parse) => {
-            for (const c of parse) {
-              nickMapRef.current[c.userId] = c.nick;
-            }
-            setNickConected(parse);
-          },
-        };
         if (socketRef.current !== null) {
           dispatcher_ws_event(parse, controller, socketRef.current);
-
-          let message = await handleProcesMsgToFeed(parse, socketRef.current);
-          console.log("listado resuelto", message);
-          //para el mensaje system hago el id y verifico que este el system
-
-          if (
-            message?.systemMessage !== undefined &&
-            message?.systemMessage?.type === "system" &&
-            message?.systemMessage?.payload !== undefined
-          ) {
-            const { timestamp, payload } = message.systemMessage;
-            const messageIdSystem = nanoid();
-            //ACA HAY QUE ACTUALIZAR EL ESTADO LO BORRE APROPOSITO POR LA DIFERENCIA DE TIPOS LO QUE NOTE ES QUE EL MENSAJE QUE VIENE DESDE EL SOCKET SERVER, VIENE CON OTRAS PROPIEDADES, ASI QUE HAY QUE HACER UNA NORMALIZACION
-
-            if (message.systemMessage?.payload.message.includes("ingresaste")) {
-              setHasNickname(true);
-            }
-          }
-
-          //datos para el feed de mensajes
-          if (
-            message.message?.type === "chat.public" &&
-            typeof message.message.text === "string"
-          ) {
-            const { text, messageId, timestamp, fromId } = message.message;
-
-            const fromNick = resolveNick(fromId);
-            console.log("mensaje con nick:", { fromId, fromNick });
-
-            //ACA HAY QUE ACTUALIZAR EL ESTADO LO BORRE APROPOSITO POR LA DIFERENCIA DE TIPOS
-          }
-
-          //datos para los chats privados
-          if (
-            message.message?.type === "chat.private" &&
-            message.message?.toId
-          ) {
-            const { text, messageId, timestamp, fromId } = message.message;
-
-            setNickConected((prev) =>
-              prev.map((c) =>
-                c.userId === fromId
-                  ? {
-                      ...c,
-                      messageIn: true,
-                      totalMessageIn: (c.totalMessageIn ?? 0) + 1,
-                      msgPriv: [
-                        ...(c.msgPriv ?? []),
-                        {
-                          msg: text,
-                          messageId: messageId,
-                          timestamp: timestamp,
-                          fromId: fromId,
-                          type: "user",
-                          privateId: fromId,
-                        },
-                      ],
-                    }
-                  : c,
-              ),
-            );
-          }
-//PARA MODIFICAR ESTO DE ACA ABAJO TENGO QUE TOCAR EL APP STORE Y BORRAMOS LOS ESTADOS Y SETTERS
-          //datos para el feed de clientes conectados
-          if (Array.isArray(message.clients)) {
-            const nicks = message.clients;
-            setNickConected(nicks);
-            //datos para el contador y nicks conectados
-            setConectedCount(nicks.length);
-          }
         }
       });
       socketRef.current.addEventListener("close", (event) => {
@@ -433,13 +356,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         console.log("Error connecting to server");
       });
     } catch (error) {
-      console.log(`error capturado en catch del useeffect inicial: ${error}`);
+      console.log(`error al iniciar el socket: ${error}`);
     }
 
     return () => {
       socketRef.current?.close();
     };
-  }, [user]);
+  }, [user, controller]);
 
   //este lo hago de prueba para el feed privado
   useEffect(() => {
@@ -481,8 +404,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     inputMsgSearch,
     setInputMsgSearch,
     handleSearchMsg,
-    setResMsgSearch,
-    resMsgSearch,
+    // setResMsgSearch,
+    // resMsgSearch,
     onChangeSearchMsgFeed,
     setSearchMatches,
     searchMatches,

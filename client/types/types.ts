@@ -79,7 +79,7 @@ export type ServerToClientMessage =
   | ChatMessage
   | ErrorMessage
   | SystemMessage
-  | AckMessage
+  | AckHandshake
   | PongServer
   | SnapshotClients;
 
@@ -119,9 +119,17 @@ export interface DispatchContext {
   addMessage(message: FeedMessage): void;
   addMessageSystem(message: FeedMessage): void;
   setClients(message: ClientsConected[]): void;
-  handleAck(message: AckMessage, socket: WebSocket): void;
+  handleAck(message: AckHandshake, socket: WebSocket): void;
 }
 
+export interface AckHandshake extends BaseMessage{
+    type:"ack.handshake";
+    payload:{
+        status:"ok" | "error",
+        id:number,
+        nickname:string
+    }
+}
 //**************************************************NUEVOS TIPADOS************************************************************/
 
 //TIPADOS PARA FORMULARIOS REFACTORIZADOS
