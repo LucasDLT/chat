@@ -10,6 +10,7 @@ import type {
   PongServer,
   SnapshotClients,
   ServerToClientMessage,
+  AckHandshake
 } from "./types/message.t.js";
 import { isSendMessage } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
@@ -111,16 +112,15 @@ export const websocketSetup = (server: Server) => {
     const userData: userData = {
       userId: ws.userId as number,
       isAlive: ws.isAlive,
-      nickname: ws.nickname ?? null,
+      nickname: ws.nickname,
     };
-    const msgAckOk: AckMessage = {
-      type: "ack",
-      correlationId: "login",
+    const msgAckOk: AckHandshake = {
       timestamp: new Date(),
+      type: "ack.handshake",
       payload: {
         status: "ok",
-        fromId: ws.userId,
-        nickname: ws.nickname ?? null,
+        id: userData.userId,
+        nickname: userData.nickname,
       },
     };
     //prueba para login
