@@ -3,6 +3,8 @@ import {
   ClientsConected,
   DispatchContext,
   FeedMessage,
+  PrivateMessage,
+  PublicMessage,
   ServerToClientMessage,
   SnapshotClients,
   SystemMessage,
@@ -73,5 +75,32 @@ export const dispatcher_ws_event = (
       controller.handleAck(msg, socket);
       break;
   }
+};
+
+//handles para normalizacion de mensajes entrantes desde la BDD
+
+export const normalize_msg_private= (msg: PrivateMessage[]): FeedMessage[] => {
+  return msg.map(c=>({
+    id:c.id,
+    kind:"user",
+    scope:"private",
+    text:c.text,
+    timestamp:c.craetedAt.getTime(),
+    fromId:c.sender.id,
+    fromNick:c.sender.name,
+    toId:c.receiver?.id
+    }))  
+};
+
+export const normalize_msg_public= (msg: PublicMessage[]): FeedMessage[] => {
+  return msg.map(c=>({
+    id:c.id,
+    kind:"user",
+    scope:"public",
+    text:c.text,
+    timestamp:c.craetedAt.getTime(),
+    fromId:c.sender.id,
+    fromNick:c.sender.name,
+    }))  
 };
 

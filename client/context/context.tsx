@@ -27,27 +27,25 @@ import { resolve_private_messages } from "@/helpers/messages/private_msg";
 import { resolve_public_messages } from "@/helpers/messages/public_msg";
 import { resolve_search_public_messages } from "@/helpers/messages/search_public_msg";
 import { resolve_search_private_messages } from "@/helpers/messages/search_private_msg";
-import { dispatcher_ws_event } from "@/helpers/sockets_fn/ws_handles";
+import {
+  dispatcher_ws_event,
+  normalize_msg_private,
+  normalize_msg_public
+} from "@/helpers/sockets_fn/ws_handles";
 import {
   updateDataSnapshot,
   updateDataUser,
   uptadeInboxSystem,
   uptadeInboxUser,
+  handleUpdatePrivateData,
 } from "@/helpers/app_store/app_store_actions";
 
 interface IcontextProps {
   //interface para las variables, setters o handlers que pase por contexto a la app
   socketRef: React.RefObject<WebSocket | null>;
-  setMessageFeed: React.Dispatch<React.SetStateAction<PublicMessage[]>>;
-  messageFeed: PublicMessage[];
   hasNickname: boolean;
   setHasNickname: React.Dispatch<React.SetStateAction<boolean>>;
-  nickConected: ClientsConected[];
-  setNickConected: React.Dispatch<React.SetStateAction<ClientsConected[]>>;
-  messageFeedPriv: PrivateMessage[];
-  setMessageFeedPriv: React.Dispatch<React.SetStateAction<PrivateMessage[]>>;
-  conectedCount: number;
-  setConectedCount: React.Dispatch<React.SetStateAction<number>>;
+
   privateIdMsg: number | undefined;
   setPrivateIdMsg: React.Dispatch<React.SetStateAction<number | undefined>>;
   clientSelected: string | undefined;
@@ -68,8 +66,6 @@ interface IcontextProps {
   setInputMsgSearch: React.Dispatch<React.SetStateAction<string | undefined>>;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
   onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
-  // resMsgSearch: MsgInFeed[];
-  //setResMsgSearch: React.Dispatch<React.SetStateAction<MsgInFeed[]>>;
   searchMatches: number[];
   setSearchMatches: React.Dispatch<React.SetStateAction<number[]>>;
   activeMatchIndex: number;
@@ -104,11 +100,8 @@ export function useAppContextWs(): IcontextProps {
 export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
-  const [messageFeed, setMessageFeed] = useState<PublicMessage[]>([]);
-  const [messageFeedPriv, setMessageFeedPriv] = useState<PrivateMessage[]>([]);
+
   const [hasNickname, setHasNickname] = useState<boolean>(false);
-  const [nickConected, setNickConected] = useState<ClientsConected[]>([]);
-  const [conectedCount, setConectedCount] = useState<number>(0);
   const [privateIdMsg, setPrivateIdMsg] = useState<number | undefined>(
     undefined,
   );
@@ -141,10 +134,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   //ESTADO PARA EL APPSTORE
   const [appStore, setAppStore] = useState<AppStore>(INITIAL_STATE);
 
-
-  const [offset, setOffset] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(20); //acordate que esto lo tenes que sacar del appstore
-
   //toda esta funcion es para lo privado al seleccionar un usuario del directorio
   const handleSelectClient = async (userId: number, nick: string) => {
     try {
@@ -154,26 +143,15 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setPrivateIdMsg(userId);
       setClientSelected(nick);
       const id = Number(userId);
+      const offset = appStore.store.remote.offset;
+      const limit = appStore.store.remote.limit;
 
-      const messages: PrivateMessage[] = await resolve_private_messages(
-        id,
-        offset,
-        limit,
-      );
-      console.log(messages, "lo que llega al contexto");
+      const messages = await resolve_private_messages(id, offset, limit);
+      const normalized_msg = normalize_msg_private(messages);
 
-      //en este espacio hay que: recibir los mensajes tipados, despues actualizar los mensajes, despues actualizar el offset al numero actual duplicando el primero, y limpiar bien el estado que maneja la notificacion por que ahi teniamos un bug
-
-      setMessageFeedPriv((prev) => [...prev, ...messages]);
-      console.log(messageFeedPriv, "estado lalala");
-
-      //aca en realidad lo que hacemos es: dentro del setter, mapear el estado solo para volver a 0 todas sus propiedades, por que estas sirven para que la lista de usuarios muestre si tiene mensajes sin leer, tras ingresar una vez estas se resetean y no vuelven a mostrar nada, hasta recibir mensajes nuevamente
-      setNickConected((prev) =>
-        prev.map((c) =>
-          c.userId === userId
-            ? { ...c, messageIn: false, totalMessageIn: 0 }
-            : c,
-        ),
+      //reset de metadata en inbox privados, update de offset, order, byId y hasmore
+      setAppStore((prev) =>
+        handleUpdatePrivateData(normalized_msg, prev, userId),
       );
     } catch (err) {
       console.log(err);
@@ -194,21 +172,57 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         privateIdMsg,
       );
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
-      const res = messageFeedPriv
+      const normalized_msg = normalize_msg_private(history_msg);
+      setAppStore((prev) => {
+        const new_data = { ...prev.store.local.searchBufferPrivate };
+        normalized_msg.forEach((msg) => {
+          new_data[msg.id] = msg;
+        });
+        return {
+          ...prev,
+          store: {
+            ...prev.store,
+            local: {
+              ...prev.store.local,
+              searchBufferPrivate: new_data,
+            },
+          }, 
+        };
+      });
+      //const messageFeedPriv = Object.values(appStore.store.byId);
+      const res = normalized_msg
         .filter((m) => m.text.toLowerCase().includes(query))
-        .map((m) => m.id);
-      //NOTA IMPORTATE SOBRE SEARCH MATCHES, ANTES ERA STRING POR QUE LOS ID LO ERAN, PERO AHORA SON NUMERICOS AL VENIR DE LA BDD.
+        .map((m) => Number(m.id));
       setSearchMatches(res);
       setActiveMatchIndex(0);
       console.log(res);
-    } else if (messageFeed) {
+    } else {
       //aca deberia poner el helper para la busqueda de mensajes publicos
       const history_msg = await resolve_search_public_messages(query);
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
-      setMessageFeed((prev) => [...prev, ...history_msg]);
-      const res = messageFeed
+      const normalized_msg = normalize_msg_public(history_msg);
+
+      setAppStore((prev) => {
+        const new_data = { ...prev.store.local.searchBufferPublic };
+        normalized_msg.forEach((msg) => {
+          new_data[msg.id] = msg;
+        });
+        return {
+          ...prev,
+          store: {
+            ...prev.store,
+            local: {
+              ...prev.store.local,
+              searchBufferPublic: new_data,
+            },
+          }, 
+        };
+      })      
+
+      //const messageFeed = Object.values(appStore.store.byId);
+      const res = normalized_msg
         .filter((m) => m.text.toLowerCase().includes(query))
-        .map((m) => m.id);
+        .map((m) => Number(m.id));
 
       setSearchMatches(res);
       setActiveMatchIndex(0);
@@ -282,14 +296,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputMsg(data.value);
   };
 
-  const [limitPublic, setLimitPublic] = useState<number>(20);
-  const [offsetPublic, setOffsetPublic] = useState<number>(0); //acordate que esto tambien vive dentro del appstore por eso tener que borrar este estado luego
-
   //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
   const returnToGroup = async () => {
+    const offsetPublic = appStore.store.view.offset;
+    const limitPublic = appStore.store.view.limit;
     const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
     console.log(public_msg);
-    setMessageFeed((prev) => [...prev, ...public_msg]);
+    //  setMessageFeed((prev) => [...prev, ...public_msg]); esto ahora vive en el appstore
 
     setPrivateIdMsg(undefined);
     setClientSelected("");
@@ -364,27 +377,21 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     };
   }, [user, controller]);
 
-  //este lo hago de prueba para el feed privado
-  useEffect(() => {
+  //QUEDA COMENTADO HASTA SER NECESARIO.
+  {
+    /*useEffect(() => {
     if (!privateIdMsg) {
-      setMessageFeedPriv([]);
+      setMessageFeedPriv([]); esto ahora se deriva del appstore
       return;
     }
     //aca tengo que hacer una actualizacion del estado que guarda los estados de mensajes
-  }, [nickConected, privateIdMsg]);
+  }, [appStore.clients, privateIdMsg]);*/
+  }
 
   const value = {
     socketRef,
-    messageFeed,
-    setMessageFeed,
     hasNickname,
     setHasNickname,
-    nickConected,
-    setNickConected,
-    messageFeedPriv,
-    setMessageFeedPriv,
-    conectedCount,
-    setConectedCount,
     privateIdMsg,
     setPrivateIdMsg,
     clientSelected,
@@ -404,8 +411,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     inputMsgSearch,
     setInputMsgSearch,
     handleSearchMsg,
-    // setResMsgSearch,
-    // resMsgSearch,
     onChangeSearchMsgFeed,
     setSearchMatches,
     searchMatches,

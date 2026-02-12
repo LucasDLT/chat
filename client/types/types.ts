@@ -207,8 +207,12 @@ interface MessagesStore {
     limit: number;
     currentMsgId?: string;
   };
+  local: {
+    searchBufferPrivate:Record<string, FeedMessage>
+    searchBufferPublic: Record<string, FeedMessage>;//aca vamos a guardar los mensajes entrantes de cada busqueda y sus coincidencias, ese caudal gigante queda aca, y desde aca lo consumimos utilizando el offset y limit local de la vista, cuando encontremos el mensaje que buscamos actualizamos todo para sincronia y el buffer se elimina quedando el feed como lo queriamos y hasta el mensaje hallado
+  }
   remote: {
-    //control de busqueda en bdd
+    //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras
     offset: number;
     limit: number;
     hasMore: boolean;
@@ -255,6 +259,10 @@ export const INITIAL_STATE: AppStore = {
       limit: 30,
       hasMore: true,
       loading: false,
+    },
+    local: {
+      searchBufferPublic: {},
+      searchBufferPrivate:{}
     },
   },
   inboxMeta: {},

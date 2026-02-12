@@ -1,4 +1,9 @@
-import { AckHandshake, AppStore, ClientsConected, FeedMessage } from "@/types/types";
+import {
+  AckHandshake,
+  AppStore,
+  ClientsConected,
+  FeedMessage,
+} from "@/types/types";
 
 //tipado del setter del estado que actualiza el appstore, cuando exportemos la funcion al contexto, ponemos en este espacio el setter y nos ahorramos poner la funcion entera alla
 type AppStoreSetter = React.Dispatch<React.SetStateAction<AppStore>>;
@@ -60,9 +65,9 @@ export const uptadeInboxSystem = (msg: FeedMessage, setter: AppStoreSetter) => {
           ...prev.store.byId,
           [msg.id]: msg,
         },
-        order: {
-          ...prev.store.order,
-        },
+        order: exists_order
+          ? prev.store.order
+          : [...prev.store.order, id_order],
       },
     };
   });
@@ -70,7 +75,7 @@ export const uptadeInboxSystem = (msg: FeedMessage, setter: AppStoreSetter) => {
 
 export const updateDataUser = (msg: AckHandshake, setter: AppStoreSetter) => {
   setter((prev) => ({
- ...prev,
+    ...prev,
     userData: {
       isAlive: true,
       nickname: msg.payload.nickname,
@@ -79,11 +84,59 @@ export const updateDataUser = (msg: AckHandshake, setter: AppStoreSetter) => {
   }));
 };
 
-export const updateDataSnapshot = (msg: ClientsConected[], setter: AppStoreSetter) => {
+export const updateDataSnapshot = (
+  msg: ClientsConected[],
+  setter: AppStoreSetter,
+) => {
   setter((prev) => {
     return {
       ...prev,
       clients: msg,
+    };
+  });
+};
+
+//HANDLE PARA INTEGRAR DENTRO DEL HANDLESELECTCLIENT
+
+export const handleUpdatePrivateData = (
+  normalized_msg: FeedMessage[],
+  prev: AppStore,
+  userId: number,
+): AppStore => {
+  const newById = { ...prev.store.byId };
+  const newOrder = [...prev.store.order];
+
+  const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
+
+  const newOffset = normalized_msg.length + prev.store.remote.offset;
+
+  normalized_msg.forEach((msg) => {
+    newById[msg.id] = msg;
+
+    if (!newOrder.includes(msg.id.toString())) {
+      newOrder.push(msg.id.toString());
     }
-  })
-}
+  });
+
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      byId: newById,
+      order: newOrder,
+      remote: {
+        ...prev.store.remote,
+        offset: newOffset,
+        hasMore: newHasMore,
+      },
+    },
+    inboxMeta: {
+      ...prev.inboxMeta,
+      [userId]: {
+        hasNewMessages: false,
+        unreadCount: 0,
+        lastMessageTimestamp: 0,
+      },
+    },
+  };
+};
