@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { PrivateMessage, PublicMessage } from "@/types/types";
+import { SystemFeedMessage } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem, MessageItemPrivate } from "@/app/components/msgItem";
 
@@ -110,7 +110,10 @@ socketRef } = useAppContextWs();
     setIsNearBottom(nearBottom); //paso el valor contrario por que si el valor es true, si esta abajo el boton no tiene que mostrarse, y si el valor es false, no esta abajo, se tiene que mostrar, y como el estado inicia el false para no ser visible, la logica debe ser al reves. Dejo esta nota por que me consto entener la vuelta
   };
 
-  //funcion para scrollear al final
+  //funcion para scrollear al final, primero se verifica que referencia de feed esta activa usando container viendo si privateIdMsg es true o false, esto determina si es el feed publico o privado.
+  //si container es null, no pasa nada y se retorna.
+  //si container es valido, se llama a la funcion scrollTo, que tiene 2 argumentos, el top es el final del scroll, y el behavior es para que sea suave.
+  //setUnreadCount(0) es para resetear el contador de mensajes no leidos
   const handleGoToBottom = () => {
     const container = privateIdMsg
       ? refMessageInFeedPrivate.current
@@ -180,7 +183,7 @@ const privateMessages = messageFeedPriv;
             })}
           </div>
           {unreadCount > 0 && !isNearBottom && (
-            <button
+            <button 
               onClick={handleGoToBottom}
               className="absolute animate-pulse -right-3.5 xl:-right-2 -bottom-4 xl:bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
             >

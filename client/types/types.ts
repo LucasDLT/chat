@@ -122,13 +122,13 @@ export interface DispatchContext {
   handleAck(message: AckHandshake, socket: WebSocket): void;
 }
 
-export interface AckHandshake extends BaseMessage{
-    type:"ack.handshake";
-    payload:{
-        status:"ok" | "error",
-        id:number,
-        nickname:string
-    }
+export interface AckHandshake extends BaseMessage {
+  type: "ack.handshake";
+  payload: {
+    status: "ok" | "error";
+    id: number;
+    nickname: string;
+  };
 }
 //**************************************************NUEVOS TIPADOS************************************************************/
 
@@ -197,30 +197,43 @@ interface PrivateUser {
 }
 
 /****************************TIPADO PARA EL STORE DEL USER*******************************/
-
-interface MessagesStore {
+type feedMode = "local" | "remote";
+type activeFeed = "public" | "private";
+interface Conversation {
   byId: Record<string, FeedMessage>; //estructura record para mensajes se convierte en array antes del render
   order: string[]; //aca vamos almacenar los ids entrantes previo dedupe
-  view: {
-    //control de busqueda local de mensajes en store
-    offset: number;
-    limit: number;
-    currentMsgId?: string;
-  };
-  local: {
-    searchBufferPrivate:Record<string, FeedMessage>
-    searchBufferPublic: Record<string, FeedMessage>;//aca vamos a guardar los mensajes entrantes de cada busqueda y sus coincidencias, ese caudal gigante queda aca, y desde aca lo consumimos utilizando el offset y limit local de la vista, cuando encontremos el mensaje que buscamos actualizamos todo para sincronia y el buffer se elimina quedando el feed como lo queriamos y hasta el mensaje hallado
-  }
+  //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras
+  searchBuffer: Record<string, FeedMessage>; //aca vamos a guardar los mensajes entrantes de cada busqueda y sus coincidencias, ese caudal gigante queda aca, y desde aca lo consumimos utilizando el offset y limit local de la vista, cuando encontremos el mensaje que buscamos actualizamos todo para sincronia y el buffer se elimina quedando el feed como lo queriamos y hasta el mensaje hallado
+
   remote: {
-    //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras
     offset: number;
-    limit: number;
     hasMore: boolean;
     loading: boolean;
   };
 }
+interface MessagesStore {
+  //tipado para el feed de mensajes publicos y privados
+  feed: {
+    mode: feedMode;
+    active: activeFeed;
+    private: Record<string, Conversation>;
+    public: Conversation;
+  };
+  remote: {
+    limit: number;
+  };
+  //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras
+  local: {
+    matches: string[];
+    activeIndex: number;
+    offset: number;
+    limit: number;
+    currentMsgId?: string;
+  };
+}
 
 interface UserInboxMeta {
+  //nickname: string;
   unreadCount: number;
   hasNewMessages: boolean;
   lastMessageTimestamp?: number;
@@ -248,22 +261,32 @@ export const INITIAL_STATE: AppStore = {
     isAlive: false,
   },
   store: {
-    byId: {},
-    order: [],
-    view: {
-      offset: 0,
-      limit: 30,
+    feed: {
+      mode: "local",
+      active: "public",
+      private: {},
+      public: {
+        byId: {},
+        order: [],
+        searchBuffer: {},
+        remote: {
+          offset: 0,
+          hasMore: false,
+          loading: false,
+        }
+      },
     },
     remote: {
-      offset: 0,
       limit: 30,
-      hasMore: true,
-      loading: false,
+
     },
     local: {
-      searchBufferPublic: {},
-      searchBufferPrivate:{}
+      matches: [],
+      activeIndex: 0,
+      offset: 0,
+      limit: 30,
     },
+
   },
   inboxMeta: {},
   publicMeta: {

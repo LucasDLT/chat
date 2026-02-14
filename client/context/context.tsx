@@ -30,14 +30,18 @@ import { resolve_search_private_messages } from "@/helpers/messages/search_priva
 import {
   dispatcher_ws_event,
   normalize_msg_private,
-  normalize_msg_public
+  normalize_msg_public,
 } from "@/helpers/sockets_fn/ws_handles";
 import {
   updateDataSnapshot,
   updateDataUser,
   uptadeInboxSystem,
   uptadeInboxUser,
+  
   handleUpdatePrivateData,
+  handleUpdateSearchMsgPriv,
+  handleUpdateSearchMsgPublic,
+  handleConsiderNewFeed,
 } from "@/helpers/app_store/app_store_actions";
 
 interface IcontextProps {
@@ -66,10 +70,7 @@ interface IcontextProps {
   setInputMsgSearch: React.Dispatch<React.SetStateAction<string | undefined>>;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
   onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
-  searchMatches: number[];
-  setSearchMatches: React.Dispatch<React.SetStateAction<number[]>>;
-  activeMatchIndex: number;
-  setActiveMatchIndex: React.Dispatch<React.SetStateAction<number>>;
+
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   inputSearch: string;
   setInputSearch: React.Dispatch<React.SetStateAction<string>>;
@@ -77,6 +78,8 @@ interface IcontextProps {
   //estados compartidos en refactor
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  appStore: AppStore;
+  setAppStore: React.Dispatch<React.SetStateAction<AppStore>>;
 }
 
 interface ContextProviderProps {
@@ -118,10 +121,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   //const [resMsgSearch, setResMsgSearch] = useState<MsgInFeed[] | []>([]);
   const [inputSearch, setInputSearch] = useState<string>("");
 
-  //estado para el filtrado tipo wp
-  const [searchMatches, setSearchMatches] = useState<number[]>([]);
-  //este es para los saltos entre indices del array de coincidencias del filtrado de arriba
-  const [activeMatchIndex, setActiveMatchIndex] = useState<number>(0);
   //referencia para el scroll automatico al mensaje filtrado activo
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   //referencia para el scroll automatico al mensaje nuevo ingresado al feed
@@ -173,60 +172,19 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       );
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_private(history_msg);
-      setAppStore((prev) => {
-        const new_data = { ...prev.store.local.searchBufferPrivate };
-        normalized_msg.forEach((msg) => {
-          new_data[msg.id] = msg;
-        });
-        return {
-          ...prev,
-          store: {
-            ...prev.store,
-            local: {
-              ...prev.store.local,
-              searchBufferPrivate: new_data,
-            },
-          }, 
-        };
-      });
-      //const messageFeedPriv = Object.values(appStore.store.byId);
-      const res = normalized_msg
-        .filter((m) => m.text.toLowerCase().includes(query))
-        .map((m) => Number(m.id));
-      setSearchMatches(res);
-      setActiveMatchIndex(0);
-      console.log(res);
+
+      setAppStore((prev) =>
+        handleUpdateSearchMsgPriv(query, prev, normalized_msg),
+      );
     } else {
       //aca deberia poner el helper para la busqueda de mensajes publicos
       const history_msg = await resolve_search_public_messages(query);
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_public(history_msg);
 
-      setAppStore((prev) => {
-        const new_data = { ...prev.store.local.searchBufferPublic };
-        normalized_msg.forEach((msg) => {
-          new_data[msg.id] = msg;
-        });
-        return {
-          ...prev,
-          store: {
-            ...prev.store,
-            local: {
-              ...prev.store.local,
-              searchBufferPublic: new_data,
-            },
-          }, 
-        };
-      })      
-
-      //const messageFeed = Object.values(appStore.store.byId);
-      const res = normalized_msg
-        .filter((m) => m.text.toLowerCase().includes(query))
-        .map((m) => Number(m.id));
-
-      setSearchMatches(res);
-      setActiveMatchIndex(0);
-      console.log(res);
+      setAppStore((prev) =>
+        handleUpdateSearchMsgPublic(query, prev, normalized_msg),
+      );
     }
   };
 
@@ -235,8 +193,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
     if (data.trim() === "") {
-      setSearchMatches([]);
-      setActiveMatchIndex(0);
+      handleConsiderNewFeed(appStore);
     }
   };
 
@@ -302,14 +259,28 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const limitPublic = appStore.store.view.limit;
     const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
     console.log(public_msg);
-    //  setMessageFeed((prev) => [...prev, ...public_msg]); esto ahora vive en el appstore
 
     setPrivateIdMsg(undefined);
     setClientSelected("");
     setActiveFeed(true);
     setInputSearch("");
+    //reset de metadata en inbox privados, update de offset, order, byId y hasmore
+    setAppStore((prev) =>
+      handleUpdatePrivateData(normalized_msg, prev, userId),
+    );
 
-    //    setResSearch([]);
+    //setMessageFeed((prev) => [...prev, ...public_msg]); esto ahora vive en el appstore
+    //setResSearch([]);
+    setAppStore((prev) => ({
+      ...prev,
+      store: {
+        ...prev.store,
+        local: {
+          ...prev.store.local,
+          matches: [],
+        },
+      },
+    }));
   };
 
   //CONTROLLER DE SETTERS
@@ -412,10 +383,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputMsgSearch,
     handleSearchMsg,
     onChangeSearchMsgFeed,
-    setSearchMatches,
-    searchMatches,
-    setActiveMatchIndex,
-    activeMatchIndex,
+
     messageRefs,
     inputSearch,
     setInputSearch,
@@ -423,6 +391,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     //nueos estados
     user,
     setUser,
+    appStore,
+    setAppStore,
   };
   //value son los valores que vamos a pasar desde aca a la app, todas las props
 

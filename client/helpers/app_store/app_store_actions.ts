@@ -140,3 +140,151 @@ export const handleUpdatePrivateData = (
     },
   };
 };
+
+//HANDLE PARA INTEGRAR DENTRO DEL HANDLESEARCHMSG
+
+export const handleUpdateSearchMsgPriv = (
+  query: string,
+  prev: AppStore,
+  normalized_msg: FeedMessage[],
+): AppStore => {
+  const new_buffer = { ...prev.store.local.searchBufferPrivate };
+  const new_byId = { ...prev.store.byId };
+  const new_order = [...prev.store.order];
+
+  normalized_msg.forEach((msg) => {
+    new_buffer[msg.id] = msg;
+
+    new_byId[msg.id] = msg;
+
+    if (!new_order.includes(msg.id.toString())) {
+      new_order.push(msg.id.toString());
+    }
+  });
+  const new_matches = Object.values(new_buffer)
+    .filter((m) => m.text.toLowerCase().includes(query))
+    .map((m) => Number(m.id));
+
+  const new_offset = prev.store.view.offset + prev.store.view.limit; //calculo el new_offset sumando el offset y el limit
+
+  const new_hasMore = new_matches.length > new_offset; //calculo si la longitud de matches es mayor al new_offset
+
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      view: {
+        ...prev.store.view,
+        offset: new_offset,
+      },
+      feedMode: "local",
+      local: {
+        ...prev.store.local,
+        searchBufferPrivate: new_buffer,
+        matches: new_matches,
+        activeIndex: 0,
+        hasMore: new_hasMore,
+      },
+    },
+  };
+};
+
+export const handleUpdateSearchMsgPublic = (
+  query: string,
+  prev: AppStore,
+  normalized_msg: FeedMessage[],
+): AppStore => {
+  const new_buffer = { ...prev.store.local.searchBufferPublic };
+  const new_byId = { ...prev.store.byId };
+  const new_order = [...prev.store.order];
+
+  normalized_msg.forEach((msg) => {
+    new_buffer[msg.id] = msg;
+
+    new_byId[msg.id] = msg;
+
+    if (!new_order.includes(msg.id.toString())) {
+      new_order.push(msg.id.toString());
+    }
+  });
+  const new_matches = Object.values(new_buffer)
+    .filter((m) => m.text.toLowerCase().includes(query))
+    .map((m) => Number(m.id));
+
+  const new_offset = prev.store.view.offset + prev.store.view.limit; //calculo el new_offset sumando el offset y el limit
+
+  const new_hasMore = new_matches.length > new_offset; //calculo si la longitud de matches es mayor al new_offset
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      byId: new_byId,
+      order: new_order,
+      view: {
+        ...prev.store.view,
+        offset: new_offset,
+      },
+      feedMode: "local",
+      local: {
+        ...prev.store.local,
+        searchBufferPublic: new_buffer,
+        matches: new_matches,
+        activeIndex: 0,
+        hasMore: new_hasMore,
+      },
+    },
+  };
+};
+
+//FUNCION PARA RESETEAR PROPIEDADES AL CERRAR BUSQUEDA LOCAL Y CONSOLIDAR NUEVO FEED
+
+export const handleConsiderNewFeed = (prev: AppStore): AppStore => {
+  const order = [...prev.store.order];
+  //aca hay que actualizar el order de la store y ademas el byId
+  const consolidateOrder = order.slice(0, prev.store.view.offset);
+  //hay que resetear las propiedades de busqueda local
+  const currentById = { ...prev.store.byId };
+  const newById: Record<string, FeedMessage> = {};
+  consolidateOrder.forEach((id) => {
+    newById[id] = currentById[id];
+  })
+  const new_offset = prev.store.view.offset
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      byId: newById,//aca agregar el byId consolidado
+      order: consolidateOrder,
+      feedMode: "remote",
+      remote: {
+        ...prev.store.remote,
+        offset: new_offset,
+        loading: false,
+      },
+      local: {
+        ...prev.store.local,
+        searchBufferPrivate: {},
+        searchBufferPublic: {},
+        matches: [],
+        activeIndex: 0,
+        hasMore: false,
+      },
+    },
+  };
+};
+
+//FUNCION PARA ACTUALIZAR EN CADA SCROLL LAS PROPIEDADES DE BUSQUEDA LOCAL O REMOTE
+
+export const handleUpdateView = (prev: AppStore): AppStore => {
+  const new_offset = prev.store.view.offset + prev.store.view.limit;
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      view: {
+        ...prev.store.view,
+        offset: new_offset,
+      },
+    },
+  };
+};

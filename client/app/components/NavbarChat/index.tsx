@@ -5,15 +5,15 @@ import { Section_Edit_Form } from "../Forms/Edit";
 import { Logout_Button } from "@/app/components/Logout_Button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { INITIAL_STATE } from "@/types/types";
 
 export const NavbarChat = () => {
   const router = useRouter();
   const [active, setActive] = useState<boolean>(false);
   const [activeMobile, setActiveMobile] = useState<boolean>(false);
   const {
-    setMessageFeed,
-    setMessageFeedPriv,
-    setNickConected,
+
+    setAppStore,
     setHasNickname,
     setPrivateIdMsg,
     setClientSelected,
@@ -23,9 +23,7 @@ export const NavbarChat = () => {
     setActiveUser,
   } = useAppContextWs();
   const handleToClose = () => {
-    setMessageFeed([]);
-    setMessageFeedPriv([]);
-    setNickConected([]);
+    setAppStore(INITIAL_STATE)
     setHasNickname(false);
     setPrivateIdMsg(undefined);
     setClientSelected(undefined);

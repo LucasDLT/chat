@@ -4,21 +4,22 @@ import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 
-
 export const DirectorySection = () => {
   const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
 
   const {
     activeFeed,
-    conectedCount,
+    appStore,
     inputSearch,
     handleSelectClient,
     socketRef,
-    nickConected,
+
     setInputSearch,
-    returnToGroup
+    returnToGroup,
   } = useAppContextWs();
 
+  const conectedCount = appStore.clients.length;
+  const nickConected = appStore.clients;
   const myId = socketRef.current?.userId;
 
   //esta constante toma un estado tipado con clientsconected, verifica su length y si es mayor a 0 retornar el estado que ya esta cargado con usuarios, pero como no se setea nunca eso no sucede, y siempre termina pasando la segunda opcion, por lo que se filtra nickconected para que se muestren todos los que tienen nick menos mi user.
@@ -27,8 +28,7 @@ export const DirectorySection = () => {
       ? resSearch
       : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
 
-      
-      
+  const metadataUsers = Object.entries(appStore.inboxMeta);
 
   function changeInputSearch(e: FormEvent<HTMLInputElement>) {
     const data = e.currentTarget.value;
@@ -41,6 +41,12 @@ export const DirectorySection = () => {
     setResSearch(res);
   }
 
+  const handleCalculeNick =(arr:ClientsConected[], id:number)=>{
+    const nick= arr.find((c) => c.userId === id)
+       if (nick?.nick !== undefined) {
+        return nick.nick
+       } 
+  }
   return (
     <section
       className={`
@@ -121,22 +127,27 @@ export const DirectorySection = () => {
           }`}
         >
           {visibleContacts.length > 0 ? (
-            visibleContacts.map((client) => (
+            metadataUsers.map(([index, client]) => (
               <div
-                key={client.userId}
-                className={`text-black flex ${client.totalMessageIn && client.totalMessageIn > 0 ? "justify-evenly" : " justify-center"} items-center bgBlurYellow w-full p-1 my-1 rounded-xs `}
+                key={index}
+                className={`text-black flex ${client.hasNewMessages && client.unreadCount > 0 ? "justify-evenly" : " justify-center"} items-center bgBlurYellow w-full p-1 my-1 rounded-xs `}
               >
                 <p
-                  onClick={() => handleSelectClient(client.userId, client.nick)}
+                  onClick={() => {
+                   const nick= handleCalculeNick(nickConected, Number(index))
+                    if (nick !== undefined) {
+                      handleSelectClient(Number(index), nick);
+                    }
+                  }}
                   className=" mesoninaRegular font-extrabold text-xl hover:cursor-pointer h-6 flex items-center justify-center tracking-widest transition-all duration-1000"
                 >
-                  {client.nick}
+                  { handleCalculeNick(nickConected, Number(index))}
                 </p>
                 <p
                   className={`rounded-full yellowBg w-6 h-6 flex items-center justify-center transition-all duration-300 ease-in-out
-                   ${client.messageIn ? "opacity-100 scale-100" : "opacity-0 scale-0 pointer-events-none"}`}
+                   ${client.hasNewMessages ? "opacity-100 scale-100" : "opacity-0 scale-0 pointer-events-none"}`}
                 >
-                  {client.totalMessageIn || ""}
+                  {client.unreadCount || ""}
                 </p>
               </div>
             ))
