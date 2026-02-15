@@ -42,7 +42,8 @@ import {
   handleUpdatePrivateData,
   handleUpdateSearchMsgPriv,
   handleUpdateSearchMsgPublic,
-  handleConsiderNewFeed,
+  handleNewFeedPublic,
+  handleNewFeedPrivate,
 } from "@/helpers/app_store/app_store_actions";
 
 interface IcontextProps {
@@ -173,7 +174,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       );
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_private(history_msg);
-      const id = Number(privateIdMsg);
+      const id = privateIdMsg.toString();
       setAppStore((prev) =>
         handleUpdateSearchMsgPriv(query, prev, normalized_msg, id),
       );
@@ -193,8 +194,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
+    
     if (data.trim() === "") {
-      handleConsiderNewFeed(appStore);
+      if(appStore.store.feed.active === "public")handleNewFeedPublic(appStore);
+      if(appStore.store.feed.active === "private" && privateIdMsg){
+        const id = privateIdMsg.toString();
+        handleNewFeedPrivate(appStore, id);}
+
     }
   };
 

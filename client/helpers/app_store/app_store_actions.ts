@@ -199,7 +199,7 @@ export const handleUpdateSearchMsgPriv = (
   query: string,
   prev: AppStore,
   normalized_msg: FeedMessage[],
-  id: number,
+  id: string,
 ): AppStore => {
   const new_buffer = { ...prev.store.feed.private[id].searchBuffer };
   const new_byId = { ...prev.store.feed.private[id].byId };
@@ -229,17 +229,17 @@ export const handleUpdateSearchMsgPriv = (
       ...prev.store,
       feed: {
         ...prev.store.feed,
-        mode:"local",
+        mode: "local",
         active: "private",
         private: {
           ...prev.store.feed.private,
           [id]: {
             ...prev.store.feed.private[id],
+            searchBuffer: new_buffer,
             remote: {
               ...prev.store.feed.private[id].remote,
               offset: new_offset,
               hasMore: new_hasMore,
-              searchBuffer: new_buffer,
             },
           },
         },
@@ -258,9 +258,9 @@ export const handleUpdateSearchMsgPublic = (
   prev: AppStore,
   normalized_msg: FeedMessage[],
 ): AppStore => {
-  const new_buffer = { ...prev.store.local.searchBufferPublic };
-  const new_byId = { ...prev.store.byId };
-  const new_order = [...prev.store.order];
+  const new_buffer = { ...prev.store.feed.public.searchBuffer };
+  const new_byId = { ...prev.store.feed.public.byId };
+  const new_order = [...prev.store.feed.public.order];
 
   normalized_msg.forEach((msg) => {
     new_buffer[msg.id] = msg;
@@ -273,28 +273,35 @@ export const handleUpdateSearchMsgPublic = (
   });
   const new_matches = Object.values(new_buffer)
     .filter((m) => m.text.toLowerCase().includes(query))
-    .map((m) => Number(m.id));
+    .map((m) => m.id.toString());
 
-  const new_offset = prev.store.view.offset + prev.store.view.limit; //calculo el new_offset sumando el offset y el limit
+  const new_offset =
+    prev.store.feed.public.remote.offset + prev.store.remote.limit; //calculo el new_offset sumando el offset y el limit
 
   const new_hasMore = new_matches.length > new_offset; //calculo si la longitud de matches es mayor al new_offset
   return {
     ...prev,
     store: {
       ...prev.store,
-      byId: new_byId,
-      order: new_order,
-      view: {
-        ...prev.store.view,
-        offset: new_offset,
+      feed: {
+        ...prev.store.feed,
+        mode: "local",
+        public: {
+          ...prev.store.feed.public,
+          byId: new_byId,
+          order: new_order,
+          searchBuffer: new_buffer,
+          remote: {
+            ...prev.store.feed.public.remote,
+            offset: new_offset,
+            hasMore: new_hasMore,
+          },
+        },
       },
-      feedMode: "local",
       local: {
         ...prev.store.local,
-        searchBufferPublic: new_buffer,
         matches: new_matches,
         activeIndex: 0,
-        hasMore: new_hasMore,
       },
     },
   };
@@ -302,53 +309,104 @@ export const handleUpdateSearchMsgPublic = (
 
 //FUNCION PARA RESETEAR PROPIEDADES AL CERRAR BUSQUEDA LOCAL Y CONSOLIDAR NUEVO FEED
 
-export const handleConsiderNewFeed = (prev: AppStore): AppStore => {
-  const order = [...prev.store.order];
+export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
+  const order = [...prev.store.feed.private[id].order];
   //aca hay que actualizar el order de la store y ademas el byId
-  const consolidateOrder = order.slice(0, prev.store.view.offset);
+  const consolidateOrder = order.slice(0, prev.store.feed.private[id].remote.offset);
   //hay que resetear las propiedades de busqueda local
-  const currentById = { ...prev.store.byId };
+  const currentById = { ...prev.store.feed.private[id].byId };
   const newById: Record<string, FeedMessage> = {};
   consolidateOrder.forEach((id) => {
     newById[id] = currentById[id];
   });
-  const new_offset = prev.store.view.offset;
+  const new_offset = prev.store.feed.private[id].remote.offset;
   return {
     ...prev,
     store: {
       ...prev.store,
-      byId: newById, //aca agregar el byId consolidado
-      order: consolidateOrder,
-      feedMode: "remote",
-      remote: {
-        ...prev.store.remote,
-        offset: new_offset,
-        loading: false,
+      feed: {
+        ...prev.store.feed,
+        mode: "remote",
+        active: "private",
+        private:{
+          ...prev.store.feed.private,
+          [id]:{
+            ...prev.store.feed.private[id],
+            byId: newById, //aca agregar el byId consolidado
+            order: consolidateOrder,
+            searchBuffer: {},
+            remote: {
+              ...prev.store.feed.private[id].remote,
+              offset: new_offset,
+              hasMore: false,
+            }
+          }, 
+        }
       },
       local: {
         ...prev.store.local,
-        searchBufferPrivate: {},
-        searchBufferPublic: {},
         matches: [],
         activeIndex: 0,
-        hasMore: false,
+      },
+    },
+  };
+};
+export const handleNewFeedPublic = (prev: AppStore): AppStore => {
+  const order = [...prev.store.feed.public.order];
+  //aca hay que actualizar el order de la store y ademas el byId
+  const consolidateOrder = order.slice(0, prev.store.feed.public.remote.offset);
+  //hay que resetear las propiedades de busqueda local
+  const currentById = { ...prev.store.feed.public.byId };
+  const newById: Record<string, FeedMessage> = {};
+  consolidateOrder.forEach((id) => {
+    newById[id] = currentById[id];
+  });
+  const new_offset = prev.store.feed.public.remote.offset;
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      feed: {
+        ...prev.store.feed,
+        mode: "remote",
+        public:{
+          byId: newById, //aca agregar el byId consolidado
+          order: consolidateOrder,
+          searchBuffer: {},
+          remote: {
+            ...prev.store.remote,
+            offset: new_offset,
+            loading: false,
+            hasMore: false,
+          }
+        }
+      },
+      local: {
+        ...prev.store.local,
+        matches: [],
+        activeIndex: 0,
       },
     },
   };
 };
 
 //FUNCION PARA ACTUALIZAR EN CADA SCROLL LAS PROPIEDADES DE BUSQUEDA LOCAL O REMOTE
-
+//VERIFICARLA BIEN ESTA A PRUEBA
 export const handleUpdateView = (prev: AppStore): AppStore => {
-  const new_offset = prev.store.view.offset + prev.store.view.limit;
+  const new_offset = prev.store.feed.public.remote.offset + prev.store.remote.limit;
   return {
     ...prev,
     store: {
       ...prev.store,
-      view: {
-        ...prev.store.view,
-        offset: new_offset,
-      },
+      feed: {
+        ...prev.store.feed,
+        public: {
+        ...prev.store.feed.public,
+          remote: {
+            ...prev.store.feed.public.remote,
+            offset: new_offset,
+          },
+      }},
     },
   };
 };
