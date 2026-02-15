@@ -9,6 +9,7 @@ import React, {
   FormEvent,
   ChangeEvent,
   useMemo,
+  use,
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers/sockets_fn";
 import {
@@ -36,8 +37,8 @@ import {
   updateDataSnapshot,
   updateDataUser,
   uptadeInboxSystem,
-  uptadeInboxUser,
-  
+  uptadeInboxPrivate,
+  uptadeInboxPublic,
   handleUpdatePrivateData,
   handleUpdateSearchMsgPriv,
   handleUpdateSearchMsgPublic,
@@ -142,7 +143,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       setPrivateIdMsg(userId);
       setClientSelected(nick);
       const id = Number(userId);
-      const offset = appStore.store.remote.offset;
+      const offset = appStore.store.feed.private[userId].remote.offset;
       const limit = appStore.store.remote.limit;
 
       const messages = await resolve_private_messages(id, offset, limit);
@@ -172,9 +173,9 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       );
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_private(history_msg);
-
+      const id = Number(privateIdMsg);
       setAppStore((prev) =>
-        handleUpdateSearchMsgPriv(query, prev, normalized_msg),
+        handleUpdateSearchMsgPriv(query, prev, normalized_msg, id),
       );
     } else {
       //aca deberia poner el helper para la busqueda de mensajes publicos
@@ -255,8 +256,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
   const returnToGroup = async () => {
-    const offsetPublic = appStore.store.view.offset;
-    const limitPublic = appStore.store.view.limit;
+    const offsetPublic = appStore.store.feed.public.remote.offset;
+    const limitPublic = appStore.store.remote.limit;
     const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
     console.log(public_msg);
 
@@ -265,12 +266,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setActiveFeed(true);
     setInputSearch("");
     //reset de metadata en inbox privados, update de offset, order, byId y hasmore
-    setAppStore((prev) =>
-      handleUpdatePrivateData(normalized_msg, prev, userId),
-    );
+
 
     //setMessageFeed((prev) => [...prev, ...public_msg]); esto ahora vive en el appstore
     //setResSearch([]);
+
+    //con este setter deberia comprender las mismas funciones que los dos que tengo comentado una linea arriba. Si estoy en chat privado o en una busqueda privada y presiono ir al chat publico, seteo el cambio de modo a remoto por las dudas, cambio el active a public y con un efecto deberia escuchar esa dependencia y cambiar el feed que leo viendo public y pasando ahora la informacion del estado que designe al feed. 
     setAppStore((prev) => ({
       ...prev,
       store: {
@@ -278,7 +279,14 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         local: {
           ...prev.store.local,
           matches: [],
+          activeIndex: 0,
+          hasMore: false
         },
+        feed: {
+          ...prev.store.feed,
+          active:"public",
+          mode:"remote",
+        }
       },
     }));
   };
@@ -287,7 +295,15 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const controller = useMemo<DispatchContext>(
     () => ({
       addMessage: (parse) => {
-        uptadeInboxUser(setAppStore, parse);
+        if (parse.scope === "public") {
+          uptadeInboxPublic(setAppStore, parse);
+        }
+        if (parse.scope === "private") {
+          if (parse.fromId !== undefined) {
+            const id = parse.fromId;
+            uptadeInboxPrivate(setAppStore, parse, id);
+          }
+        }
       },
       addMessageSystem: (parse) => {
         if (parse.text.includes("ingresaste")) {
