@@ -136,28 +136,39 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [appStore, setAppStore] = useState<AppStore>(INITIAL_STATE);
 
   //toda esta funcion es para lo privado al seleccionar un usuario del directorio
-  const handleSelectClient = async (userId: number, nick: string) => {
-    try {
-      console.log("se activo la funcion handle select client");
+const handleSelectClient = async (userId: number, nick: string) => {
+  setActiveFeed(true);
+  setPrivateIdMsg(userId);
+  setClientSelected(nick);
 
-      setActiveFeed(true);
-      setPrivateIdMsg(userId);
-      setClientSelected(nick);
-      const id = Number(userId);
-      const offset = appStore.store.feed.private[userId].remote.offset;
-      const limit = appStore.store.remote.limit;
+  // Reset unread
+  setAppStore((prev) => ({
+    ...prev,
+    inboxMeta: {
+      ...prev.inboxMeta,
+      [userId]: {
+        ...prev.inboxMeta[userId],
+        unreadCount: 0,
+        hasNewMessages: false,
+      },
+    },
+  }));
 
-      const messages = await resolve_private_messages(id, offset, limit);
-      const normalized_msg = normalize_msg_private(messages);
+  //Cargar histórico solo si no hay mensajes cargados
+  const existing = appStore.store.feed.private[userId];
+  if (!existing || existing.order.length === 0) {
+    const id = userId.toString();
+    const offset = 0;
+    const limit = appStore.store.remote.limit;
 
-      //reset de metadata en inbox privados, update de offset, order, byId y hasmore
-      setAppStore((prev) =>
-        handleUpdatePrivateData(normalized_msg, prev, userId),
-      );
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    const messages = await resolve_private_messages(userId, offset, limit);
+    const normalized_msg = normalize_msg_private(messages);
+
+    setAppStore((prev) => handleUpdatePrivateData(normalized_msg, prev, id));
+  }
+};
+
+
   const handleSearchMsg = async (e: FormEvent<HTMLFormElement>) => {
     //busqueda de mensajes
     e.preventDefault();
@@ -194,13 +205,14 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
-    
-    if (data.trim() === "") {
-      if(appStore.store.feed.active === "public")handleNewFeedPublic(appStore);
-      if(appStore.store.feed.active === "private" && privateIdMsg){
-        const id = privateIdMsg.toString();
-        handleNewFeedPrivate(appStore, id);}
 
+    if (data.trim() === "") {
+      if (appStore.store.feed.active === "public")
+        handleNewFeedPublic(appStore);
+      if (appStore.store.feed.active === "private" && privateIdMsg) {
+        const id = privateIdMsg.toString();
+        handleNewFeedPrivate(appStore, id);
+      }
     }
   };
 
@@ -241,7 +253,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const messageId = nanoid();
     if (inputMsg) {
       const message: SendMessage = {
-        timestamp: new Date().toString(),//buscar el cambio de comportamiento debimos cambiar tolocaletimestring por tostring para solucuonar un error de parseo de date en el la bdd
+        timestamp: new Date().toString(), //buscar el cambio de comportamiento debimos cambiar tolocaletimestring por tostring para solucuonar un error de parseo de date en el la bdd
         type: "chat.send",
         messageId: messageId,
         payload: {
@@ -273,11 +285,10 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     setInputSearch("");
     //reset de metadata en inbox privados, update de offset, order, byId y hasmore
 
-
     //setMessageFeed((prev) => [...prev, ...public_msg]); esto ahora vive en el appstore
     //setResSearch([]);
 
-    //con este setter deberia comprender las mismas funciones que los dos que tengo comentado una linea arriba. Si estoy en chat privado o en una busqueda privada y presiono ir al chat publico, seteo el cambio de modo a remoto por las dudas, cambio el active a public y con un efecto deberia escuchar esa dependencia y cambiar el feed que leo viendo public y pasando ahora la informacion del estado que designe al feed. 
+    //con este setter deberia comprender las mismas funciones que los dos que tengo comentado una linea arriba. Si estoy en chat privado o en una busqueda privada y presiono ir al chat publico, seteo el cambio de modo a remoto por las dudas, cambio el active a public y con un efecto deberia escuchar esa dependencia y cambiar el feed que leo viendo public y pasando ahora la informacion del estado que designe al feed.
     setAppStore((prev) => ({
       ...prev,
       store: {
@@ -286,13 +297,13 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           ...prev.store.local,
           matches: [],
           activeIndex: 0,
-          hasMore: false
+          hasMore: false,
         },
         feed: {
           ...prev.store.feed,
-          active:"public",
-          mode:"remote",
-        }
+          active: "public",
+          mode: "remote",
+        },
       },
     }));
   };
@@ -305,9 +316,15 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           uptadeInboxPublic(setAppStore, parse);
         }
         if (parse.scope === "private") {
-          if (parse.fromId !== undefined) {
-            const id = parse.fromId;
-            uptadeInboxPrivate(setAppStore, parse, id);
+          const myId = socketRef.current?.userId;
+          if(myId === undefined) return
+
+          const conversationId = 
+          parse.fromId === myId
+           ? parse.toId?.toString() 
+           : parse.fromId?.toString();
+          if (conversationId) {
+            uptadeInboxPrivate(setAppStore, parse, conversationId);
           }
         }
       },
@@ -374,16 +391,16 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     if (!privateIdMsg) {
       setAppStore((prev) => ({
         ...prev,
-        store:{
+        store: {
           ...prev.store,
           feed: {
             ...prev.store.feed,
             mode: "remote",
             active: "public",
             private: {},
-          }
-        }
-      }))
+          },
+        },
+      }));
       return;
     }
   }, [appStore.clients, privateIdMsg]);

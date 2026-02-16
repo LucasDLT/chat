@@ -199,7 +199,7 @@ interface PrivateUser {
 /****************************TIPADO PARA EL STORE DEL USER*******************************/
 type feedMode = "local" | "remote";
 type activeFeed = "public" | "private";
-interface Conversation {
+export interface Conversation {
   byId: Record<string, FeedMessage>; //estructura record para mensajes se convierte en array antes del render
   order: string[]; //aca vamos almacenar los ids entrantes previo dedupe
   //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras

@@ -85,7 +85,7 @@ export const normalize_msg_private= (msg: PrivateMessage[]): FeedMessage[] => {
     kind:"user",
     scope:"private",
     text:c.text,
-    timestamp:c.craetedAt.getTime(),
+    timestamp: new Date(c.craetedAt).getTime(),
     fromId:c.sender.id,
     fromNick:c.sender.name,
     toId:c.receiver?.id

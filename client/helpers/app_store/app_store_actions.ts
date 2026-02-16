@@ -2,6 +2,7 @@ import {
   AckHandshake,
   AppStore,
   ClientsConected,
+  Conversation,
   FeedMessage,
 } from "@/types/types";
 
@@ -11,11 +12,23 @@ type AppStoreSetter = React.Dispatch<React.SetStateAction<AppStore>>;
 export const uptadeInboxPrivate = (
   setter: AppStoreSetter,
   msg: FeedMessage,
-  id: number,
+  id: string
 ) => {
   setter((prev) => {
+    const privateFeed = prev.store.feed.private[id];
+    const safeFeed = privateFeed ?? {
+      byId: {},
+      order: [],
+      searchBuffer: {},
+      remote: { offset: 0, hasMore: false, loading: false },
+    };
+
     const order_id = msg.id.toString();
-    const exists_order = prev.store.feed.private[id].order.includes(order_id);
+    const exists_order = safeFeed.order.includes(order_id);
+
+    const isOwnMessage = msg.fromId === prev.userData?.userId;
+    const incrementUnread = !isOwnMessage; // tus propios mensajes no cuentan
+
     return {
       ...prev,
       store: {
@@ -25,14 +38,14 @@ export const uptadeInboxPrivate = (
           private: {
             ...prev.store.feed.private,
             [id]: {
-              ...prev.store.feed.private[id],
+              ...safeFeed,
               byId: {
-                ...prev.store.feed.private[id].byId,
+                ...safeFeed.byId,
                 [msg.id]: msg,
               },
               order: exists_order
-                ? prev.store.feed.private[id].order
-                : [...prev.store.feed.private[id].order, order_id],
+                ? [...safeFeed.order]
+                : [...safeFeed.order, order_id],
             },
           },
         },
@@ -40,17 +53,19 @@ export const uptadeInboxPrivate = (
       inboxMeta: {
         ...prev.inboxMeta,
         [id]: {
-          hasNewMessages: true,
-          unreadCount:
-            msg.scope === "private"
-              ? (prev.inboxMeta[id]?.unreadCount ?? 0) + 1
-              : (prev.inboxMeta[id]?.unreadCount ?? 0), // patron de inicio seguro, elprimer ? evalua si es undefined o null, los ?? siguientes evaluan el valor final, si es null o undefined el valor final es el que asignemos a la derecha
+          hasNewMessages: incrementUnread,
+          unreadCount: incrementUnread
+            ? (prev.inboxMeta[id]?.unreadCount ?? 0) + 1
+            : prev.inboxMeta[id]?.unreadCount ?? 0,
           lastMessageTimestamp: msg.timestamp,
         },
       },
     };
   });
 };
+
+
+
 //Esta funcion esta pensada en principio para desacoplar logica del contexto a donde seteariamos constantemente informacion al AppStore.
 //La vamos a llamar dentro del controller de eventos del socket, pasandole por parametros el setter del AppStore y el mensaje que recibimos del socket ya normalizado.
 //Una vez aca vamos a ir extrayendo informacion del mensaje para actualizar el AppStore en el setter.
@@ -145,23 +160,41 @@ export const updateDataSnapshot = (
 export const handleUpdatePrivateData = (
   normalized_msg: FeedMessage[],
   prev: AppStore,
-  userId: number,
+  userId: string,
 ): AppStore => {
-  const newById = { ...prev.store.feed.private[userId].byId };
-  const newOrder = [...prev.store.feed.private[userId].order];
+  const existingConversation = prev.store.feed.private[userId] ?? {
+    byId: {},
+    order: [],
+    searchBuffer: {},
+    remote: {
+      offset: 0,
+      hasMore: true,
+      loading: false,
+    },
+  };
 
-  const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
+  const newById = { ...existingConversation.byId };
+  const newOrder = [...existingConversation.order];
 
-  const newOffset =
-    normalized_msg.length + prev.store.feed.private[userId].remote.offset;
 
+  
   normalized_msg.forEach((msg) => {
     newById[msg.id] = msg;
-
+    
     if (!newOrder.includes(msg.id.toString())) {
       newOrder.push(msg.id.toString());
     }
   });
+
+  newOrder.sort((a, b) => {
+    const msgA = newById[a];
+    const msgB = newById[b];
+    return msgA.timestamp - msgB.timestamp;
+  });
+
+  const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
+
+  const newOffset = normalized_msg.length + existingConversation.remote.offset;
 
   return {
     ...prev,
@@ -173,9 +206,11 @@ export const handleUpdatePrivateData = (
         private: {
           ...prev.store.feed.private,
           [userId]: {
-            ...prev.store.feed.private[userId],
+            ...existingConversation,
+            byId: newById,
+            order: newOrder,
             remote: {
-              ...prev.store.feed.private[userId].remote,
+              ...existingConversation.remote,
               offset: newOffset,
               hasMore: newHasMore,
             },
@@ -188,7 +223,7 @@ export const handleUpdatePrivateData = (
       [userId]: {
         hasNewMessages: false,
         unreadCount: 0,
-        lastMessageTimestamp: 0,
+        lastMessageTimestamp: normalized_msg[normalized_msg.length - 1]?.timestamp??0,
       },
     },
   };
@@ -313,7 +348,10 @@ export const handleUpdateSearchMsgPublic = (
 export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
   const order = [...prev.store.feed.private[id].order];
   //aca hay que actualizar el order de la store y ademas el byId
-  const consolidateOrder = order.slice(0, prev.store.feed.private[id].remote.offset);
+  const consolidateOrder = order.slice(
+    0,
+    prev.store.feed.private[id].remote.offset,
+  );
   //hay que resetear las propiedades de busqueda local
   const currentById = { ...prev.store.feed.private[id].byId };
   const newById: Record<string, FeedMessage> = {};
@@ -329,9 +367,9 @@ export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
         ...prev.store.feed,
         mode: "remote",
         active: "private",
-        private:{
+        private: {
           ...prev.store.feed.private,
-          [id]:{
+          [id]: {
             ...prev.store.feed.private[id],
             byId: newById, //aca agregar el byId consolidado
             order: consolidateOrder,
@@ -340,9 +378,9 @@ export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
               ...prev.store.feed.private[id].remote,
               offset: new_offset,
               hasMore: false,
-            }
-          }, 
-        }
+            },
+          },
+        },
       },
       local: {
         ...prev.store.local,
@@ -370,7 +408,7 @@ export const handleNewFeedPublic = (prev: AppStore): AppStore => {
       feed: {
         ...prev.store.feed,
         mode: "remote",
-        public:{
+        public: {
           byId: newById, //aca agregar el byId consolidado
           order: consolidateOrder,
           searchBuffer: {},
@@ -379,8 +417,8 @@ export const handleNewFeedPublic = (prev: AppStore): AppStore => {
             offset: new_offset,
             loading: false,
             hasMore: false,
-          }
-        }
+          },
+        },
       },
       local: {
         ...prev.store.local,
@@ -394,7 +432,8 @@ export const handleNewFeedPublic = (prev: AppStore): AppStore => {
 //FUNCION PARA ACTUALIZAR EN CADA SCROLL LAS PROPIEDADES DE BUSQUEDA LOCAL O REMOTE
 //VERIFICARLA BIEN ESTA A PRUEBA
 export const handleUpdateView = (prev: AppStore): AppStore => {
-  const new_offset = prev.store.feed.public.remote.offset + prev.store.remote.limit;
+  const new_offset =
+    prev.store.feed.public.remote.offset + prev.store.remote.limit;
   return {
     ...prev,
     store: {
@@ -402,12 +441,24 @@ export const handleUpdateView = (prev: AppStore): AppStore => {
       feed: {
         ...prev.store.feed,
         public: {
-        ...prev.store.feed.public,
+          ...prev.store.feed.public,
           remote: {
             ...prev.store.feed.public.remote,
             offset: new_offset,
           },
-      }},
+        },
+      },
     },
   };
 };
+
+export const createEmptyConversation = (): Conversation => ({
+  byId: {},
+  order: [],
+  searchBuffer: {},
+  remote: {
+    offset: 0,
+    hasMore: true,
+    loading: false,
+  },
+});
