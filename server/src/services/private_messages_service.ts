@@ -21,7 +21,7 @@ export const get_private_messages = async (
         "(sender.id = :receiver_id AND receiver.id = :sender_id)",
       { sender_id, receiver_id }
     )
-    .orderBy("message.craetedAt", "ASC")
+    .orderBy("message.craetedAt", "DESC")
     .skip(offset)
     .take(limit)
     .getMany();

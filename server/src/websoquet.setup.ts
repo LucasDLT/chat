@@ -228,8 +228,7 @@ export const websocketSetup = (server: Server) => {
                     toId: toIdMsg,
                     text: message_persisted.text,
                   },
-                };
-
+                };                
                 if (msgClient.type === "chat.public") {
                   wss.clients.forEach((client: WebSocket) => {
                     if ( client.readyState === WebSocket.OPEN) {
@@ -237,20 +236,15 @@ export const websocketSetup = (server: Server) => {
                     }
                   });
                 }
-                if (
-                  msgClient.type === "chat.private" &&
-                  typeof msgClient.payload.toId === "number" &&
-                  msgClient.payload.toId
-                ) {
-                  wss.clients.forEach((client: WebSocket) => {
-                    if (
-                      client.readyState === WebSocket.OPEN  &&
-                      client.userId === msgClient.payload.toId
-                    ) {
-                      client.send(JSON.stringify(msgClient));
-                    }
-                  });
-                }
+if (msgClient.type === "chat.private" && typeof msgClient.payload.toId === "number") {
+  wss.clients.forEach((client: WebSocket) => {
+    if (client.readyState === WebSocket.OPEN &&
+       (client.userId === msgClient.payload.toId || client.userId === msgClient.payload.fromId)) {
+      client.send(JSON.stringify(msgClient));
+    }
+  });
+}
+
               }
             }
             break;
