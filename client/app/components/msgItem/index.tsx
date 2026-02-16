@@ -1,12 +1,14 @@
-"use client"
-import {  PrivateMessage, PublicMessage } from "@/types/types";
+"use client";
+
+import { FeedMessage } from "@/types/types";
+import React from "react";
 
 interface MessageItemProps {
-  message: PublicMessage;
+  message: FeedMessage;
   isMatch: boolean;
   isActive: boolean;
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
-  myUserId: number | undefined;
+  myUserId?: number;
   showAuthor?: boolean;
 }
 
@@ -18,65 +20,33 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   myUserId,
   showAuthor = false,
 }) => {
-  const isMine = message.sender.id === myUserId;
-  const isSystem = message.sender.id? "":"system"
+  const isMine = message.fromId === myUserId;
+  const isSystem =  message.kind === "system";
+
+  const baseClasses =
+    "m-2.5 w-fit max-w-[70%] px-3 py-2 rounded-xl break-words whitespace-pre-wrap block";
+
+  const alignmentClasses = isMine
+    ? "text-right bg-[#a29714] mr-[1.6rem] xl:mr-52 self-end border border-[#0a0a0a]"
+    : "text-left bg-[#a98543] ml-[1.6rem] xl:ml-56 self-start";
+
+  const stateClasses = `
+    ${isSystem ? "message--system" : ""}
+    ${isMatch ? "message--match" : ""}
+    ${isActive ? "message--active" : ""}
+  `;
 
   return (
     <div
-      className={`
-        message
-        ${isMine ? "text-right bg-[#a29714] m-2.5 mr-[1.6rem] xl:mr-52 w-fit max-w-[70%] px-3 py-2 rounded-xl wrap-break-word overflow-wrap break-word whitespace-pre-wrap block self-end border border-[#0a0a0a]" : "text-left bg-[#a98543] m-2.5 ml-[1.6rem] xl:ml-56 w-fit max-w-[70%] px-3 py-2 rounded-xl wrap-break-word overflow-wrap break-word whitespace-pre-wrap block self-start"}
-        ${isSystem ? "message--system" : ""}
-        ${isMatch ? "message--match" : ""}
-        ${isActive ? "message--active" : ""}
-      `}
+      className={`message ${baseClasses} ${alignmentClasses} ${stateClasses}`}
       ref={(el) => {
-        messageRefs.current[message.id] = el;
+        if (messageRefs.current) {
+          messageRefs.current[message.id] = el;
+        }
       }}
     >
-      {showAuthor && !isMine && !isSystem && message.sender.name && (
-        <span className="message__author">{message.sender.name}</span>
-      )}
-
-      <div className="message__body">{message.text}</div>
-    </div>
-  );
-};
-interface MessagePrivateItemProps {
-  message: PrivateMessage;
-  isMatch: boolean;
-  isActive: boolean;
-  messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
-  myUserId: number | undefined;
-  showAuthor?: boolean;
-}
-
-export const MessageItemPrivate: React.FC<MessagePrivateItemProps> = ({
-  message,
-  isMatch,
-  isActive,
-  messageRefs,
-  myUserId,
-  showAuthor = false,
-}) => {
-  const isMine = message.sender.id === myUserId;
-  const isSystem = message.sender.id? "":"system"
-
-  return (
-    <div
-      className={`
-        message
-        ${isMine ? "text-right bg-[#a29714] m-2.5 mr-[1.6rem] xl:mr-52 w-fit max-w-[70%] px-3 py-2 rounded-xl wrap-break-word overflow-wrap break-word whitespace-pre-wrap block self-end border border-[#0a0a0a]" : "text-left bg-[#a98543] m-2.5 ml-[1.6rem] xl:ml-56 w-fit max-w-[70%] px-3 py-2 rounded-xl wrap-break-word overflow-wrap break-word whitespace-pre-wrap block self-start"}
-        ${isSystem ? "message--system" : ""}
-        ${isMatch ? "message--match" : ""}
-        ${isActive ? "message--active" : ""}
-      `}
-      ref={(el) => {
-        messageRefs.current[message.id] = el;
-      }}
-    >
-      {showAuthor && !isMine && !isSystem && message.sender.name && (
-        <span className="message__author">{message.sender.name}</span>
+      {showAuthor && !isMine && !isSystem && message.fromNick && (
+        <span className="message__author">{message.fromNick}</span>
       )}
 
       <div className="message__body">{message.text}</div>

@@ -1,35 +1,53 @@
-interface ButtonsSearchProps {
-  matches: number[];
-  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  activeIndex: number;
-}
-export const ButtonsSearch: React.FC<ButtonsSearchProps> = ({
-  matches,
-  setActiveIndex,
-  activeIndex,
-}) => {
-  const goToPrevMatch = () => {
-    if (matches.length === 0) return;
+"use client";
+import { useAppContextWs } from "@/context/context";
 
-    setActiveIndex((prev) => (prev - 1 >= 0 ? prev - 1 : prev));
+export const ButtonsSearch = () => {
+
+  const { appStore, setAppStore } = useAppContextWs();
+  const goToPrevMatch = () => {
+    if (appStore.store.local.matches.length === 0) return;
+
+    //setActiveIndex((prev) => (prev - 1 >= 0 ? prev - 1 : prev));
+
+    setAppStore((prev) => ({
+      ...prev,
+      store: {
+        ...prev.store,
+        local: {
+          ...prev.store.local,
+          activeIndex: prev.store.local.activeIndex - 1 >= 0 ? prev.store.local.activeIndex - 1 : prev.store.local.activeIndex,
+        },
+      },
+    }));
   };
   const goToNextMatch = () => {
-    if (matches.length === 0) return;
+    if (appStore.store.local.matches.length === 0) return;
 
-    setActiveIndex((prev) => (prev + 1 < matches.length ? prev + 1 : prev));
+   // setActiveIndex((prev) => (prev + 1 < matches.length ? prev + 1 : prev));
+
+    setAppStore((prev) => ({
+      ...prev,
+      store: {
+        ...prev.store,
+        local: {
+          ...prev.store.local,
+          activeIndex: prev.store.local.activeIndex + 1 < prev.store.local.matches.length ? prev.store.local.activeIndex + 1 : prev.store.local.activeIndex,
+        },
+      },
+    }));
   };
   return (
     <div>
       <button
         type="button"
         onClick={goToNextMatch}
-        disabled={activeIndex === matches.length - 1}>
+        disabled={appStore.store.local.activeIndex === appStore.store.local.matches.length - 1}>
         ↓
       </button>
       <button
         type="button"
         onClick={goToPrevMatch}
-        disabled={activeIndex === 0}>
+        disabled={appStore.store.local.activeIndex === 0}>
         ↑
       </button>
     </div>

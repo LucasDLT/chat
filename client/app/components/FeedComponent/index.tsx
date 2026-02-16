@@ -1,35 +1,40 @@
 "use client";
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { SystemFeedMessage } from "@/types/types";
+import { use, useEffect, useMemo, useRef, useState } from "react";
+import { FeedMessage } from "@/types/types";
 import { useAppContextWs } from "@/context/context";
-import { MessageItem, MessageItemPrivate } from "@/app/components/msgItem";
+import { MessageItem } from "@/app/components/msgItem";
 
 
 
 export const FeedSection = () => {
   const { activeFeed,
 privateIdMsg,
-messageFeed,
-messageFeedPriv,
 clientSelected,
-inputMsgSearch,
-onChangeSearchMsgFeed,
-handleSearchMsg,
-resMsgSearch,
-activeMatchIndex,
-searchMatches,
-setActiveMatchIndex,
+appStore,
 messageRefs,
 socketRef } = useAppContextWs();
-  const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
+  const activeMessageId = appStore.store.local.matches[appStore.store.local.activeIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista. Dice local por que es la buscada mediante buffer. No hay busqueda de este tipo en remote.
   const refMessageInFeedPublic = useRef<HTMLDivElement | null>(null);
   const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const prevLengthRef = useRef(0);
+//NUEVOS MEMOS
 
+
+const messageFeed = useMemo(() => {
+  const publicFeed = appStore.store.feed.public;
+  return publicFeed.order.map(id => publicFeed.byId[id]);
+}, [appStore.store.feed.public]);
+
+const messageFeedPriv = useMemo(() => {
+  if (!privateIdMsg) return [];
+  const privateFeed = appStore.store.feed.private[privateIdMsg];
+  if (!privateFeed) return [];
+  return privateFeed.order.map(id => privateFeed.byId[id]);
+}, [appStore.store.feed.private, privateIdMsg]);
 
   useEffect(() => {
   const currentFeed = privateIdMsg ? messageFeedPriv : messageFeed;
@@ -75,7 +80,7 @@ socketRef } = useAppContextWs();
   }, [activeMessageId]);
 
   useEffect(() => {
-    if (searchMatches.length > 0) return;
+    if (appStore.store.local.matches.length > 0) return;
 
     const container = privateIdMsg
       ? refMessageInFeedPrivate.current
@@ -93,7 +98,7 @@ socketRef } = useAppContextWs();
       top: container.scrollHeight,
       behavior: "smooth",
     });
-  }, [messageFeed, privateIdMsg, searchMatches.length]);
+  }, [messageFeed, privateIdMsg, appStore.store.local.matches.length]);
 
   //funcion de calculo solamente
   const handleToBottom = () => {
@@ -138,14 +143,7 @@ const privateMessages = messageFeedPriv;
           : "hidden"
       }`}
     >
-      <InputMsgSearch
-        inputMsgSearch={inputMsgSearch}
-        onChange={onChangeSearchMsgFeed}
-        handleSearchMsg={handleSearchMsg}
-        activeIndex={activeMatchIndex}
-        matches={searchMatches}
-        setActiveIndex={setActiveMatchIndex}
-      />
+      <InputMsgSearch/>
 
       {privateIdMsg ? (
         <section
@@ -167,10 +165,11 @@ const privateMessages = messageFeedPriv;
             ref={refMessageInFeedPrivate}
           >
             {privateMessages.map((msg) => {
-              const isMatch = searchMatches.includes(msg.id);
+              const id = msg.id.toString();
+              const isMatch = appStore.store.local.matches.includes(id);
               const isActive = msg.id === activeMessageId;
               return (
-                <MessageItemPrivate 
+                <MessageItem 
                   key={msg.id}
                   isActive={isActive}
                   isMatch={isMatch}
@@ -209,7 +208,8 @@ const privateMessages = messageFeedPriv;
             ref={refMessageInFeedPublic}
           >
             {messageFeed.map((msg) => {
-              const isMatch = searchMatches.includes(msg.id);
+              const id = msg.id.toString();
+              const isMatch = appStore.store.local.matches.includes(id);
               const isActive = msg.id === activeMessageId;
               
               return (

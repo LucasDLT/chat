@@ -169,6 +169,7 @@ export const handleUpdatePrivateData = (
       ...prev.store,
       feed: {
         ...prev.store.feed,
+        active: "private",
         private: {
           ...prev.store.feed.private,
           [userId]: {

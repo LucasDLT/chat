@@ -218,7 +218,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const messageId = nanoid();
     if (privateIdMsg && inputMsg) {
       const message: SendMessage = {
-        timestamp: new Date().toLocaleTimeString(),
+        timestamp: new Date().toString(),
         type: "chat.send",
         messageId: messageId,
         payload: {
@@ -241,7 +241,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const messageId = nanoid();
     if (inputMsg) {
       const message: SendMessage = {
-        timestamp: new Date().toLocaleTimeString(),
+        timestamp: new Date().toString(),//buscar el cambio de comportamiento debimos cambiar tolocaletimestring por tostring para solucuonar un error de parseo de date en el la bdd
         type: "chat.send",
         messageId: messageId,
         payload: {
@@ -370,16 +370,23 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     };
   }, [user, controller]);
 
-  //QUEDA COMENTADO HASTA SER NECESARIO.
-  {
-    /*useEffect(() => {
+  useEffect(() => {
     if (!privateIdMsg) {
-      setMessageFeedPriv([]); esto ahora se deriva del appstore
+      setAppStore((prev) => ({
+        ...prev,
+        store:{
+          ...prev.store,
+          feed: {
+            ...prev.store.feed,
+            mode: "remote",
+            active: "public",
+            private: {},
+          }
+        }
+      }))
       return;
     }
-    //aca tengo que hacer una actualizacion del estado que guarda los estados de mensajes
-  }, [appStore.clients, privateIdMsg]);*/
-  }
+  }, [appStore.clients, privateIdMsg]);
 
   const value = {
     socketRef,
