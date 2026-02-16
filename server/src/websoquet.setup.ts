@@ -232,7 +232,7 @@ export const websocketSetup = (server: Server) => {
 
                 if (msgClient.type === "chat.public") {
                   wss.clients.forEach((client: WebSocket) => {
-                    if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    if ( client.readyState === WebSocket.OPEN) {
                       client.send(JSON.stringify(msgClient));
                     }
                   });
@@ -244,8 +244,7 @@ export const websocketSetup = (server: Server) => {
                 ) {
                   wss.clients.forEach((client: WebSocket) => {
                     if (
-                      client.readyState === WebSocket.OPEN &&
-                      client !== ws &&
+                      client.readyState === WebSocket.OPEN  &&
                       client.userId === msgClient.payload.toId
                     ) {
                       client.send(JSON.stringify(msgClient));
