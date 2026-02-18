@@ -194,7 +194,10 @@ export const handleUpdatePrivateData = (
 
   const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
 
-  const newOffset = normalized_msg.length + existingConversation.remote.offset;
+  const newOffset = newOrder.length;
+console.log("ANTES", existingConversation.order.length);
+console.log("NUEVOS", normalized_msg.length);
+console.log("DESPUES", newOrder.length);
 
   return {
     ...prev,
@@ -202,7 +205,7 @@ export const handleUpdatePrivateData = (
       ...prev.store,
       feed: {
         ...prev.store.feed,
-        active: "private",
+       // active: "private",
         private: {
           ...prev.store.feed.private,
           [userId]: {
@@ -221,8 +224,7 @@ export const handleUpdatePrivateData = (
     inboxMeta: {
       ...prev.inboxMeta,
       [userId]: {
-        hasNewMessages: false,
-        unreadCount: 0,
+        ...prev.inboxMeta[userId],
         lastMessageTimestamp: normalized_msg[normalized_msg.length - 1]?.timestamp??0,
       },
     },

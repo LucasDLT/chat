@@ -136,35 +136,51 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [appStore, setAppStore] = useState<AppStore>(INITIAL_STATE);
 
   //toda esta funcion es para lo privado al seleccionar un usuario del directorio
-const handleSelectClient = async (userId: number, nick: string) => {
+ const handleSelectClient = async (userId: number, nick: string) => {
   setActiveFeed(true);
   setPrivateIdMsg(userId);
   setClientSelected(nick);
 
-  // Reset unread
-  setAppStore((prev) => ({
-    ...prev,
-    inboxMeta: {
-      ...prev.inboxMeta,
-      [userId]: {
-        ...prev.inboxMeta[userId],
-        unreadCount: 0,
-        hasNewMessages: false,
-      },
-    },
-  }));
+const existing = appStore.store.feed.private[userId];
+let shouldFetch = !existing || existing.remote.offset === 0;
 
-  //Cargar histórico solo si no hay mensajes cargados
-  const existing = appStore.store.feed.private[userId];
-  if (!existing || existing.order.length === 0) {
-    const id = userId.toString();
+  setAppStore((prev) => {
+    const existing = prev.store.feed.private[userId];
+
+    if (!existing || existing.order.length === 0) {
+      shouldFetch = true;
+    }
+
+    return {
+      ...prev,
+      store: {
+        ...prev.store,
+        feed: {
+          ...prev.store.feed,
+          active: "private",
+        },
+      },
+      inboxMeta: {
+        ...prev.inboxMeta,
+        [userId]: {
+          ...prev.inboxMeta[userId],
+          unreadCount: 0,
+          hasNewMessages: false,
+        },
+      },
+    };
+  });
+
+  if (shouldFetch) {
     const offset = 0;
     const limit = appStore.store.remote.limit;
 
     const messages = await resolve_private_messages(userId, offset, limit);
     const normalized_msg = normalize_msg_private(messages);
 
-    setAppStore((prev) => handleUpdatePrivateData(normalized_msg, prev, id));
+    setAppStore((prev) =>
+      handleUpdatePrivateData(normalized_msg, prev, userId.toString())
+    );
   }
 };
 
@@ -317,12 +333,12 @@ const handleSelectClient = async (userId: number, nick: string) => {
         }
         if (parse.scope === "private") {
           const myId = socketRef.current?.userId;
-          if(myId === undefined) return
+          if (myId === undefined) return;
 
-          const conversationId = 
-          parse.fromId === myId
-           ? parse.toId?.toString() 
-           : parse.fromId?.toString();
+          const conversationId =
+            parse.fromId === myId
+              ? parse.toId?.toString()
+              : parse.fromId?.toString();
           if (conversationId) {
             uptadeInboxPrivate(setAppStore, parse, conversationId);
           }
