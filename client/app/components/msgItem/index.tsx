@@ -20,7 +20,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   myUserId,
   showAuthor = false,
 }) => {
-  console.log('render en msg item', message.id)
   const isMine = message.fromId === myUserId;
   const isSystem =  message.kind === "system";
 

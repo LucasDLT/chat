@@ -40,7 +40,7 @@ const messageFeed = useMemo(() => {
   return Object.values(publicFeed.byId).sort((a, b) => a.timestamp - b.timestamp);
 }, [publicFeed.byId]);
 
-const currentFeed = privateIdMsg ? privateMessages : messageFeed;console.log('currentFeed length', currentFeed.length);
+const currentFeed = privateIdMsg ? privateMessages : messageFeed;
 
   // Control unread
   useEffect(() => {

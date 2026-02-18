@@ -192,6 +192,7 @@ let shouldFetch = !existing || existing.remote.offset === 0;
     if (!inputMsgSearch) return;
 
     const query = inputMsgSearch.trim().toLowerCase();
+console.log(query, "query que llega al handle");
 
     if (clientSelected && privateIdMsg) {
       //aca deberia poner el helper para la busqueda de mensajes privados
@@ -199,9 +200,13 @@ let shouldFetch = !existing || existing.remote.offset === 0;
         query,
         privateIdMsg,
       );
+      console.log("historyprivate", history_msg);
+      
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_private(history_msg);
       const id = privateIdMsg.toString();
+      console.log(normalized_msg, id, "normalizacion y id");
+      
       setAppStore((prev) =>
         handleUpdateSearchMsgPriv(query, prev, normalized_msg, id),
       );
@@ -286,7 +291,7 @@ let shouldFetch = !existing || existing.remote.offset === 0;
   const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.currentTarget;
     setInputMsg(data.value);
-  };
+  };//onchange para el input de mensajes
 
   //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
   const returnToGroup = async () => {
@@ -299,12 +304,9 @@ let shouldFetch = !existing || existing.remote.offset === 0;
     setClientSelected("");
     setActiveFeed(true);
     setInputSearch("");
-    //reset de metadata en inbox privados, update de offset, order, byId y hasmore
-
-    //setMessageFeed((prev) => [...prev, ...public_msg]); esto ahora vive en el appstore
-    //setResSearch([]);
-
     //con este setter deberia comprender las mismas funciones que los dos que tengo comentado una linea arriba. Si estoy en chat privado o en una busqueda privada y presiono ir al chat publico, seteo el cambio de modo a remoto por las dudas, cambio el active a public y con un efecto deberia escuchar esa dependencia y cambiar el feed que leo viendo public y pasando ahora la informacion del estado que designe al feed.
+    
+    //FALTAN LOS MENSAJES PUBLICOS, ACA HAY QUE HACER LO MISMO QUE EN EL HANDLE SELECT CLIENT
     setAppStore((prev) => ({
       ...prev,
       store: {
@@ -445,11 +447,9 @@ let shouldFetch = !existing || existing.remote.offset === 0;
     setInputMsgSearch,
     handleSearchMsg,
     onChangeSearchMsgFeed,
-
     messageRefs,
     inputSearch,
     setInputSearch,
-
     //nueos estados
     user,
     setUser,

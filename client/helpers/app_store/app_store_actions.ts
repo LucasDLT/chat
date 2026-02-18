@@ -195,9 +195,7 @@ export const handleUpdatePrivateData = (
   const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
 
   const newOffset = newOrder.length;
-console.log("ANTES", existingConversation.order.length);
-console.log("NUEVOS", normalized_msg.length);
-console.log("DESPUES", newOrder.length);
+
 
   return {
     ...prev,
@@ -257,7 +255,8 @@ export const handleUpdateSearchMsgPriv = (
     .map((m) => m.id.toString());
 
   const new_offset =
-    prev.store.feed.private[id].remote.offset + prev.store.remote.limit; //calculo el new_offset sumando el offset y el limit
+    prev.store.feed.private[id].remote.offset + prev.store.remote.limit; 
+    //calculo el new_offset sumando el offset y el limit
 
   const new_hasMore = new_matches.length > new_offset; //calculo si la longitud de matches es mayor al new_offset
 
@@ -268,7 +267,6 @@ export const handleUpdateSearchMsgPriv = (
       feed: {
         ...prev.store.feed,
         mode: "local",
-        active: "private",
         private: {
           ...prev.store.feed.private,
           [id]: {
