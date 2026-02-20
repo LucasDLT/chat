@@ -241,6 +241,12 @@ export const handleUpdateSearchMsgPriv = (
   const new_byId = { ...prev.store.feed.private[id].byId };
   const new_order = [...prev.store.feed.private[id].order];
 
+  console.log(new_buffer, "buffer");
+  console.log(new_byId, "newById");
+  console.log(new_order, "new_order");
+  
+  
+  
   normalized_msg.forEach((msg) => {
     new_buffer[msg.id] = msg;
 
@@ -253,6 +259,7 @@ export const handleUpdateSearchMsgPriv = (
   const new_matches = Object.values(new_buffer)
     .filter((m) => m.text.toLowerCase().includes(query))
     .map((m) => m.id.toString());
+console.log(new_matches, "new_matches");
 
   const new_offset =
     prev.store.feed.private[id].remote.offset + prev.store.remote.limit; 

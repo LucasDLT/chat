@@ -262,7 +262,7 @@ export const INITIAL_STATE: AppStore = {
   },
   store: {
     feed: {
-      mode: "local",
+      mode: "remote",
       active: "public",
       private: {},
       public: {
@@ -277,14 +277,14 @@ export const INITIAL_STATE: AppStore = {
       },
     },
     remote: {
-      limit: 30,
+      limit: 100,
 
     },
     local: {
       matches: [],
       activeIndex: 0,
       offset: 0,
-      limit: 30,
+      limit: 100,
     },
 
   },

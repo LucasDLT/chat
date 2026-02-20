@@ -31,7 +31,7 @@ export default function Chat() {
   }, [user]);
 
   return (
-    <main className="yellowBg h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
+    <main className=" h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
       <DirectorySection />
       <FeedSection />
       <InputMsgChat />

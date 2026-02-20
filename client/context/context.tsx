@@ -200,12 +200,10 @@ console.log(query, "query que llega al handle");
         query,
         privateIdMsg,
       );
-      console.log("historyprivate", history_msg);
       
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_private(history_msg);
       const id = privateIdMsg.toString();
-      console.log(normalized_msg, id, "normalizacion y id");
       
       setAppStore((prev) =>
         handleUpdateSearchMsgPriv(query, prev, normalized_msg, id),

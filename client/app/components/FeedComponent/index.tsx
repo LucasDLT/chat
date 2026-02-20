@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { InputMsgSearch } from "../InputMsgSearch";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
 
@@ -22,85 +22,85 @@ export const FeedSection = () => {
   const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
 
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isNearBottom, setIsNearBottom] = useState(true);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isAtTop, setIsAtTop] = useState(false);
+ // const containerRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const hasMountedRef = useRef(false);
+
+
+
   const prevLengthRef = useRef(0);
 
-  // Feeds derivados
   const publicFeed = appStore.store.feed.public;
   const privateFeed = privateIdMsg
     ? appStore.store.feed.private[privateIdMsg]
     : null;
 
-const privateMessages = useMemo(() => {
-  if (!privateFeed) return [];
-  return Object.values(privateFeed.byId).sort((a, b) => a.timestamp - b.timestamp);
-}, [privateFeed?.byId]);
+  const privateMessages = useMemo(() => {
+    if (!privateFeed) return [];
+    return Object.values(privateFeed.byId).sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+  }, [privateFeed?.byId]);
 
-const messageFeed = useMemo(() => {
-  return Object.values(publicFeed.byId).sort((a, b) => a.timestamp - b.timestamp);
-}, [publicFeed.byId]);
+  const messageFeed = useMemo(() => {
+    return Object.values(publicFeed.byId).sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+  }, [publicFeed.byId]);
 
-const currentFeed = privateIdMsg ? privateMessages : messageFeed;
+  const currentFeed = privateIdMsg ? privateMessages : messageFeed;
 
-  // Control unread
-  useEffect(() => {
-    const prevLength = prevLengthRef.current;
-
-    if (currentFeed.length > prevLength && !isNearBottom) {
-      setUnreadCount((prev) => prev + (currentFeed.length - prevLength));
-    }
-
-    prevLengthRef.current = currentFeed.length;
-  }, [currentFeed.length, isNearBottom]);
-
-  // Scroll listener
-  useEffect(() => {
-    const container = privateIdMsg
+  const getContainer = () =>
+    privateIdMsg
       ? refMessageInFeedPrivate.current
       : refMessageInFeedPublic.current;
 
+  // SCROLL DETECTOR REAL
+  useEffect(() => {
+    const container = getContainer();
     if (!container) return;
 
     const handleScroll = () => {
-      const nearBottom =
-        container.scrollHeight - container.scrollTop - container.clientHeight <
-        50;
-      setIsNearBottom(nearBottom);
+      const { scrollTop, scrollHeight, clientHeight } = container;
+
+      const atTop = scrollTop <= 5;
+
+      const atBottom = scrollHeight - scrollTop - clientHeight <= 5;
+
+      setIsAtTop(atTop);
+      setIsAtBottom(atBottom);
+
+      // Si el usuario baja manualmente al fondo → limpiar unread
+      if (atBottom) {
+        setUnreadCount(0);
+      }
     };
 
-    handleScroll();
+    requestAnimationFrame(handleScroll);
+
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [privateIdMsg]);
 
-  //Scroll automático cuando llegan mensajes nuevos
+  // CONTROL UNREAD 
   useEffect(() => {
-    const container = privateIdMsg
-      ? refMessageInFeedPrivate.current
-      : refMessageInFeedPublic.current;
+    const prevLength = prevLengthRef.current;
 
-    if (!container) return;
-
-    const feedById = privateIdMsg
-      ? appStore.store.feed.private[privateIdMsg]?.byId
-      : appStore.store.feed.public.byId;
-
-    if (!feedById) return;
-
-    const nearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      80;
-    if (nearBottom) {
-      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-      setUnreadCount(0);
+    if (currentFeed.length > prevLength) {
+      const newMessages = currentFeed.slice(prevLength);
+      const myUserId = socketRef.current?.userId;
+      const foreignMessages = newMessages.filter((m) => m.fromId !== myUserId);
+      if (!isAtBottom && foreignMessages.length > 0) {
+        setUnreadCount((prev) => prev + foreignMessages.length);
+      }
     }
-  }, [
-    privateIdMsg,
-    appStore.store.feed.public.byId,
-    appStore.store.feed.private[privateIdMsg ?? ""]?.byId,
-  ]);
 
-  // Scroll al mensaje activo (búsqueda)
+    prevLengthRef.current = currentFeed.length;
+  }, [currentFeed.length, isAtBottom]);
+
+  // Scroll a mensaje buscado
   useEffect(() => {
     if (!activeMessageId) return;
     const el = messageRefs.current[activeMessageId];
@@ -108,41 +108,62 @@ const currentFeed = privateIdMsg ? privateMessages : messageFeed;
   }, [activeMessageId]);
 
   const handleGoToBottom = () => {
-    const container = privateIdMsg
-      ? refMessageInFeedPrivate.current
-      : refMessageInFeedPublic.current;
+    const container = getContainer();
     if (!container) return;
 
-    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+
     setUnreadCount(0);
   };
+useEffect(() => {
+  const container = getContainer();
+  if (!container) return;
 
+  if (hasMountedRef.current) return;
+  if (currentFeed.length === 0) return;
+
+  requestAnimationFrame(() => {
+    container.scrollTop = container.scrollHeight;
+    hasMountedRef.current = true;
+  });
+}, [currentFeed.length, privateIdMsg]);
+useEffect(() => {
+  hasMountedRef.current = false;
+  prevLengthRef.current = 0;
+  setUnreadCount(0);
+}, [privateIdMsg]);
   return (
     <section
-      className={`${activeFeed ? "flex yellowBg justify-center items-center h-100vh " : "hidden"}`}
+      className={`${activeFeed ? " " : ""}`}
     >
       <InputMsgSearch />
 
       {privateIdMsg ? (
-        <section className="h-[60vh] w-94 top-46 xl:h-[90vh] xl:w-[80vw] absolute xl:top-1 xl:right-16.5 rounded-bl-xs rounded-br-xs">
-          <Image
-            src="/background-directorio.jpg"
-            width={3000}
-            height={1000}
-            alt="background feed chat"
-            className="w-full h-full object-cover z-0 rounded-xs"
-          />
-          <h3 className="absolute -top-12 left-1 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-44 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
+        <section className="">
+         
+
+          <h3 className="z-10">
             {clientSelected}
           </h3>
+
           <div
-            className="flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[51.5vh] xl:h-[83.7vh] absolute g-2 top-18 xl:top-11 w-94 xl:w-[79vw]"
+            className=" "
             ref={refMessageInFeedPrivate}
           >
+            {isAtTop && (
+              <div className=" z-8">
+                ↑
+              </div>
+            )}
+
             {privateMessages.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
               const isActive = msg.id === activeMessageId;
+
               return (
                 <MessageItem
                   key={msg.id}
@@ -156,35 +177,40 @@ const currentFeed = privateIdMsg ? privateMessages : messageFeed;
               );
             })}
           </div>
-          {unreadCount > 0 && !isNearBottom && (
+
+          {unreadCount > 0 && !isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="absolute animate-pulse -right-3.5 xl:-right-2 -bottom-4 xl:bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
+              className="z-8"
             >
               ↓ {unreadCount}
             </button>
           )}
+          
         </section>
       ) : (
-        <section className="h-[60vh] w-94 top-46 xl:h-[90vh] xl:w-[80vw] absolute xl:top-1 xl:right-16.5 rounded-sm">
-          <Image
-            src="/background-directorio.jpg"
-            width={3000}
-            height={1000}
-            alt="background feed chat"
-            className="w-full h-full object-cover z-0 rounded-xs"
-          />
-          <h3 className="absolute -top-12 left-1 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-44 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
+        <section className="">
+          
+
+          <h3 className="z-10">
             mensaje publico
           </h3>
+
           <div
-            className="flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[51.5vh] xl:h-[83.7vh] absolute g-2 top-18 xl:top-11 w-94 xl:w-[79vw]"
+            className=""
             ref={refMessageInFeedPublic}
           >
+            {isAtTop && (
+              <div className="z-8">
+                ↑
+              </div>
+            )}
+
             {messageFeed.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
               const isActive = msg.id === activeMessageId;
+
               return (
                 <MessageItem
                   key={msg.id}
@@ -197,11 +223,12 @@ const currentFeed = privateIdMsg ? privateMessages : messageFeed;
                 />
               );
             })}
-          </div>
-          {unreadCount > 0 && !isNearBottom && (
+        </div>
+
+          {unreadCount > 0 && !isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="absolute animate-pulse -right-3.5 xl:-right-2 -bottom-4 xl:bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
+              className="z-8"
             >
               ↓ {unreadCount}
             </button>
