@@ -183,10 +183,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       );
     }
   };
- const requestInBuffer = ()=>{
-      if (!inputMsgSearch) return;
 
-}
   const handleSearchMsg = async (e: FormEvent<HTMLFormElement>) => {
     //busqueda de mensajes
     e.preventDefault();
@@ -228,14 +225,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
 
-    if (data.trim() === "") {
-      if (appStore.store.feed.active === "public")
-        handleNewFeedPublic(appStore);
-      if (appStore.store.feed.active === "private" && privateIdMsg) {
-        const id = privateIdMsg.toString();
-        handleNewFeedPrivate(appStore, id);
-      }
-    }
+
   };
 
   const handleActiveUser = () => {

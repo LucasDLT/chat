@@ -36,7 +36,6 @@ export const FeedSection = () => {
   const privateFeed = privateIdMsg
     ? appStore.store.feed.private[privateIdMsg]
     : null;
-    console.log(appStore.store.local.limit, "limit en memo");
 
   const privateMessages = useMemo(() => {
     if (!privateFeed) return [];
@@ -52,7 +51,7 @@ export const FeedSection = () => {
         (a, b) => a.timestamp - b.timestamp,
       );
     }
-  }, [privateFeed?.byId, appStore.store.local.offset]);  // clave: recalcula al pedir más
+  }, [privateFeed?.byId, appStore.store.local.offset, appStore.store.feed.mode, privateFeed?.order ]);  // clave: recalcula al pedir más
 
   const messageFeed = useMemo(() => {
     return Object.values(publicFeed.byId).sort(

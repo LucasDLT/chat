@@ -28,7 +28,8 @@ export const uptadeInboxPrivate = (
 
     const isOwnMessage = msg.fromId === prev.userData?.userId;
     const incrementUnread = !isOwnMessage; // tus propios mensajes no cuentan
-
+console.log("misma referencia byId?",
+  prev.store.feed.private[id].byId === safeFeed.byId);
     return {
       ...prev,
       store: {
@@ -428,18 +429,27 @@ export const handleUpdateSearchMsgPublic = (
 
 export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
   const order = [...prev.store.feed.private[id].order];
+  console.log(order, "order");
+  
   //aca hay que actualizar el order de la store y ademas el byId
   const consolidateOrder = order.slice(
     0,
     prev.store.feed.private[id].remote.offset,
   );
+  console.log("consolidate order", consolidateOrder);
+  
   //hay que resetear las propiedades de busqueda local
   const currentById = { ...prev.store.feed.private[id].byId };
+  console.log("currentbyId", currentById);
+  
   const newById: Record<string, FeedMessage> = {};
   consolidateOrder.forEach((id) => {
     newById[id] = currentById[id];
   });
+  console.log("newById", newById);
   const new_offset = prev.store.feed.private[id].remote.offset;
+  console.log("newOffset", new_offset);
+  
   return {
     ...prev,
     store: {
@@ -447,26 +457,29 @@ export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
       feed: {
         ...prev.store.feed,
         mode: "remote",
-        active: "private",
+       active: "private",
         private: {
           ...prev.store.feed.private,
           [id]: {
-            ...prev.store.feed.private[id],
             byId: newById, //aca agregar el byId consolidado
             order: consolidateOrder,
             searchBuffer: {},
             remote: {
-              ...prev.store.feed.private[id].remote,
               offset: new_offset,
-              hasMore: false,
+              hasMore: order.length > new_offset,
+              loading: false,
             },
+
           },
         },
       },
       local: {
-        ...prev.store.local,
         matches: [],
         activeIndex: 0,
+        hasMore: false,
+        limit: prev.store.remote.limit,
+        offset: 0,
+        currentMsgId: "0",
       },
     },
   };
