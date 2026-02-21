@@ -229,6 +229,7 @@ interface MessagesStore {
     offset: number;
     limit: number;
     currentMsgId?: string;
+    hasMore:boolean
   };
 }
 
@@ -285,6 +286,7 @@ export const INITIAL_STATE: AppStore = {
       activeIndex: 0,
       offset: 0,
       limit: 100,
+      hasMore:false
     },
 
   },

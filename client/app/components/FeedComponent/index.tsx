@@ -6,14 +6,8 @@ import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
 
 export const FeedSection = () => {
-  const {
-    activeFeed,
-    privateIdMsg,
-    clientSelected,
-    appStore,
-    messageRefs,
-    socketRef,
-  } = useAppContextWs();
+  const { activeFeed, privateIdMsg, appStore, messageRefs, socketRef } =
+    useAppContextWs();
 
   const activeMessageId =
     appStore.store.local.matches[appStore.store.local.activeIndex];
@@ -24,11 +18,9 @@ export const FeedSection = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isAtTop, setIsAtTop] = useState(false);
- // const containerRef = useRef<HTMLDivElement>(null);
+  // const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasMountedRef = useRef(false);
-
-
 
   const prevLengthRef = useRef(0);
 
@@ -39,9 +31,20 @@ export const FeedSection = () => {
 
   const privateMessages = useMemo(() => {
     if (!privateFeed) return [];
-    return Object.values(privateFeed.byId).sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
+    if(appStore.store.feed.mode === "local"){
+      return Object.values(privateFeed.order)
+      .slice(0, appStore.store.local.limit)
+      .map((id) => privateFeed.byId[id])
+      .sort(
+        (a, b) => a.timestamp - b.timestamp
+      )
+    }else{
+      return Object.values(privateFeed.byId).sort(
+        (a, b) => a.timestamp - b.timestamp,
+      );
+
+    }
+
   }, [privateFeed?.byId]);
 
   const messageFeed = useMemo(() => {
@@ -84,7 +87,7 @@ export const FeedSection = () => {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [privateIdMsg]);
 
-  // CONTROL UNREAD 
+  // CONTROL UNREAD
   useEffect(() => {
     const prevLength = prevLengthRef.current;
 
@@ -118,23 +121,24 @@ export const FeedSection = () => {
 
     setUnreadCount(0);
   };
-useEffect(() => {
-  const container = getContainer();
-  if (!container) return;
+  useEffect(() => {
+    const container = getContainer();
+    if (!container) return;
 
-  if (hasMountedRef.current) return;
-  if (currentFeed.length === 0) return;
+    if (hasMountedRef.current) return;
+    if (currentFeed.length === 0) return;
 
-  requestAnimationFrame(() => {
-    container.scrollTop = container.scrollHeight;
-    hasMountedRef.current = true;
-  });
-}, [currentFeed.length, privateIdMsg]);
-useEffect(() => {
-  hasMountedRef.current = false;
-  prevLengthRef.current = 0;
-  setUnreadCount(0);
-}, [privateIdMsg]);
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+      hasMountedRef.current = true;
+    });
+  }, [currentFeed.length, privateIdMsg]);
+  useEffect(() => {
+    hasMountedRef.current = false;
+    prevLengthRef.current = 0;
+    setUnreadCount(0);
+  }, [privateIdMsg]);
+
   return (
     <section
       className={`${activeFeed ? " border border-amber-50 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
@@ -143,10 +147,6 @@ useEffect(() => {
 
       {privateIdMsg ? (
         <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
-         
-
-
-
           <div
             className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
             ref={refMessageInFeedPrivate}
@@ -154,6 +154,7 @@ useEffect(() => {
             {isAtTop && (
               <div className="absolute z-8 top-0 right-4">
                 ↑
+                {/*ESTE TIENE QUE SER EL BOTON QUE PIDA MAS INFORMACION AL BUFFER O BDD DEPENDE DEL MODO DEL FEED. SI ES A LA BDD YA TENEMOS EL RESOLVE PRIVATE O PUBLIC PERO SI ES LOCAL PODEMOS REPLICARLA PARA QUE SE HAGA LO MISMO PERO SOBRE EL BUFFER*/}
               </div>
             )}
 
@@ -184,25 +185,13 @@ useEffect(() => {
               ↓ {unreadCount}
             </button>
           )}
-          
         </section>
       ) : (
         <section className="">
-          
+          <h3 className="z-10">mensaje publico</h3>
 
-          <h3 className="z-10">
-            mensaje publico
-          </h3>
-
-          <div
-            className=""
-            ref={refMessageInFeedPublic}
-          >
-            {isAtTop && (
-              <div className="z-8">
-                ↑
-              </div>
-            )}
+          <div className="" ref={refMessageInFeedPublic}>
+            {isAtTop && <div className="z-8">↑</div>}
 
             {messageFeed.map((msg) => {
               const id = msg.id.toString();
@@ -221,21 +210,16 @@ useEffect(() => {
                 />
               );
             })}
-        </div>
+          </div>
 
           {unreadCount > 0 && !isAtBottom && (
-            <button
-              onClick={handleGoToBottom}
-              className="z-8 absolute"
-            >
+            <button onClick={handleGoToBottom} className="z-8 absolute">
               ↓ {unreadCount}
             </button>
           )}
         </section>
       )}
-            <InputMsgChat />
-
+      <InputMsgChat />
     </section>
-    
   );
 };

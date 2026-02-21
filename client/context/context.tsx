@@ -136,55 +136,57 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const [appStore, setAppStore] = useState<AppStore>(INITIAL_STATE);
 
   //toda esta funcion es para lo privado al seleccionar un usuario del directorio
- const handleSelectClient = async (userId: number, nick: string) => {
-  setActiveFeed(true);
-  setPrivateIdMsg(userId);
-  setClientSelected(nick);
+  const handleSelectClient = async (userId: number, nick: string) => {
+    setActiveFeed(true);
+    setPrivateIdMsg(userId);
+    setClientSelected(nick);
 
-const existing = appStore.store.feed.private[userId];
-let shouldFetch = !existing || existing.remote.offset === 0;
+    const existing = appStore.store.feed.private[userId];
+    let shouldFetch = !existing || existing.remote.offset === 0;
 
-  setAppStore((prev) => {
-    const existing = prev.store.feed.private[userId];
+    setAppStore((prev) => {
+      const existing = prev.store.feed.private[userId];
 
-    if (!existing || existing.order.length === 0) {
-      shouldFetch = true;
+      if (!existing || existing.order.length === 0) {
+        shouldFetch = true;
+      }
+
+      return {
+        ...prev,
+        store: {
+          ...prev.store,
+          feed: {
+            ...prev.store.feed,
+            active: "private",
+          },
+        },
+        inboxMeta: {
+          ...prev.inboxMeta,
+          [userId]: {
+            ...prev.inboxMeta[userId],
+            unreadCount: 0,
+            hasNewMessages: false,
+          },
+        },
+      };
+    });
+
+    if (shouldFetch) {
+      const offset = 0;
+      const limit = appStore.store.remote.limit;
+
+      const messages = await resolve_private_messages(userId, offset, limit);
+      const normalized_msg = normalize_msg_private(messages);
+
+      setAppStore((prev) =>
+        handleUpdatePrivateData(normalized_msg, prev, userId.toString()),
+      );
     }
+  };
+ const requestInBuffer = ()=>{
+      if (!inputMsgSearch) return;
 
-    return {
-      ...prev,
-      store: {
-        ...prev.store,
-        feed: {
-          ...prev.store.feed,
-          active: "private",
-        },
-      },
-      inboxMeta: {
-        ...prev.inboxMeta,
-        [userId]: {
-          ...prev.inboxMeta[userId],
-          unreadCount: 0,
-          hasNewMessages: false,
-        },
-      },
-    };
-  });
-
-  if (shouldFetch) {
-    const offset = 0;
-    const limit = appStore.store.remote.limit;
-
-    const messages = await resolve_private_messages(userId, offset, limit);
-    const normalized_msg = normalize_msg_private(messages);
-
-    setAppStore((prev) =>
-      handleUpdatePrivateData(normalized_msg, prev, userId.toString())
-    );
-  }
-};
-
-
+}
   const handleSearchMsg = async (e: FormEvent<HTMLFormElement>) => {
     //busqueda de mensajes
     e.preventDefault();
@@ -192,7 +194,7 @@ let shouldFetch = !existing || existing.remote.offset === 0;
     if (!inputMsgSearch) return;
 
     const query = inputMsgSearch.trim().toLowerCase();
-console.log(query, "query que llega al handle");
+    console.log(query, "query que llega al handle");
 
     if (clientSelected && privateIdMsg) {
       //aca deberia poner el helper para la busqueda de mensajes privados
@@ -200,11 +202,11 @@ console.log(query, "query que llega al handle");
         query,
         privateIdMsg,
       );
-      
+
       //cuando tenga los resultados deberia actualizar el estado que guarda los mensajes filtrados
       const normalized_msg = normalize_msg_private(history_msg);
       const id = privateIdMsg.toString();
-      
+
       setAppStore((prev) =>
         handleUpdateSearchMsgPriv(query, prev, normalized_msg, id),
       );
@@ -219,6 +221,7 @@ console.log(query, "query que llega al handle");
       );
     }
   };
+  
 
   //esta la vamos a usar en el filtro tipo WS
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,7 +292,7 @@ console.log(query, "query que llega al handle");
   const changeInputMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const data = event.currentTarget;
     setInputMsg(data.value);
-  };//onchange para el input de mensajes
+  }; //onchange para el input de mensajes
 
   //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
   const returnToGroup = async () => {
@@ -303,7 +306,7 @@ console.log(query, "query que llega al handle");
     setActiveFeed(true);
     setInputSearch("");
     //con este setter deberia comprender las mismas funciones que los dos que tengo comentado una linea arriba. Si estoy en chat privado o en una busqueda privada y presiono ir al chat publico, seteo el cambio de modo a remoto por las dudas, cambio el active a public y con un efecto deberia escuchar esa dependencia y cambiar el feed que leo viendo public y pasando ahora la informacion del estado que designe al feed.
-    
+
     //FALTAN LOS MENSAJES PUBLICOS, ACA HAY QUE HACER LO MISMO QUE EN EL HANDLE SELECT CLIENT
     setAppStore((prev) => ({
       ...prev,
