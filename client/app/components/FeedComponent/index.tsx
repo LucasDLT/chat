@@ -4,10 +4,18 @@ import { InputMsgSearch } from "../InputMsgSearch";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
+import { handleUpdateView } from "@/helpers/app_store/app_store_actions";
 
 export const FeedSection = () => {
-  const { activeFeed, privateIdMsg, appStore, messageRefs, socketRef } =
-    useAppContextWs();
+  const {
+    activeFeed,
+    privateIdMsg,
+    appStore,
+    messageRefs,
+    socketRef,
+    inputMsgSearch,
+    setAppStore,
+  } = useAppContextWs();
 
   const activeMessageId =
     appStore.store.local.matches[appStore.store.local.activeIndex];
@@ -28,24 +36,23 @@ export const FeedSection = () => {
   const privateFeed = privateIdMsg
     ? appStore.store.feed.private[privateIdMsg]
     : null;
+    console.log(appStore.store.local.limit, "limit en memo");
 
   const privateMessages = useMemo(() => {
     if (!privateFeed) return [];
-    if(appStore.store.feed.mode === "local"){
+    if (appStore.store.feed.mode === "local") {
+      let limit = appStore.store.local.offset;
+      
       return Object.values(privateFeed.order)
-      .slice(0, appStore.store.local.limit)
-      .map((id) => privateFeed.byId[id])
-      .sort(
-        (a, b) => a.timestamp - b.timestamp
-      )
-    }else{
+        .slice(0, limit)
+        .map((id) => privateFeed.byId[id])
+        .sort((a, b) => a.timestamp - b.timestamp);
+    } else {
       return Object.values(privateFeed.byId).sort(
         (a, b) => a.timestamp - b.timestamp,
       );
-
     }
-
-  }, [privateFeed?.byId]);
+  }, [privateFeed?.byId, appStore.store.local.offset]);  // clave: recalcula al pedir más
 
   const messageFeed = useMemo(() => {
     return Object.values(publicFeed.byId).sort(
@@ -133,12 +140,27 @@ export const FeedSection = () => {
       hasMountedRef.current = true;
     });
   }, [currentFeed.length, privateIdMsg]);
+
   useEffect(() => {
     hasMountedRef.current = false;
     prevLengthRef.current = 0;
     setUnreadCount(0);
   }, [privateIdMsg]);
 
+  const getMoreMessages = () => {
+    if (
+      appStore.store.feed.mode === "local" &&
+      inputMsgSearch &&
+      privateIdMsg
+    ) {
+      const query = inputMsgSearch.trim().toLowerCase();
+      const activeIndex = appStore.store.local.activeIndex;
+      const id = privateIdMsg.toString();
+      console.log("valores que paso dentro del get more msg", query, activeIndex, id);
+      
+      setAppStore((prev) => handleUpdateView(prev, id, activeIndex, query));
+    }
+  };
   return (
     <section
       className={`${activeFeed ? " border border-amber-50 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
@@ -152,10 +174,12 @@ export const FeedSection = () => {
             ref={refMessageInFeedPrivate}
           >
             {isAtTop && (
-              <div className="absolute z-8 top-0 right-4">
+              <button
+                onClick={getMoreMessages}
+                className="absolute z-8 top-0 right-4">
                 ↑
                 {/*ESTE TIENE QUE SER EL BOTON QUE PIDA MAS INFORMACION AL BUFFER O BDD DEPENDE DEL MODO DEL FEED. SI ES A LA BDD YA TENEMOS EL RESOLVE PRIVATE O PUBLIC PERO SI ES LOCAL PODEMOS REPLICARLA PARA QUE SE HAGA LO MISMO PERO SOBRE EL BUFFER*/}
-              </div>
+              </button>
             )}
 
             {privateMessages.map((msg) => {
