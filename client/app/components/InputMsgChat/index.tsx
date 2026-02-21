@@ -27,13 +27,13 @@ export const InputMsgChat = () => {
     activeFeed && (
       <form
         onSubmit={handleSubmit}
-        className="flex items-center justify-center bg-black px-3 absolute bottom-2 right-1 h-[7vh]  rounded-none w-[98vw] xl:bottom-1 xl:right-35 xl:w-[70vw] xl:h-[8vh] xl:rounded"
+        className=" bg-white h-full flex justify-center items-center"
       >
         <input
           onChange={changeInputMessage}
           value={inputMsg ? inputMsg : ""}
           type="text"
-          className=" m-1 rounded xl:w-full xl:h-10 bg-neutral-800 text-white p-1"
+          className=" m-1 rounded xl:w-250 xl:h-10 bg-neutral-800 text-white p-1"
         />
         <button
           type="submit"

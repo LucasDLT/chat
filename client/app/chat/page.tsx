@@ -4,7 +4,6 @@ import { useAppContextWs } from "@/context/context";
 import { DirectorySection } from "@/app/components/DirectorySection/index";
 import { NavbarChat } from "@/app/components/NavbarChat/index";
 import { FeedSection } from "@/app/components/FeedComponent/index";
-import { InputMsgChat } from "@/app/components/InputMsgChat/index";
 import { resolve_request_me } from "@/helpers/me";
 import { User } from "@/types/types";
 
@@ -31,10 +30,9 @@ export default function Chat() {
   }, [user]);
 
   return (
-    <main className=" h-[92vh] w-full flex flex-col xl:h-screen xl:flex-row relative xl:justify-between ">
+    <main className="h-dvh w-auto grid grid-cols-[236px_1fr_60px]">
       <DirectorySection />
       <FeedSection />
-      <InputMsgChat />
       <NavbarChat />
     </main>
   );

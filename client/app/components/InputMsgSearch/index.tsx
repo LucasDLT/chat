@@ -8,33 +8,33 @@ export const InputMsgSearch = () => {
     onChangeSearchMsgFeed,
     inputMsgSearch,
     handleSearchMsg,
+    clientSelected,
   } = useAppContextWs();
 
   return (
     <form
-      className={`z-11 top-36 justify-between right-6 w-40 items-center xl:w-56 xl:h-9 flex absolute xl:right-78 xl:top-[5.6px]`}
+      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_240px_20px] min-w-0 min-h-0 gap-4 items-center justify-center `}
       onSubmit={handleSearchMsg}
     >
+      <h3 className="z-10 border  bg-lime-500 text-black">{clientSelected}</h3>
       <input
         onChange={onChangeSearchMsgFeed}
         type="text"
-        className=" yellowBg h-6 rounded-xs text-black text-center w-34 xl:w-45 xl:h-7"
+        className="bg-amber-600 text-black"
         value={inputMsgSearch ? inputMsgSearch : ""}
       />
 
-      <button
-        type="submit"
-        className=" m-1 rounded bg-neutral-800 text-white text-sm p-1.5 hover:cursor-pointer"
-      >
-        <Image
-          src={"/icons/enviar.png"}
-          alt="enviar mensaje"
-          width={20}
-          height={30}
-        />
-      </button>
-      {inputMsgSearch && (
-        <ButtonsSearch/>
+      {inputMsgSearch ? (
+        <ButtonsSearch />
+      ) : (
+        <button type="submit" className=" bg-blue-500">
+          <Image
+            src={"/icons/enviar.png"} //CAMBIAR POR UNA LUPA
+            alt="enviar mensaje"
+            width={20}
+            height={30}
+          />
+        </button>
       )}
     </form>
   );

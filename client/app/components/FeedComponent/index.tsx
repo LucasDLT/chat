@@ -1,7 +1,7 @@
 "use client";
-import Image from "next/image";
+import { InputMsgChat } from "@/app/components/InputMsgChat/index";
 import { InputMsgSearch } from "../InputMsgSearch";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
 
@@ -137,24 +137,22 @@ useEffect(() => {
 }, [privateIdMsg]);
   return (
     <section
-      className={`${activeFeed ? " " : ""}`}
+      className={`${activeFeed ? " border border-amber-50 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
     >
       <InputMsgSearch />
 
       {privateIdMsg ? (
-        <section className="">
+        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
          
 
-          <h3 className="z-10">
-            {clientSelected}
-          </h3>
+
 
           <div
-            className=" "
+            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
             ref={refMessageInFeedPrivate}
           >
             {isAtTop && (
-              <div className=" z-8">
+              <div className="absolute z-8 top-0 right-4">
                 ↑
               </div>
             )}
@@ -181,7 +179,7 @@ useEffect(() => {
           {unreadCount > 0 && !isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="z-8"
+              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
             >
               ↓ {unreadCount}
             </button>
@@ -228,13 +226,16 @@ useEffect(() => {
           {unreadCount > 0 && !isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="z-8"
+              className="z-8 absolute"
             >
               ↓ {unreadCount}
             </button>
           )}
         </section>
       )}
+            <InputMsgChat />
+
     </section>
+    
   );
 };

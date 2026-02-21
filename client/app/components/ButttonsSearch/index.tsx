@@ -37,14 +37,16 @@ export const ButtonsSearch = () => {
     }));
   };
   return (
-    <div>
+    <div className="flex justify-center items-center gap-4">
       <button
+        className="hover:cursor-pointer"
         type="button"
         onClick={goToNextMatch}
         disabled={appStore.store.local.activeIndex === appStore.store.local.matches.length - 1}>
         ↓
       </button>
       <button
+        className="hover:cursor-pointer"
         type="button"
         onClick={goToPrevMatch}
         disabled={appStore.store.local.activeIndex === 0}>
