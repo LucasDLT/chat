@@ -4,7 +4,12 @@ import { InputMsgSearch } from "../InputMsgSearch";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
-import { handleUpdateView } from "@/helpers/app_store/app_store_actions";
+import {
+  handleUpdatePrivateData,
+  handleUpdateView,
+} from "@/helpers/app_store/app_store_actions";
+import { resolve_private_messages } from "@/helpers/messages/private_msg";
+import { normalize_msg_private } from "@/helpers/sockets_fn/ws_handles";
 
 export const FeedSection = () => {
   const {
@@ -23,7 +28,6 @@ export const FeedSection = () => {
   const refMessageInFeedPublic = useRef<HTMLDivElement | null>(null);
   const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
 
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isAtTop, setIsAtTop] = useState(false);
   // const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +45,7 @@ export const FeedSection = () => {
     if (!privateFeed) return [];
     if (appStore.store.feed.mode === "local") {
       let limit = appStore.store.local.offset;
-      
+
       return Object.values(privateFeed.order)
         .slice(0, limit)
         .map((id) => privateFeed.byId[id])
@@ -51,7 +55,12 @@ export const FeedSection = () => {
         (a, b) => a.timestamp - b.timestamp,
       );
     }
-  }, [privateFeed?.byId, appStore.store.local.offset, appStore.store.feed.mode, privateFeed?.order ]);  // clave: recalcula al pedir más
+  }, [
+    privateFeed?.byId,
+    appStore.store.local.offset,
+    appStore.store.feed.mode,
+    privateFeed?.order,
+  ]); // clave: recalcula al pedir más
 
   const messageFeed = useMemo(() => {
     return Object.values(publicFeed.byId).sort(
@@ -81,10 +90,7 @@ export const FeedSection = () => {
       setIsAtTop(atTop);
       setIsAtBottom(atBottom);
 
-      // Si el usuario baja manualmente al fondo → limpiar unread
-      if (atBottom) {
-        setUnreadCount(0);
-      }
+
     };
 
     requestAnimationFrame(handleScroll);
@@ -93,21 +99,6 @@ export const FeedSection = () => {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [privateIdMsg]);
 
-  // CONTROL UNREAD
-  useEffect(() => {
-    const prevLength = prevLengthRef.current;
-
-    if (currentFeed.length > prevLength) {
-      const newMessages = currentFeed.slice(prevLength);
-      const myUserId = socketRef.current?.userId;
-      const foreignMessages = newMessages.filter((m) => m.fromId !== myUserId);
-      if (!isAtBottom && foreignMessages.length > 0) {
-        setUnreadCount((prev) => prev + foreignMessages.length);
-      }
-    }
-
-    prevLengthRef.current = currentFeed.length;
-  }, [currentFeed.length, isAtBottom]);
 
   // Scroll a mensaje buscado
   useEffect(() => {
@@ -125,7 +116,6 @@ export const FeedSection = () => {
       behavior: "smooth",
     });
 
-    setUnreadCount(0);
   };
   useEffect(() => {
     const container = getContainer();
@@ -143,10 +133,9 @@ export const FeedSection = () => {
   useEffect(() => {
     hasMountedRef.current = false;
     prevLengthRef.current = 0;
-    setUnreadCount(0);
   }, [privateIdMsg]);
 
-  const getMoreMessages = () => {
+  const getMoreMessages = async () => {
     if (
       appStore.store.feed.mode === "local" &&
       inputMsgSearch &&
@@ -155,9 +144,31 @@ export const FeedSection = () => {
       const query = inputMsgSearch.trim().toLowerCase();
       const activeIndex = appStore.store.local.activeIndex;
       const id = privateIdMsg.toString();
-      console.log("valores que paso dentro del get more msg", query, activeIndex, id);
-      
+      console.log(
+        "valores que paso dentro del get more msg",
+        query,
+        activeIndex,
+        id,
+      );
+
       setAppStore((prev) => handleUpdateView(prev, id, activeIndex, query));
+    }
+    if (appStore.store.feed.mode === "remote" && privateIdMsg) {
+      const existing = appStore.store.feed.private[privateIdMsg];
+
+      if (!existing?.remote.hasMore || existing.remote.loading) return;
+      const offset = existing.remote.offset;
+      const limit = appStore.store.remote.limit;
+      const userId = privateIdMsg.toString();
+
+      const messages = await resolve_private_messages(
+        privateIdMsg,
+        offset,
+        limit,
+      );
+      const normalized = normalize_msg_private(messages);
+
+      setAppStore((prev) => handleUpdatePrivateData(normalized, prev, userId));
     }
   };
   return (
@@ -175,7 +186,8 @@ export const FeedSection = () => {
             {isAtTop && (
               <button
                 onClick={getMoreMessages}
-                className="absolute z-8 top-0 right-4">
+                className="absolute z-8 top-0 right-4"
+              >
                 ↑
                 {/*ESTE TIENE QUE SER EL BOTON QUE PIDA MAS INFORMACION AL BUFFER O BDD DEPENDE DEL MODO DEL FEED. SI ES A LA BDD YA TENEMOS EL RESOLVE PRIVATE O PUBLIC PERO SI ES LOCAL PODEMOS REPLICARLA PARA QUE SE HAGA LO MISMO PERO SOBRE EL BUFFER*/}
               </button>
@@ -200,12 +212,12 @@ export const FeedSection = () => {
             })}
           </div>
 
-          {unreadCount > 0 && !isAtBottom && (
+          {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
               className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
             >
-              ↓ {unreadCount}
+              ↓
             </button>
           )}
         </section>
@@ -235,9 +247,9 @@ export const FeedSection = () => {
             })}
           </div>
 
-          {unreadCount > 0 && !isAtBottom && (
+          {!isAtBottom && (
             <button onClick={handleGoToBottom} className="z-8 absolute">
-              ↓ {unreadCount}
+              ↓ 
             </button>
           )}
         </section>

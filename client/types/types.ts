@@ -265,7 +265,9 @@ export const INITIAL_STATE: AppStore = {
     feed: {
       mode: "remote",
       active: "public",
-      private: {},
+      private: {
+        
+      },
       public: {
         byId: {},
         order: [],
@@ -290,7 +292,9 @@ export const INITIAL_STATE: AppStore = {
     },
 
   },
-  inboxMeta: {},
+  inboxMeta: {
+
+  },
   publicMeta: {
     unreadCount: 0,
     hasNewMessages: false,

@@ -28,8 +28,7 @@ export const uptadeInboxPrivate = (
 
     const isOwnMessage = msg.fromId === prev.userData?.userId;
     const incrementUnread = !isOwnMessage; // tus propios mensajes no cuentan
-console.log("misma referencia byId?",
-  prev.store.feed.private[id].byId === safeFeed.byId);
+
     return {
       ...prev,
       store: {
@@ -220,13 +219,14 @@ export const handleUpdatePrivateData = (
         },
       },
     },
-    inboxMeta: {
-      ...prev.inboxMeta,
-      [userId]: {
-        ...prev.inboxMeta[userId],
-        lastMessageTimestamp: normalized_msg[normalized_msg.length - 1]?.timestamp??0,
-      },
-    },
+inboxMeta: {
+  ...prev.inboxMeta,
+  [userId]: {
+    ...(prev.inboxMeta[userId] ?? {}),
+    lastMessageTimestamp:
+      normalized_msg[normalized_msg.length - 1]?.timestamp ?? 0,
+  },
+},
   };
 };
 
