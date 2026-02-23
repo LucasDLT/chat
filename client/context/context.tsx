@@ -22,6 +22,7 @@ import {
   DispatchContext,
   AppStore,
   INITIAL_STATE,
+  FeedMessage,
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { resolve_private_messages } from "@/helpers/messages/private_msg";
@@ -42,8 +43,8 @@ import {
   handleUpdatePrivateData,
   handleUpdateSearchMsgPriv,
   handleUpdateSearchMsgPublic,
-  handleNewFeedPublic,
-  handleNewFeedPrivate,
+  handleUpdatePublicData,
+
 } from "@/helpers/app_store/app_store_actions";
 
 interface IcontextProps {
@@ -286,17 +287,12 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   //ahora esta funcion tambien va a lanzar la peticion de mensajes publicos, tiene que ser async y ademas recibir en orden los parametros para la query
   const returnToGroup = async () => {
-    const offsetPublic = appStore.store.feed.public.remote.offset;
-    const limitPublic = appStore.store.remote.limit;
-    const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
-    console.log(public_msg);
-
     setPrivateIdMsg(undefined);
     setClientSelected("");
     setActiveFeed(true);
     setInputSearch("");
     //con este setter deberia comprender las mismas funciones que los dos que tengo comentado una linea arriba. Si estoy en chat privado o en una busqueda privada y presiono ir al chat publico, seteo el cambio de modo a remoto por las dudas, cambio el active a public y con un efecto deberia escuchar esa dependencia y cambiar el feed que leo viendo public y pasando ahora la informacion del estado que designe al feed.
-
+    
     //FALTAN LOS MENSAJES PUBLICOS, ACA HAY QUE HACER LO MISMO QUE EN EL HANDLE SELECT CLIENT
     setAppStore((prev) => ({
       ...prev,
@@ -315,6 +311,14 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
         },
       },
     }));
+    const offsetPublic = appStore.store.feed.public.remote.offset;
+    const limitPublic = appStore.store.remote.limit;
+    const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
+    console.log(public_msg);
+    
+    const normalized_msg = normalize_msg_public(public_msg);
+    setAppStore((prev) => 
+      handleUpdatePublicData( normalized_msg, prev))
   };
 
   //CONTROLLER DE SETTERS
@@ -451,3 +455,7 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   return <ContextApp.Provider value={value}>{children}</ContextApp.Provider>;
 };
+{/*function handleUpdatePublic(prev: AppStore, normalized_msg: FeedMessage[]): AppStore {
+  throw new Error("Function not implemented.");
+}
+*/}

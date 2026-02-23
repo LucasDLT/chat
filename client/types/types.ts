@@ -176,7 +176,7 @@ export enum forms {
 export interface PublicMessage {
   id: number;
   text: string;
-  craetedAt: Date;
+  craetedAt: string;
   sender: PublicUser;
 }
 export interface PublicUser {

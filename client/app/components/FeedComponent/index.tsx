@@ -63,7 +63,10 @@ export const FeedSection = () => {
   ]); // clave: recalcula al pedir más
 
   const messageFeed = useMemo(() => {
-    return Object.values(publicFeed.byId).sort(
+    return Object.values(publicFeed.order)
+    .slice(0, publicFeed.remote.offset)
+    .map((id) => publicFeed.byId[id])
+    .sort(
       (a, b) => a.timestamp - b.timestamp,
     );
   }, [publicFeed.byId]);
@@ -89,8 +92,6 @@ export const FeedSection = () => {
 
       setIsAtTop(atTop);
       setIsAtBottom(atBottom);
-
-
     };
 
     requestAnimationFrame(handleScroll);
@@ -98,7 +99,6 @@ export const FeedSection = () => {
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [privateIdMsg]);
-
 
   // Scroll a mensaje buscado
   useEffect(() => {
@@ -115,7 +115,6 @@ export const FeedSection = () => {
       top: container.scrollHeight,
       behavior: "smooth",
     });
-
   };
   useEffect(() => {
     const container = getContainer();
@@ -186,10 +185,9 @@ export const FeedSection = () => {
             {isAtTop && (
               <button
                 onClick={getMoreMessages}
-                className="absolute z-8 top-0 right-4"
+                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
               >
                 ↑
-                {/*ESTE TIENE QUE SER EL BOTON QUE PIDA MAS INFORMACION AL BUFFER O BDD DEPENDE DEL MODO DEL FEED. SI ES A LA BDD YA TENEMOS EL RESOLVE PRIVATE O PUBLIC PERO SI ES LOCAL PODEMOS REPLICARLA PARA QUE SE HAGA LO MISMO PERO SOBRE EL BUFFER*/}
               </button>
             )}
 
@@ -222,12 +220,19 @@ export const FeedSection = () => {
           )}
         </section>
       ) : (
-        <section className="">
-          <h3 className="z-10">mensaje publico</h3>
-
-          <div className="" ref={refMessageInFeedPublic}>
-            {isAtTop && <div className="z-8">↑</div>}
-
+        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
+          <div
+            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
+            ref={refMessageInFeedPublic}
+          >
+            {isAtTop && (
+              <button
+                onClick={getMoreMessages}
+                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+              >
+                ↑
+              </button>
+            )}
             {messageFeed.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
@@ -248,8 +253,11 @@ export const FeedSection = () => {
           </div>
 
           {!isAtBottom && (
-            <button onClick={handleGoToBottom} className="z-8 absolute">
-              ↓ 
+            <button
+              onClick={handleGoToBottom}
+              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
+            >
+              ↓
             </button>
           )}
         </section>

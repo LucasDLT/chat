@@ -12,7 +12,7 @@ type AppStoreSetter = React.Dispatch<React.SetStateAction<AppStore>>;
 export const uptadeInboxPrivate = (
   setter: AppStoreSetter,
   msg: FeedMessage,
-  id: string
+  id: string,
 ) => {
   setter((prev) => {
     const privateFeed = prev.store.feed.private[id];
@@ -56,15 +56,13 @@ export const uptadeInboxPrivate = (
           hasNewMessages: incrementUnread,
           unreadCount: incrementUnread
             ? (prev.inboxMeta[id]?.unreadCount ?? 0) + 1
-            : prev.inboxMeta[id]?.unreadCount ?? 0,
+            : (prev.inboxMeta[id]?.unreadCount ?? 0),
           lastMessageTimestamp: msg.timestamp,
         },
       },
     };
   });
 };
-
-
 
 //Esta funcion esta pensada en principio para desacoplar logica del contexto a donde seteariamos constantemente informacion al AppStore.
 //La vamos a llamar dentro del controller de eventos del socket, pasandole por parametros el setter del AppStore y el mensaje que recibimos del socket ya normalizado.
@@ -176,11 +174,68 @@ export const handleUpdatePrivateData = (
   const newById = { ...existingConversation.byId };
   const newOrder = [...existingConversation.order];
 
-
-  
   normalized_msg.forEach((msg) => {
     newById[msg.id] = msg;
-    
+
+    if (!newOrder.includes(msg.id.toString())) {
+      newOrder.push(msg.id.toString());
+    }
+  });
+
+  newOrder.sort((a, b) => {
+    const msgA = newById[a];
+    const msgB = newById[b];
+    return msgA.timestamp - msgB.timestamp;
+  });
+
+  const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
+
+  const newOffset = newOrder.length;
+
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      feed: {
+        ...prev.store.feed,
+        // active: "private",
+        private: {
+          ...prev.store.feed.private,
+          [userId]: {
+            ...existingConversation,
+            byId: newById,
+            order: newOrder,
+            remote: {
+              ...existingConversation.remote,
+              offset: newOffset,
+              hasMore: newHasMore,
+            },
+          },
+        },
+      },
+    },
+    inboxMeta: {
+      ...prev.inboxMeta,
+      [userId]: {
+        ...(prev.inboxMeta[userId] ?? {}),
+        lastMessageTimestamp:
+          normalized_msg[normalized_msg.length - 1]?.timestamp ?? 0,
+      },
+    },
+  };
+};
+
+export const handleUpdatePublicData = (
+  normalized_msg: FeedMessage[],
+  prev: AppStore,
+): AppStore => {
+
+  const newById = { ...prev.store.feed.public.byId };
+  const newOrder = [...prev.store.feed.public.order];
+
+  normalized_msg.forEach((msg) => {
+    newById[msg.id] = msg;
+
     if (!newOrder.includes(msg.id.toString())) {
       newOrder.push(msg.id.toString());
     }
@@ -203,33 +258,21 @@ export const handleUpdatePrivateData = (
       ...prev.store,
       feed: {
         ...prev.store.feed,
-       // active: "private",
-        private: {
-          ...prev.store.feed.private,
-          [userId]: {
-            ...existingConversation,
-            byId: newById,
-            order: newOrder,
-            remote: {
-              ...existingConversation.remote,
-              offset: newOffset,
-              hasMore: newHasMore,
-            },
+        // active: "private",
+        public: {
+          ...prev.store.feed.public,
+          byId: newById,
+          order: newOrder,
+          remote: {
+            ...prev.store.feed.public.remote,
+            offset: newOffset,
+            hasMore: newHasMore,
           },
         },
       },
     },
-inboxMeta: {
-  ...prev.inboxMeta,
-  [userId]: {
-    ...(prev.inboxMeta[userId] ?? {}),
-    lastMessageTimestamp:
-      normalized_msg[normalized_msg.length - 1]?.timestamp ?? 0,
-  },
-},
   };
 };
-
 //HANDLE PARA INTEGRAR DENTRO DEL HANDLESEARCHMSG
 
 export const handleUpdateSearchMsgPriv = (
@@ -301,14 +344,17 @@ export const handleUpdateView = (
   prev: AppStore,
   id: string,
   currentActiveIndex: number,
-  query: string
+  query: string,
 ): AppStore => {
   const new_buffer = { ...prev.store.feed.private[id].searchBuffer };
   const current_order = [...prev.store.feed.private[id].order];
   const limit = prev.store.local.limit;
 
   // Nuevo offset: sumamos el limit al offset actual
-  const new_offset = Math.min(prev.store.local.offset + limit, current_order.length);
+  const new_offset = Math.min(
+    prev.store.local.offset + limit,
+    current_order.length,
+  );
 
   // Matches visibles: recalculamos SOLO dentro de los mensajes que vamos a mostrar
   const visible_matches = current_order
@@ -325,51 +371,15 @@ export const handleUpdateView = (
       ...prev.store,
       local: {
         ...prev.store.local,
-        offset: new_offset,       // cuántos mensajes del buffer estamos mostrando
+        offset: new_offset, // cuántos mensajes del buffer estamos mostrando
         matches: visible_matches, // recalculamos matches visibles
         hasMore: new_hasMore,
         activeIndex: currentActiveIndex,
-        limit,                    // limit original
+        limit, // limit original
       },
     },
   };
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export const handleUpdateSearchMsgPublic = (
   query: string,
@@ -430,18 +440,18 @@ export const handleUpdateSearchMsgPublic = (
 export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
   const order = [...prev.store.feed.private[id].order];
   console.log(order, "order");
-  
+
   //aca hay que actualizar el order de la store y ademas el byId
   const consolidateOrder = order.slice(
     0,
     prev.store.feed.private[id].remote.offset,
   );
   console.log("consolidate order", consolidateOrder);
-  
+
   //hay que resetear las propiedades de busqueda local
   const currentById = { ...prev.store.feed.private[id].byId };
   console.log("currentbyId", currentById);
-  
+
   const newById: Record<string, FeedMessage> = {};
   consolidateOrder.forEach((id) => {
     newById[id] = currentById[id];
@@ -449,7 +459,7 @@ export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
   console.log("newById", newById);
   const new_offset = prev.store.feed.private[id].remote.offset;
   console.log("newOffset", new_offset);
-  
+
   return {
     ...prev,
     store: {
@@ -457,7 +467,7 @@ export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
       feed: {
         ...prev.store.feed,
         mode: "remote",
-       active: "private",
+        active: "private",
         private: {
           ...prev.store.feed.private,
           [id]: {
@@ -469,7 +479,6 @@ export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
               hasMore: order.length > new_offset,
               loading: false,
             },
-
           },
         },
       },

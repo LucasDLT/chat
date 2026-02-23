@@ -93,13 +93,13 @@ export const normalize_msg_private= (msg: PrivateMessage[]): FeedMessage[] => {
 };
 
 export const normalize_msg_public= (msg: PublicMessage[]): FeedMessage[] => {
-  return msg.map(c=>({
+  
+  return msg.map(c=>({    
     id:c.id,
     kind:"user",
     scope:"public",
     text:c.text,
-    timestamp:c.craetedAt.getTime(),
-    fromId:c.sender.id,
+timestamp: new Date(c.craetedAt).getTime(),    fromId:c.sender.id,
     fromNick:c.sender.name,
     }))  
 };
