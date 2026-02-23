@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useAppContextWs } from "@/context/context";
 import {
   handleNewFeedPrivate,
@@ -49,7 +50,8 @@ export const ButtonsSearch = () => {
     });
   };
   const closeSearch = () => {
-    if (appStore.store.feed.active === "public") setAppStore((prev) => handleNewFeedPublic(prev));
+    if (appStore.store.feed.active === "public")
+      setAppStore((prev) => handleNewFeedPublic(prev));
 
     if (appStore.store.feed.active === "private" && privateIdMsg) {
       const id = privateIdMsg.toString();
@@ -58,28 +60,46 @@ export const ButtonsSearch = () => {
     }
   };
   return (
-    <div className="flex justify-center items-center gap-4">
+    <div className="flex justify-between border rounded-sm w-20 p-1 items-center gap-4">
+      <div className="flex gap-4">
+        <button
+          className="hover:cursor-pointer"
+          type="button"
+          onClick={goToNextMatch}
+          disabled={
+            appStore.store.local.activeIndex ===
+            appStore.store.local.matches.length - 1
+          }
+        >
+          <Image
+            src="/icons/flecha-izquierda.png"
+            alt="down"
+            width={20}
+            height={20}
+            className="rotate-270"
+          />
+        </button>
+        <button
+          className="hover:cursor-pointer"
+          type="button"
+          onClick={goToPrevMatch}
+          disabled={appStore.store.local.activeIndex === 0}
+        >
+          <Image
+            src="/icons/flecha-izquierda.png"
+            alt="down"
+            width={20}
+            height={20}
+            className="rotate-90"
+          />
+        </button>
+      </div>
       <button
-        className="hover:cursor-pointer"
         type="button"
-        onClick={goToNextMatch}
-        disabled={
-          appStore.store.local.activeIndex ===
-          appStore.store.local.matches.length - 1
-        }
-      >
-        ↓
-      </button>
-      <button
+        onClick={closeSearch}
         className="hover:cursor-pointer"
-        type="button"
-        onClick={goToPrevMatch}
-        disabled={appStore.store.local.activeIndex === 0}
       >
-        ↑
-      </button>
-      <button type="button" onClick={closeSearch} className="hover:cursor-pointer">
-        X
+        <Image src="/icons/x.png" alt="close" width={20} height={20} />
       </button>
     </div>
   );

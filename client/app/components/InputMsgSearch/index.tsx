@@ -13,12 +13,12 @@ export const InputMsgSearch = () => {
 
   return (
     <form
-      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_240px_20px] min-w-0 min-h-0 gap-4 items-center justify-center `}
+      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_240px_20px] min-w-0 min-h-0 gap-20 items-center justify-center `}
       onSubmit={handleSearchMsg}
     >
       {clientSelected
-      ?<h3 className="z-10 border  bg-lime-500 text-black">{clientSelected}</h3>
-      : <h3 className="z-10 border  bg-lime-500 text-black">mensaje grupal</h3>}
+      ?<h3 className="z-10 text-black">{clientSelected}</h3>
+      : <h3 className="z-10  text-black">sala publica</h3>}
       <input
         onChange={onChangeSearchMsgFeed}
         type="text"
