@@ -229,7 +229,6 @@ export const handleUpdatePublicData = (
   normalized_msg: FeedMessage[],
   prev: AppStore,
 ): AppStore => {
-
   const newById = { ...prev.store.feed.public.byId };
   const newOrder = [...prev.store.feed.public.order];
 
@@ -250,7 +249,6 @@ export const handleUpdatePublicData = (
   const newHasMore = normalized_msg.length === prev.store.remote.limit; //cuando devuelva menos que limit es que ya no quedan mensajes en la bdd
 
   const newOffset = newOrder.length;
-
 
   return {
     ...prev,
@@ -380,7 +378,7 @@ export const handleUpdateView = (
     },
   };
 };
- 
+
 export const handleUpdateViewPublic = (
   prev: AppStore,
   currentActiveIndex: number,
@@ -389,6 +387,7 @@ export const handleUpdateViewPublic = (
   const new_buffer = { ...prev.store.feed.public.searchBuffer };
   const current_order = [...prev.store.feed.public.order];
   const limit = prev.store.local.limit;
+  console.log("newbuffer", new_buffer);
 
   // Nuevo offset: sumamos el limit al offset actual
   const new_offset = Math.min(
@@ -426,9 +425,11 @@ export const handleUpdateSearchMsgPublic = (
   prev: AppStore,
   normalized_msg: FeedMessage[],
 ): AppStore => {
-  const new_buffer = { ...prev.store.feed.public.searchBuffer };
+  const new_buffer = { ...prev.store.feed.public.byId };
   const new_byId = { ...prev.store.feed.public.byId };
   const new_order = [...prev.store.feed.public.order];
+
+  const limit = prev.store.local.limit;
 
   normalized_msg.forEach((msg) => {
     new_buffer[msg.id] = msg;
@@ -439,12 +440,13 @@ export const handleUpdateSearchMsgPublic = (
       new_order.push(msg.id.toString());
     }
   });
-  const new_matches = Object.values(new_buffer)
+
+  const new_offset = Math.min(limit, new_order.length); //calculo el new_offset sumando el offset y el limit
+  const new_matches = Object.values(new_order)
+    .slice(0, new_offset)
+    .map((msgId) => new_buffer[msgId])
     .filter((m) => m.text.toLowerCase().includes(query))
     .map((m) => m.id.toString());
-
-  const new_offset =
-    prev.store.feed.public.remote.offset + prev.store.remote.limit; //calculo el new_offset sumando el offset y el limit
 
   const new_hasMore = new_matches.length > new_offset; //calculo si la longitud de matches es mayor al new_offset
   return {
@@ -456,7 +458,7 @@ export const handleUpdateSearchMsgPublic = (
         mode: "local",
         public: {
           ...prev.store.feed.public,
-          byId: new_byId,
+          byId: new_buffer,
           order: new_order,
           searchBuffer: new_buffer,
           remote: {
@@ -470,6 +472,9 @@ export const handleUpdateSearchMsgPublic = (
         ...prev.store.local,
         matches: new_matches,
         activeIndex: 0,
+        limit,
+        hasMore: new_hasMore,
+        offset: new_offset,
       },
     },
   };

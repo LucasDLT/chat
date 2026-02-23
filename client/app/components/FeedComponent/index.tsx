@@ -71,10 +71,10 @@ export const FeedSection = () => {
   const messageFeed = useMemo(() => {
     if (appStore.store.feed.mode === "local") {
       return Object.values(publicFeed.order)
-        .slice(0, publicFeed.remote.offset)
+        .slice(0, appStore.store.local.offset)
         .map((id) => publicFeed.byId[id])
         .sort((a, b) => a.timestamp - b.timestamp);
-    }else{
+    } else {
       return Object.values(publicFeed.byId).sort(
         (a, b) => a.timestamp - b.timestamp,
       );
@@ -82,7 +82,7 @@ export const FeedSection = () => {
   }, [
     publicFeed.byId,
     publicFeed.order,
-    publicFeed.remote.offset,
+    appStore.store.local.offset,
     appStore.store.feed.mode,
   ]);
 
@@ -202,14 +202,20 @@ export const FeedSection = () => {
       console.log("normalized: ", normalized);
 
       setAppStore((prev) => handleUpdatePublicData(normalized, prev));
-    } else if (
+    }
+    if (
       appStore.store.feed.mode === "local" &&
       appStore.store.feed.active === "public" &&
       inputMsgSearch
     ) {
       //hay que hacr el handle que sea el handleUpdateView para public}
+      console.log(appStore.store.feed.active, appStore.store.feed.mode);
+
       const query = inputMsgSearch.trim().toLowerCase();
-      handleUpdateViewPublic(appStore, appStore.store.local.activeIndex, query);
+      console.log(query, " query que quuero ver en getmore");
+      setAppStore((prev) =>
+        handleUpdateViewPublic(prev, appStore.store.local.activeIndex, query),
+      );
     }
   };
   return (

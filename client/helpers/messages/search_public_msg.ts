@@ -17,7 +17,7 @@ export const resolve_search_public_messages = async (
     body: JSON.stringify({ text }),
   });
   const res_public_messages = await response.json();
-  const public_messages: PublicMessage[] = res_public_messages.messages_publics;
+  const public_messages: PublicMessage[] = res_public_messages.history_messages;
   console.log(public_messages, "resultado de helper");
   return public_messages;
 };
