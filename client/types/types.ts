@@ -280,14 +280,14 @@ export const INITIAL_STATE: AppStore = {
       },
     },
     remote: {
-      limit: 100,
+      limit: 20,
 
     },
     local: {
       matches: [],
       activeIndex: 0,
       offset: 0,
-      limit: 100,
+      limit: 20,
       hasMore:false
     },
 

@@ -6,10 +6,16 @@ import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
 import {
   handleUpdatePrivateData,
+  handleUpdatePublicData,
   handleUpdateView,
+  handleUpdateViewPublic,
 } from "@/helpers/app_store/app_store_actions";
 import { resolve_private_messages } from "@/helpers/messages/private_msg";
-import { normalize_msg_private } from "@/helpers/sockets_fn/ws_handles";
+import {
+  normalize_msg_private,
+  normalize_msg_public,
+} from "@/helpers/sockets_fn/ws_handles";
+import { resolve_public_messages } from "@/helpers/messages/public_msg";
 
 export const FeedSection = () => {
   const {
@@ -63,13 +69,22 @@ export const FeedSection = () => {
   ]); // clave: recalcula al pedir más
 
   const messageFeed = useMemo(() => {
-    return Object.values(publicFeed.order)
-    .slice(0, publicFeed.remote.offset)
-    .map((id) => publicFeed.byId[id])
-    .sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
-  }, [publicFeed.byId]);
+    if (appStore.store.feed.mode === "local") {
+      return Object.values(publicFeed.order)
+        .slice(0, publicFeed.remote.offset)
+        .map((id) => publicFeed.byId[id])
+        .sort((a, b) => a.timestamp - b.timestamp);
+    }else{
+      return Object.values(publicFeed.byId).sort(
+        (a, b) => a.timestamp - b.timestamp,
+      );
+    }
+  }, [
+    publicFeed.byId,
+    publicFeed.order,
+    publicFeed.remote.offset,
+    appStore.store.feed.mode,
+  ]);
 
   const currentFeed = privateIdMsg ? privateMessages : messageFeed;
 
@@ -127,12 +142,12 @@ export const FeedSection = () => {
       container.scrollTop = container.scrollHeight;
       hasMountedRef.current = true;
     });
-  }, [currentFeed.length, privateIdMsg]);
+  }, [currentFeed.length, privateIdMsg, activeFeed]);
 
   useEffect(() => {
     hasMountedRef.current = false;
     prevLengthRef.current = 0;
-  }, [privateIdMsg]);
+  }, [privateIdMsg, activeFeed]);
 
   const getMoreMessages = async () => {
     if (
@@ -168,6 +183,33 @@ export const FeedSection = () => {
       const normalized = normalize_msg_private(messages);
 
       setAppStore((prev) => handleUpdatePrivateData(normalized, prev, userId));
+    }
+
+    if (
+      appStore.store.feed.mode === "remote" &&
+      appStore.store.feed.active === "public"
+    ) {
+      console.log("log en remote public");
+
+      const offset = appStore.store.feed.public.remote.offset;
+      const limit = appStore.store.remote.limit;
+      console.log(offset, limit, "offset y limit");
+
+      const messages = await resolve_public_messages(offset, limit);
+      console.log("messages:", messages);
+
+      const normalized = normalize_msg_public(messages);
+      console.log("normalized: ", normalized);
+
+      setAppStore((prev) => handleUpdatePublicData(normalized, prev));
+    } else if (
+      appStore.store.feed.mode === "local" &&
+      appStore.store.feed.active === "public" &&
+      inputMsgSearch
+    ) {
+      //hay que hacr el handle que sea el handleUpdateView para public}
+      const query = inputMsgSearch.trim().toLowerCase();
+      handleUpdateViewPublic(appStore, appStore.store.local.activeIndex, query);
     }
   };
   return (

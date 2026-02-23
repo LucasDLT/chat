@@ -380,6 +380,46 @@ export const handleUpdateView = (
     },
   };
 };
+ 
+export const handleUpdateViewPublic = (
+  prev: AppStore,
+  currentActiveIndex: number,
+  query: string,
+): AppStore => {
+  const new_buffer = { ...prev.store.feed.public.searchBuffer };
+  const current_order = [...prev.store.feed.public.order];
+  const limit = prev.store.local.limit;
+
+  // Nuevo offset: sumamos el limit al offset actual
+  const new_offset = Math.min(
+    prev.store.local.offset + limit,
+    current_order.length,
+  );
+
+  // Matches visibles: recalculamos SOLO dentro de los mensajes que vamos a mostrar
+  const visible_matches = current_order
+    .slice(0, new_offset) // ahora sí tomamos más mensajes visibles
+    .map((msgId) => new_buffer[msgId])
+    .filter((m) => m.text.toLowerCase().includes(query.toLowerCase()))
+    .map((m) => m.id.toString());
+
+  const new_hasMore = new_offset < current_order.length;
+
+  return {
+    ...prev,
+    store: {
+      ...prev.store,
+      local: {
+        ...prev.store.local,
+        offset: new_offset, // cuántos mensajes del buffer estamos mostrando
+        matches: visible_matches, // recalculamos matches visibles
+        hasMore: new_hasMore,
+        activeIndex: currentActiveIndex,
+        limit, // limit original
+      },
+    },
+  };
+};
 
 export const handleUpdateSearchMsgPublic = (
   query: string,
