@@ -338,7 +338,7 @@ if (msgClient.type === "chat.private" && typeof msgClient.payload.toId === "numb
           type: "system",
           timestamp: new Date(),
           payload: {
-            message: `${ws.nickname} get out of the room`,
+            message: `${ws.nickname} salio de la sala`,
           },
         };
         wss.clients.forEach((client) => {
