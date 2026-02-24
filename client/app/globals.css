@@ -86,6 +86,11 @@ body {
   font-family: var(--font-mesonina-regular);
 }
 
+.odor{
+  font-family: var(--font-odor);
+}
+
+
 .message {
   padding: 6px 10px;
   

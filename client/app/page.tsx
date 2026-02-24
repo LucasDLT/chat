@@ -16,7 +16,7 @@ export default function Home() {
           p-1 h-10 w-30  ${user === null ? `hover:cursor-pointer
            hover:scale-96 
           shadow-[0_2px_1px_0px_rgba(0,0,0,0.3)]
-          hover:shadow-[0_0px_2px_0px_rgba(0,0,0,0.5)]
+          hover:shadow-[0_0px_0px_0px_rgba(0,0,0,0.5)]
           transition-all ease-in-out` : `bg-grey hover:none`}`}
         >
           Login
@@ -27,16 +27,15 @@ export default function Home() {
           p-1 h-10 w-30 
           rounded  ${user === null ? "" : ` hover:cursor-pointer hover:scale-96 
           shadow-[0_2px_1px_0px_rgba(0,0,0,0.3)]
-          hover:shadow-[0_0px_2px_0px_rgba(0,0,0,0.5)]
+          hover:shadow-[0_0px_0px_0px_rgba(0,0,0,0.5)]
           transition-all ease-in-out`}`}
         >
-          Salas
+          Rooms
         </button>
       </div>
       <section className="bg-black flex w-full h-full justify-center items-center  ">
-        <h1 className="mesoninaRegular titleColor font-bold tracking-wider text-7xl xl:text-7xl">
-          LIVE CHAT
-        </h1>
+        <h1 className=" titleColor odor tracking-widest text-4xl  ">
+              SocketHub    </h1>
       </section>
     </div>
   );
