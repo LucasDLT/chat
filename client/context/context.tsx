@@ -455,7 +455,4 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   return <ContextApp.Provider value={value}>{children}</ContextApp.Provider>;
 };
-{/*function handleUpdatePublic(prev: AppStore, normalized_msg: FeedMessage[]): AppStore {
-  throw new Error("Function not implemented.");
-}
-*/}
+

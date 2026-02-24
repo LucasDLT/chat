@@ -3,7 +3,7 @@ import { useAppContextWs } from "@/context/context";
 import { useRouter } from "next/navigation";
 
 export const Logout_Button = () => {
-  const { setActiveUser } = useAppContextWs();
+  const { setActiveUser, setUser } = useAppContextWs();
   const router = useRouter();
   return (
     <button
@@ -11,6 +11,7 @@ export const Logout_Button = () => {
       onClick={() => {
         resolve_logout();
         setActiveUser(false);
+        setUser(null);
         router.push("/");
       }}
     >
