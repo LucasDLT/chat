@@ -1,10 +1,10 @@
 export interface BaseMessage{
-    timestamp:number
+    timestamp:Date
 }// mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
 
 export interface ChatMessage extends BaseMessage{
     type: "chat.public" | "chat.private"; 
-    messageId:string;
+    messageId:number;
     payload:{
         fromId:number;
         toId?:number | undefined; 
@@ -25,8 +25,8 @@ export interface SendMessage extends BaseMessage{
 //para mandar al cliente el total de usuarios conectados necesito este tipado 
 export interface userData{
     userId:number;
-    nickname?:string | null;
-    isAlive?:boolean | undefined
+    nickname:string;
+    isAlive:boolean
 }
 export interface SnapshotClients {
   type: "snapshot:clients";
@@ -90,6 +90,14 @@ export interface AckMessage extends BaseMessage{
     }
 }//tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
 
+export interface AckHandshake extends BaseMessage{
+    type:"ack.handshake";
+    payload:{
+        status:"ok" | "error",
+        id:number,
+        nickname:string
+    }
+}
 
 //uniones de tipos para que el switch me tome varios tipos desde una sola interface
 export type ServerToClientMessage = ChatMessage | ErrorMessage | SystemMessage | AckMessage | PongServer

@@ -1,41 +1,43 @@
-import { ChangeEvent } from "react";
+"use client";
 import Image from "next/image";
-import {ButtonsSearch} from "@/app/components/ButttonsSearch"
+import { ButtonsSearch } from "@/app/components/ButttonsSearch";
+import { useAppContextWs } from "@/context/context";
 
-interface InputMsgSearchProps {
-onChange: (e:ChangeEvent<HTMLInputElement>) => void;
-inputMsgSearch: string | undefined;
-handleSearchMsg:(e: React.FormEvent<HTMLFormElement>) => void;
+export const InputMsgSearch = () => {
+  const {
+    onChangeSearchMsgFeed,
+    inputMsgSearch,
+    handleSearchMsg,
+    clientSelected,
+  } = useAppContextWs();
 
-//props para los buttons
-activeIndex:number
-matches:string[];
-setActiveIndex:React.Dispatch<React.SetStateAction<number>>;
-}
-
-export const InputMsgSearch:React.FC<InputMsgSearchProps> = ({onChange, inputMsgSearch, handleSearchMsg, activeIndex, matches, setActiveIndex}) => {
   return (
     <form
-      className={`z-11 top-36 justify-between right-6 w-40 items-center xl:w-56 xl:h-9 flex absolute xl:right-78 xl:top-[5.6px]`}
+      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_240px_20px] min-w-0 min-h-0 gap-20 items-center justify-center `}
       onSubmit={handleSearchMsg}
     >
-      
+      {clientSelected
+      ?<h3 className="z-10 text-black">{clientSelected}</h3>
+      : <h3 className="z-10  text-black">sala publica</h3>}
       <input
-        onChange={onChange}
+        onChange={onChangeSearchMsgFeed}
         type="text"
-        className=" yellowBg h-6 rounded-xs text-black text-center w-34 xl:w-45 xl:h-7"
-        value={inputMsgSearch? inputMsgSearch : ""}
+        className="bg-amber-600 text-black"
+        value={inputMsgSearch ? inputMsgSearch : ""}
       />
-     { !inputMsgSearch ? (<Image
-        alt="icon lupa"
-        src={"/icons/lupa.png"}
-        width={30}
-        height={30}
-        className="p-1 rounded-xs object-cover h-5 w-5 "
-      />) :(
-      <ButtonsSearch activeIndex={activeIndex} matches={matches} 
-      setActiveIndex={setActiveIndex} />)
-      }
+
+      {inputMsgSearch ? (
+        <ButtonsSearch />
+      ) : (
+        <button type="submit" className=" bg-blue-500">
+          <Image
+            src={"/icons/enviar.png"} //CAMBIAR POR UNA LUPA
+            alt="enviar mensaje"
+            width={20}
+            height={30}
+          />
+        </button>
+      )}
     </form>
   );
 };

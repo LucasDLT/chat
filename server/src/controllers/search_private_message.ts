@@ -19,7 +19,7 @@ export const search_priv_message = async (req: Request, res: Response) => {
     if (typeof search_data !== "string") {
       throw new Error("El parametro a buscar posee un formato invalido");
     }
-
+    
     const history_messages = await search_message_private(
       sender_id,
       receiver_id,

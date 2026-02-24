@@ -1,257 +1,316 @@
 "use client";
-import Image from "next/image";
+import { InputMsgChat } from "@/app/components/InputMsgChat/index";
 import { InputMsgSearch } from "../InputMsgSearch";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { MsgInFeed } from "@/types/types";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppContextWs } from "@/context/context";
 import { MessageItem } from "@/app/components/msgItem";
+import {
+  handleUpdatePrivateData,
+  handleUpdatePublicData,
+  handleUpdateView,
+  handleUpdateViewPublic,
+} from "@/helpers/app_store/app_store_actions";
+import { resolve_private_messages } from "@/helpers/messages/private_msg";
+import {
+  normalize_msg_private,
+  normalize_msg_public,
+} from "@/helpers/sockets_fn/ws_handles";
+import { resolve_public_messages } from "@/helpers/messages/public_msg";
 
-interface FeedProps {
-  activeFeed: boolean;
-  privateIdMsg: string | undefined;
-  messageFeed: MsgInFeed[];
-  messageFeedPriv: MsgInFeed[];
-  clientSelected: string | undefined;
-  resMsgSearch: MsgInFeed[] | undefined;
-  socketRef: React.RefObject<WebSocket | null>;
+export const FeedSection = () => {
+  const {
+    activeFeed,
+    privateIdMsg,
+    appStore,
+    messageRefs,
+    socketRef,
+    inputMsgSearch,
+    setAppStore,
+  } = useAppContextWs();
 
-  //props para el inputsearchmsg
-  inputMsgSearch: string | undefined;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
+  const activeMessageId =
+    appStore.store.local.matches[appStore.store.local.activeIndex];
 
-  //props para el filtrado WP
-  matches: string[];
-  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  activeIndex: number;
-  messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
-}
-
-export const FeedSection: React.FC<FeedProps> = ({
-  activeFeed,
-  privateIdMsg,
-  messageFeed,
-  messageFeedPriv,
-  clientSelected,
-  inputMsgSearch,
-  onChange,
-  handleSearchMsg,
-  matches,
-  setActiveIndex,
-  activeIndex,
-  messageRefs,
-  socketRef
-}) => {
-  const { searchMatches, activeMatchIndex } = useAppContextWs();
-  const activeMessageId = searchMatches[activeMatchIndex]; // aca al array searchmatches le pasamos una ubicacion de index 0 por que array[0] es estar parados en la posicion 0 de l alista
   const refMessageInFeedPublic = useRef<HTMLDivElement | null>(null);
   const refMessageInFeedPrivate = useRef<HTMLDivElement | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isNearBottom, setIsNearBottom] = useState(true);
+
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isAtTop, setIsAtTop] = useState(false);
+  // const containerRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const hasMountedRef = useRef(false);
+
   const prevLengthRef = useRef(0);
 
+  const publicFeed = appStore.store.feed.public;
+  const privateFeed = privateIdMsg
+    ? appStore.store.feed.private[privateIdMsg]
+    : null;
 
-  useEffect(() => {
-  const currentFeed = privateIdMsg ? messageFeedPriv : messageFeed;
-  const prevLength = prevLengthRef.current;
+  const privateMessages = useMemo(() => {
+    if (!privateFeed) return [];
+    if (appStore.store.feed.mode === "local") {
+      let limit = appStore.store.local.offset;
 
-  if (currentFeed.length > prevLength) {
-    if (!isNearBottom) {
-      setUnreadCount((prev) => prev + (currentFeed.length - prevLength));
+      return Object.values(privateFeed.order)
+        .slice(0, limit)
+        .map((id) => privateFeed.byId[id])
+        .sort((a, b) => a.timestamp - b.timestamp);
+    } else {
+      return Object.values(privateFeed.byId).sort(
+        (a, b) => a.timestamp - b.timestamp,
+      );
     }
-  }
+  }, [
+    privateFeed?.byId,
+    appStore.store.local.offset,
+    appStore.store.feed.mode,
+    privateFeed?.order,
+  ]); // clave: recalcula al pedir más
 
-  prevLengthRef.current = currentFeed.length;
-}, [messageFeed, messageFeedPriv, isNearBottom, privateIdMsg]);
+  const messageFeed = useMemo(() => {
+    if (appStore.store.feed.mode === "local") {
+      return Object.values(publicFeed.order)
+        .slice(0, appStore.store.local.offset)
+        .map((id) => publicFeed.byId[id])
+        .sort((a, b) => a.timestamp - b.timestamp);
+    } else {
+      return Object.values(publicFeed.byId).sort(
+        (a, b) => a.timestamp - b.timestamp,
+      );
+    }
+  }, [
+    publicFeed.byId,
+    publicFeed.order,
+    appStore.store.local.offset,
+    appStore.store.feed.mode,
+  ]);
 
+  const currentFeed = privateIdMsg ? privateMessages : messageFeed;
 
-  useEffect(() => {
-    const container = privateIdMsg
+  const getContainer = () =>
+    privateIdMsg
       ? refMessageInFeedPrivate.current
       : refMessageInFeedPublic.current;
 
+  // SCROLL DETECTOR REAL
+  useEffect(() => {
+    const container = getContainer();
     if (!container) return;
 
-    handleToBottom();
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
 
-    container.addEventListener("scroll", handleToBottom);
+      const atTop = scrollTop <= 5;
 
-    return () => {
-      container.removeEventListener("scroll", handleToBottom);
+      const atBottom = scrollHeight - scrollTop - clientHeight <= 5;
+
+      setIsAtTop(atTop);
+      setIsAtBottom(atBottom);
     };
+
+    requestAnimationFrame(handleScroll);
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
   }, [privateIdMsg]);
 
+  // Scroll a mensaje buscado
   useEffect(() => {
     if (!activeMessageId) return;
-
     const el = messageRefs.current[activeMessageId];
-
-    if (el) {
-      el.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [activeMessageId]);
 
-  useEffect(() => {
-    if (searchMatches.length > 0) return;
-
-    const container = privateIdMsg
-      ? refMessageInFeedPrivate.current
-      : refMessageInFeedPublic.current;
-
-    if (!container) return;
-
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      80;
-
-    if (!isNearBottom) return;
-
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messageFeed, privateIdMsg, searchMatches.length]);
-
-  //funcion de calculo solamente
-  const handleToBottom = () => {
-    const container = privateIdMsg
-      ? refMessageInFeedPrivate.current
-      : refMessageInFeedPublic.current;
-
-    if (!container) return;
-
-    //calculo para saber si estas abajo o arriba en el feed
-    const nearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight <
-      50;
-    setIsNearBottom(nearBottom); //paso el valor contrario por que si el valor es true, si esta abajo el boton no tiene que mostrarse, y si el valor es false, no esta abajo, se tiene que mostrar, y como el estado inicia el false para no ser visible, la logica debe ser al reves. Dejo esta nota por que me consto entener la vuelta
-  };
-
-  //funcion para scrollear al final
   const handleGoToBottom = () => {
-    const container = privateIdMsg
-      ? refMessageInFeedPrivate.current
-      : refMessageInFeedPublic.current;
-
+    const container = getContainer();
     if (!container) return;
 
     container.scrollTo({
       top: container.scrollHeight,
       behavior: "smooth",
     });
-    setUnreadCount(0);
   };
-const privateMessages = messageFeedPriv;
+  useEffect(() => {
+    const container = getContainer();
+    if (!container) return;
 
+    if (hasMountedRef.current) return;
+    if (currentFeed.length === 0) return;
 
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+      hasMountedRef.current = true;
+    });
+  }, [currentFeed.length, privateIdMsg, activeFeed]);
+
+  useEffect(() => {
+    hasMountedRef.current = false;
+    prevLengthRef.current = 0;
+  }, [privateIdMsg, activeFeed]);
+
+  const getMoreMessages = async () => {
+    if (
+      appStore.store.feed.mode === "local" &&
+      inputMsgSearch &&
+      privateIdMsg
+    ) {
+      const query = inputMsgSearch.trim().toLowerCase();
+      const activeIndex = appStore.store.local.activeIndex;
+      const id = privateIdMsg.toString();
+      console.log(
+        "valores que paso dentro del get more msg",
+        query,
+        activeIndex,
+        id,
+      );
+
+      setAppStore((prev) => handleUpdateView(prev, id, activeIndex, query));
+    }
+    if (appStore.store.feed.mode === "remote" && privateIdMsg) {
+      const existing = appStore.store.feed.private[privateIdMsg];
+
+      if (!existing?.remote.hasMore || existing.remote.loading) return;
+      const offset = existing.remote.offset;
+      const limit = appStore.store.remote.limit;
+      const userId = privateIdMsg.toString();
+
+      const messages = await resolve_private_messages(
+        privateIdMsg,
+        offset,
+        limit,
+      );
+      const normalized = normalize_msg_private(messages);
+
+      setAppStore((prev) => handleUpdatePrivateData(normalized, prev, userId));
+    }
+
+    if (
+      appStore.store.feed.mode === "remote" &&
+      appStore.store.feed.active === "public"
+    ) {
+      console.log("log en remote public");
+
+      const offset = appStore.store.feed.public.remote.offset;
+      const limit = appStore.store.remote.limit;
+      console.log(offset, limit, "offset y limit");
+
+      const messages = await resolve_public_messages(offset, limit);
+      console.log("messages:", messages);
+
+      const normalized = normalize_msg_public(messages);
+      console.log("normalized: ", normalized);
+
+      setAppStore((prev) => handleUpdatePublicData(normalized, prev));
+    }
+    if (
+      appStore.store.feed.mode === "local" &&
+      appStore.store.feed.active === "public" &&
+      inputMsgSearch
+    ) {
+      //hay que hacr el handle que sea el handleUpdateView para public}
+      console.log(appStore.store.feed.active, appStore.store.feed.mode);
+
+      const query = inputMsgSearch.trim().toLowerCase();
+      console.log(query, " query que quuero ver en getmore");
+      setAppStore((prev) =>
+        handleUpdateViewPublic(prev, appStore.store.local.activeIndex, query),
+      );
+    }
+  };
   return (
     <section
-      className={`${
-        activeFeed
-          ? "flex yellowBg justify-center items-center h-100vh "
-          : "hidden"
-      }`}
+      className={`${activeFeed ? " border border-amber-50 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
     >
-      <InputMsgSearch
-        inputMsgSearch={inputMsgSearch}
-        onChange={onChange}
-        handleSearchMsg={handleSearchMsg}
-        activeIndex={activeIndex}
-        matches={matches}
-        setActiveIndex={setActiveIndex}
-      />
+      <InputMsgSearch />
 
       {privateIdMsg ? (
-        <section
-          className={`h-[60vh] w-94 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-bl-xs rounded-br-xs 
-          `}
-        >
-          <Image
-            src={"/background-directorio.jpg"}
-            width={3000}
-            height={1000}
-            alt="background feed chat"
-            className={`w-full h-full object-cover z-0 rounded-xs`}
-          ></Image>
-          <h3 className="absolute -top-12 left-1 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider  xl:left-56 flex justify-center items-center w-44 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
-            {clientSelected}
-          </h3>
+        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
           <div
-            className={`flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[51.5vh] xl:h-[83.7vh] absolute g-2 top-18 xl:top-11  w-94 xl:w-[79vw]`}
+            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
             ref={refMessageInFeedPrivate}
           >
+            {isAtTop && (
+              <button
+                onClick={getMoreMessages}
+                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+              >
+                ↑
+              </button>
+            )}
+
             {privateMessages.map((msg) => {
-              const isMatch = searchMatches.includes(msg.messageId);
-              const isActive = msg.messageId === activeMessageId;
+              const id = msg.id.toString();
+              const isMatch = appStore.store.local.matches.includes(id);
+              const isActive = msg.id === activeMessageId;
+
               return (
                 <MessageItem
-                  key={msg.messageId}
+                  key={msg.id}
                   isActive={isActive}
                   isMatch={isMatch}
                   message={msg}
                   messageRefs={messageRefs}
-                  myUserId={socketRef.current?.userId ?? ""}
+                  myUserId={socketRef.current!.userId}
                   showAuthor={false}
                 />
               );
             })}
           </div>
-          {unreadCount > 0 && !isNearBottom && (
+
+          {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="absolute animate-pulse -right-3.5 xl:-right-2 -bottom-4 xl:bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
+              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
             >
-              ↓ {unreadCount}
+              ↓
             </button>
           )}
         </section>
       ) : (
-        //section para el feed de mensajes publicos
-        <section className=" h-[60vh] w-94 top-46 xl:h-[90vh] xl:w-[80vw]  absolute xl:top-1 xl:right-16.5 rounded-sm">
-          <Image
-            src={"/background-directorio.jpg"}
-            width={3000}
-            height={1000}
-            alt="background feed chat"
-            className={`w-full h-full object-cover z-0 rounded-xs`}
-          ></Image>
-          <h3 className="absolute -top-12 left-1 xl:top-0 rounded-b-sm bg-yellow-50/25 tracking-wider xl:left-56 flex justify-center items-center w-44 xl:w-[50vw] h-10 text-2xl mesoninaRegular backdrop-blur-xl z-10">
-            mensaje publico
-          </h3>
+        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
           <div
-            className={` flex flex-col overflow-y-auto [scrollbar-gutter:stable] h-[51.5vh]  xl:h-[83.7vh] absolute g-2 top-18 xl:top-11  w-94 xl:w-[79vw]`}
+            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
             ref={refMessageInFeedPublic}
           >
+            {isAtTop && (
+              <button
+                onClick={getMoreMessages}
+                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+              >
+                ↑
+              </button>
+            )}
             {messageFeed.map((msg) => {
-              const isMatch = searchMatches.includes(msg.messageId);
-              const isActive = msg.messageId === activeMessageId;
-              
+              const id = msg.id.toString();
+              const isMatch = appStore.store.local.matches.includes(id);
+              const isActive = msg.id === activeMessageId;
+
               return (
                 <MessageItem
-                  key={msg.messageId}
+                  key={msg.id}
                   isActive={isActive}
                   isMatch={isMatch}
                   message={msg}
                   messageRefs={messageRefs}
-                  myUserId={socketRef.current?.userId ?? ""}
+                  myUserId={socketRef.current?.userId}
                   showAuthor={true}
                 />
               );
             })}
           </div>
-          {unreadCount > 0 && !isNearBottom && (
+
+          {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="absolute animate-pulse -right-3.5 xl:-right-2 -bottom-4 xl:bottom-0 m-4 rounded-xs xl:rounded-full p-1 xl:p-2 hover:cursor-pointer bg-amber-400/80 mesoninaRegular text-black font-extrabold z-8"
+              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
             >
-              ↓ {unreadCount}
+              ↓
             </button>
           )}
         </section>
       )}
+      <InputMsgChat />
     </section>
   );
 };

@@ -1,28 +1,26 @@
+/********************************************************TIPADOS PARA EVENTOS DE SOCKETS***********************************************************/
 export interface BaseMessage {
-  timestamp: number;
-} // mensaje base para tipar desde aca que tipo de mensajes tenemos. y la hora
+  timestamp: string;
+}
 
 export interface ChatMessage extends BaseMessage {
-  //esta interfaz la voy a usar para el filtrado de mensajes al estilo WP
   type: "chat.public" | "chat.private";
-  messageId: string;
+  messageId: number;
   payload: {
-    fromId: string;
-    toId?: string | undefined;
+    fromId: number;
+    toId?: number | undefined;
     text: string;
   };
-} //primer tipo de mensajes que a su vez tiene un subtipo publico y privado. Tiene desde que a que id va el mensaje, y un id unico para identificarlo y evitar duplicados.
-
+}
 export interface SendMessage extends BaseMessage {
   type: "chat.send";
-  messageId: string; // este lo tengo que crear desde el cliente con cripto uuid, es decir viene desde el frontend
+  messageId: string;
   payload: {
     scope: "chat.public" | "chat.private";
-    toId?: string;
+    toId?: number;
     text: string;
   };
-} // tipo de mensaje para el envio de mensajes, viene con el id del destinatario y el texto, proviene desde el cliente pasa por el server y luego lo pasamos en el broadcast
-
+}
 export interface ErrorMessage extends BaseMessage {
   type: "error";
   payload: {
@@ -30,23 +28,11 @@ export interface ErrorMessage extends BaseMessage {
     message: string;
     details?: string;
   };
-} //tipado basico para mensaje de error luego desestrucuraremos para hacer el envelope del msg diciendo que es un error, el numero del codigo y detalles si hay.
-
+}
 export interface SystemMessage extends BaseMessage {
-  timestamp: number;
   type: "system";
   payload: {
     message: string;
-  };
-} //de momento este tipado lo dejamos para los mensajes del sistema, como conectado, desconectado etc.
-
-
-export interface ChangeNickname extends BaseMessage {
-  type: "changeNickname";
-  payload: {
-    messageId: string;
-    userId: string;
-    nickname: string;
   };
 }
 
@@ -60,14 +46,14 @@ export interface PingClient extends BaseMessage {
 
 export interface AckMessage extends BaseMessage {
   type: "ack";
-  correlationId: string; // aca iria el id del mensaje que llega en el sendmessage
+  correlationId: string;
   payload: {
     status: "ok" | "error";
     details?: string;
-    fromId?: string | undefined;
+    fromId?: number | undefined;
     nickname?: string;
   };
-} //tipado para el ack de los mensajes. el id del mensaje, el status y los detalles si hay errores
+}
 
 export interface SnapshotClients {
   type: "snapshot:clients";
@@ -76,68 +62,75 @@ export interface SnapshotClients {
   count: number;
 }
 
+/**************************************************************************************************************************************************/
+
 export interface userData {
-  userId: string;
+  userId: number;
   nickname: string;
   isAlive?: boolean;
 }
-export interface ProcessMsg {
-  message?: {
-    type: "chat.public" | "chat.private";
-    text: string;
-    toId?: string;
-    fromId?: string;
-    messageId: string;
-    timestamp: number;
-  };
-  clients?: ClientsConected[];
-  count?: number;
-  systemMessage?: SystemMessage;
-}
 
 export interface ClientsConected {
-  messageIn?: boolean;
-  totalMessageIn?: number;
-  msgPriv?: MsgInFeed[];
-  userId: string;
+  userId: number;
   nick: string;
 }
-
-//uniones de tipos para que el switch me tome varios tipos desde una sola interface
+/***************************************************DESCRIMINATED UNIONS DE SOCKETS EVENTS*********************************************************/
 export type ServerToClientMessage =
   | ChatMessage
   | ErrorMessage
   | SystemMessage
-  | AckMessage
+  | AckHandshake
   | PongServer
   | SnapshotClients;
 
 export type ClientToServerMessage =
-  | Register
+  //| Register
   | SendMessage
-  | ChangeNickname
+  //| ChangeNickname
   | PingClient;
 
-//tipado para los mensajes en feeds privados y publicos
+/***************************************************TIPADO NORMALIZADOR DE MESSAGES PARA FEED******************************************************/
 
-export interface MsgInFeed {
-  fromId?: string;
-  msg: string;
-  messageId: string;
+type FeedScope = "public" | "private" | "system";
+
+export interface FeedMessage {
+  id: string | number;
+  scope: FeedScope;
+  kind: "user" | "system";
+
+  text: string;
   timestamp: number;
-  type: "user" | "system";
+
+  fromId?: number;
   fromNick?: string;
-  privateId?: string;
+  toId?: number;
 }
 
-//tipado para los datos que quiero persistir
-export interface PersistedState {
-  nickname?: string;
-  messageFeed: MsgInFeed[];
+export interface SystemFeedMessage {
+  id: string;
+  scope: "system";
+  timestamp: number;
+  message: string;
 }
 
+/***************************************************TIPADO PARA EL CONTROLLER DEL CTX*******************/
 
-//***************************NUEVOS TIPADOS**************************//
+export interface DispatchContext {
+  addMessage(message: FeedMessage): void;
+  addMessageSystem(message: FeedMessage): void;
+  setClients(message: ClientsConected[]): void;
+  handleAck(message: AckHandshake, socket: WebSocket): void;
+}
+
+export interface AckHandshake extends BaseMessage {
+  type: "ack.handshake";
+  payload: {
+    status: "ok" | "error";
+    id: number;
+    nickname: string;
+  };
+}
+//**************************************************NUEVOS TIPADOS************************************************************/
 
 //TIPADOS PARA FORMULARIOS REFACTORIZADOS
 export interface User {
@@ -156,18 +149,156 @@ export interface Register {
   name: string;
   email: string;
   password: string;
-} 
+}
 export interface Login {
   email: string;
   password: string;
-} 
+}
 export interface FormsErrors {
-  name?:string;
+  name?: string;
   email: string;
   password: string;
-} 
+}
 
 export interface ModalProps {
   message: string;
 }
+
+//enum para el container de formularios
+
+export enum forms {
+  login = "login",
+  register = "register",
+}
+
+//Tipos para retornos de messages DTOS server to client
+
+export interface PublicMessage {
+  id: number;
+  text: string;
+  craetedAt: string;
+  sender: PublicUser;
+}
+export interface PublicUser {
+  id: number;
+  name: string;
+}
+
+export interface PrivateMessage {
+  id: number;
+  text: string;
+  craetedAt: Date;
+  sender: PrivateUser;
+  receiver: PrivateUser | null;
+}
+interface PrivateUser {
+  id: number;
+  name: string;
+}
+
+/****************************TIPADO PARA EL STORE DEL USER*******************************/
+type feedMode = "local" | "remote";
+type activeFeed = "public" | "private";
+export interface Conversation {
+  byId: Record<string, FeedMessage>; //estructura record para mensajes se convierte en array antes del render
+  order: string[]; //aca vamos almacenar los ids entrantes previo dedupe
+  //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras
+  searchBuffer: Record<string, FeedMessage>; //aca vamos a guardar los mensajes entrantes de cada busqueda y sus coincidencias, ese caudal gigante queda aca, y desde aca lo consumimos utilizando el offset y limit local de la vista, cuando encontremos el mensaje que buscamos actualizamos todo para sincronia y el buffer se elimina quedando el feed como lo queriamos y hasta el mensaje hallado
+
+  remote: {
+    offset: number;
+    hasMore: boolean;
+    loading: boolean;
+  };
+}
+interface MessagesStore {
+  //tipado para el feed de mensajes publicos y privados
+  feed: {
+    mode: feedMode;
+    active: activeFeed;
+    private: Record<string, Conversation>;
+    public: Conversation;
+  };
+  remote: {
+    limit: number;
+  };
+  //control de busqueda en bdd tanto para automaticos por scroll como busqueda de palabras
+  local: {
+    matches: string[];
+    activeIndex: number;
+    offset: number;
+    limit: number;
+    currentMsgId?: string;
+    hasMore:boolean
+  };
+}
+
+interface UserInboxMeta {
+  //nickname: string;
+  unreadCount: number;
+  hasNewMessages: boolean;
+  lastMessageTimestamp?: number;
+}
+
+interface PublicInboxMeta {
+  unreadCount: number;
+  hasNewMessages: boolean;
+}
+//por ultimo hacemos este appstore lleva dentro los datos privados del usuario y el store tipado. Todo centralizado desde aca.
+export interface AppStore {
+  userData: userData;
+  store: MessagesStore;
+  inboxMeta: Record<string, UserInboxMeta>;
+  publicMeta: PublicInboxMeta;
+  clients: ClientsConected[];
+}
+
+//INITIAL STATE
+
+export const INITIAL_STATE: AppStore = {
+  userData: {
+    userId: 0,
+    nickname: "",
+    isAlive: false,
+  },
+  store: {
+    feed: {
+      mode: "remote",
+      active: "public",
+      private: {
+        
+      },
+      public: {
+        byId: {},
+        order: [],
+        searchBuffer: {},
+        remote: {
+          offset: 0,
+          hasMore: false,
+          loading: false,
+        }
+      },
+    },
+    remote: {
+      limit: 20,
+
+    },
+    local: {
+      matches: [],
+      activeIndex: 0,
+      offset: 0,
+      limit: 20,
+      hasMore:false
+    },
+
+  },
+  inboxMeta: {
+
+  },
+  publicMeta: {
+    unreadCount: 0,
+    hasNewMessages: false,
+  },
+  clients: [],
+};
 

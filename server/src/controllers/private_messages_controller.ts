@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { get_private_messages } from "../services/private_messages_service.js";
+
 export const private_messages_controller = async (
   req: Request,
   res: Response
@@ -14,7 +15,7 @@ export const private_messages_controller = async (
         message: "limit y offset deben ser números válidos",
       });
     }
-    if (!sender_id) {
+    if (!sender_id) { 
       throw new Error("Error de autenticacion");
     }
     const receiver_id = Number(req.params.id);

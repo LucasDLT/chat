@@ -9,6 +9,8 @@ import type {
   userData,
   PongServer,
   SnapshotClients,
+  ServerToClientMessage,
+  AckHandshake
 } from "./types/message.t.js";
 import { isSendMessage } from "./guards/index.js";
 import { event_bus } from "./events/events.bus.js";
@@ -110,20 +112,31 @@ export const websocketSetup = (server: Server) => {
     const userData: userData = {
       userId: ws.userId as number,
       isAlive: ws.isAlive,
-      nickname: ws.nickname ?? null,
+      nickname: ws.nickname,
     };
+    const msgAckOk: AckHandshake = {
+      timestamp: new Date(),
+      type: "ack.handshake",
+      payload: {
+        status: "ok",
+        id: userData.userId,
+        nickname: userData.nickname,
+      },
+    };
+    //prueba para login
+    ws.send(JSON.stringify(msgAckOk));
 
     //ahora si, el system de que ingrese a la sala si debo armarlo y broadcastearlo
 
     const login_clients: SystemMessage = {
-      timestamp: Date.now(),
+      timestamp: new Date(),
       type: "system",
       payload: {
         message: `${ws.nickname} ingreso a la sala`,
       },
     };
     const login_client: SystemMessage = {
-      timestamp: Date.now(),
+      timestamp: new Date(),
       type: "system",
       payload: {
         message: `${ws.nickname} ingresaste a la sala`,
@@ -156,7 +169,7 @@ export const websocketSetup = (server: Server) => {
 
         switch (messageData.type) {
           case "chat.send": {
-            if (!isSendMessage(messageData)) return;
+            //  if (!isSendMessage(messageData)) return;
 
             const id = mapMessageId.has(messageData.messageId);
 
@@ -164,7 +177,7 @@ export const websocketSetup = (server: Server) => {
               const msgAckError: AckMessage = {
                 type: "ack",
                 correlationId: messageData.messageId,
-                timestamp: Date.now(),
+                timestamp: new Date(),
                 payload: {
                   status: "error",
                   details: "duplicate",
@@ -178,7 +191,7 @@ export const websocketSetup = (server: Server) => {
               const msgAckOk: AckMessage = {
                 type: "ack",
                 correlationId: messageData.messageId,
-                timestamp: Date.now(),
+                timestamp: new Date(),
                 payload: {
                   status: "ok",
                   details: "message sent",
@@ -193,53 +206,45 @@ export const websocketSetup = (server: Server) => {
                     ? undefined
                     : messageData.payload.toId;
 
+                // esta parte es nueva la uso para no tener que llamar a la clase de la entidad o crear una nueva interface, directamente creo el mensaje para guardarlo a partir del repositorio de los mensajes a donde luego lo voy a mandar
+                const message = await messageRepository.create({
+                  text: messageData.payload.text,
+                  craetedAt: new Date(messageData.timestamp),
+                  sender: { id: ws.userId },
+                  receiver: messageData.payload.toId
+                    ? { id: messageData.payload.toId }
+                    : null,
+                });
+
+                const message_persisted = await messageRepository.save(message);
+                console.log(message_persisted);
+
                 const msgClient: ChatMessage = {
-                  messageId: messageData.messageId,
-                  timestamp: Date.now(),
+                  messageId: message_persisted.id,
+                  timestamp: message_persisted.craetedAt,
                   type: messageData.payload.scope,
                   payload: {
                     fromId: ws.userId,
                     toId: toIdMsg,
-                    text: messageData.payload.text,
+                    text: message_persisted.text,
                   },
-                };
-
-                interface message_bdd {
-                  text: string;
-                  createdAt: Date;
-                  senderId: number;
-                  receiverId: number | null;
-                }
-                const message: message_bdd = {
-                  text: msgClient.payload.text,
-                  createdAt: new Date(),
-                  senderId: msgClient.payload.fromId,
-                  receiverId: msgClient.payload.toId ?? null,
-                };
-                await messageRepository.save(message);
-
+                };                
                 if (msgClient.type === "chat.public") {
                   wss.clients.forEach((client: WebSocket) => {
-                    if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    if ( client.readyState === WebSocket.OPEN) {
                       client.send(JSON.stringify(msgClient));
                     }
                   });
                 }
-                if (
-                  msgClient.type === "chat.private" &&
-                  typeof msgClient.payload.toId === "number" &&
-                  msgClient.payload.toId
-                ) {
-                  wss.clients.forEach((client: WebSocket) => {
-                    if (
-                      client.readyState === WebSocket.OPEN &&
-                      client !== ws &&
-                      client.userId === msgClient.payload.toId
-                    ) {
-                      client.send(JSON.stringify(msgClient));
-                    }
-                  });
-                }
+if (msgClient.type === "chat.private" && typeof msgClient.payload.toId === "number") {
+  wss.clients.forEach((client: WebSocket) => {
+    if (client.readyState === WebSocket.OPEN &&
+       (client.userId === msgClient.payload.toId || client.userId === msgClient.payload.fromId)) {
+      client.send(JSON.stringify(msgClient));
+    }
+  });
+}
+
               }
             }
             break;
@@ -258,7 +263,7 @@ export const websocketSetup = (server: Server) => {
       } catch (error) {
         console.log("Error WSS handler", error);
         const errorMsg: ErrorMessage = {
-          timestamp: Date.now(),
+          timestamp: new Date(),
           type: "error",
           payload: {
             code: "500",
@@ -289,14 +294,14 @@ export const websocketSetup = (server: Server) => {
 
         const changeNickname: SystemMessage = {
           type: "system",
-          timestamp: Date.now(),
+          timestamp: new Date(),
           payload: {
             message: `${oldNick} cambio a ${ws.nickname}`,
           },
         };
         const msgForClient: SystemMessage = {
           type: "system",
-          timestamp: Date.now(),
+          timestamp: new Date(),
           payload: {
             message: `${oldNick} cambiaste a ${ws.nickname}`,
           },
@@ -331,7 +336,7 @@ export const websocketSetup = (server: Server) => {
       if (ws.nickname) {
         const msgForClient: SystemMessage = {
           type: "system",
-          timestamp: Date.now(),
+          timestamp: new Date(),
           payload: {
             message: `${ws.nickname} get out of the room`,
           },
