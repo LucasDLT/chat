@@ -1,5 +1,6 @@
 import { FormsErrors, Register } from "@/types/types";
 import React from "react";
+import Image from "next/image";
 
 interface Register_Form_UI {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -16,7 +17,7 @@ export const Register_UI: React.FC<Register_Form_UI> = ({
 }) => {
   return (
     <form
-      className="flex flex-col g-1 justify-center items-center backdrop-blur-[2px] absolute h-50 w-60 rounded-sm border borderYellow gap-4"
+      className="flex flex-col p-2 justify-center items-center backdrop-blur-[2px]  w-70 rounded-sm border borderYellow gap-4"
       onSubmit={onSubmit}
     >
       <label className="mesoninaRegular font-bold tracking-wider text-3xl">
@@ -55,13 +56,10 @@ export const Register_UI: React.FC<Register_Form_UI> = ({
 
       <button
         type="submit"
-        className="border  borderYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow"
+        className="border bgBlurYellow rounded p-1 m-1 mesoninaRegular tracking-widest font-extrabold text-[15px] hover:cursor-pointer borderYellow text-black text-bolder"
       >
         registrar
       </button>
-      <p className="titleColor mesoninaRegular font-bold tracking-widest">
-        Ya casi terminas
-      </p>
     </form>
   );
 };

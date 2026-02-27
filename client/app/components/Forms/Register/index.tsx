@@ -50,27 +50,26 @@ export const Register_Section = () => {
 
       const { name, email, password } = inputRegister;
       const data_user = await resolve_register(name, email, password);
-      
+
       if (!data_user) {
         throw new Error("error al recibir informacion de registro");
       }
-      
+
       setInputRegister({ name: "", email: "", password: "" });
       //aca iria ese estado que cambia el valor booleano y hace que se vea el formulario de login.
     } catch (error) {
       console.log(error);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
   return (
-    <section className="flex flex-col justify-center items-center relative h-[60vh]">
+    <section className="flex flex-col justify-center items-center">
       <Image
-        height={300}
-        width={500}
+        fill
         alt="background register section"
         src={"/background-app.jpg"}
-        className="h-full w-full object-cover xl:h-80 xl:rounded-sm xl:mt-10 xl:mb-10 "
+        className="h-full w-auto object-cover  "
       />
 
       <Register_UI

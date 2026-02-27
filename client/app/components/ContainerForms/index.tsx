@@ -12,13 +12,8 @@ export const Container_Forms = () => {
 
   return (
     <>
-      <button
-        onClick={() => {
-          router.push("/");
-        }}
-      >
-        ir atras
-      </button>
+      <div className=" bg-[#d4ab4a78] flex justify-center items-center z-1">
+      </div>
       {activeForm === forms.register ? <Register_Section /> : <Login_Section />}
 
       <Aside_Message setter={setActiveForm} activeForm={activeForm} />
