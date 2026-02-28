@@ -17,7 +17,7 @@ export const Register_UI: React.FC<Register_Form_UI> = ({
 }) => {
   return (
     <form
-      className="flex flex-col p-2 justify-center items-center backdrop-blur-[2px]  w-70 rounded-sm border borderYellow gap-4"
+      className="flex flex-col p-2 justify-center items-center backdrop-blur-[2px] w-70 rounded-sm border borderYellow gap-4 bg-black/50"
       onSubmit={onSubmit}
     >
       <label className="mesoninaRegular font-bold tracking-wider text-3xl">
@@ -30,7 +30,7 @@ export const Register_UI: React.FC<Register_Form_UI> = ({
         onChange={onChange}
         value={inputRegister.name}
       />
-      <p>{errors.name}</p>
+      <p className="text-red-600 mesoninaRegular tracking-widest h-0 text-sm font-extrabold">{errors.name}</p>
       <label className="mesoninaRegular font-bold tracking-wider text-3xl">
         email
       </label>
@@ -41,7 +41,7 @@ export const Register_UI: React.FC<Register_Form_UI> = ({
         onChange={onChange}
         value={inputRegister.email}
       />
-      <p>{errors.email}</p>
+      <p className="text-red-600 mesoninaRegular tracking-widest h-0 text-sm font-extrabold">{errors.email}</p>
       <label className="mesoninaRegular font-bold tracking-wider text-3xl">
         password
       </label>
@@ -52,7 +52,7 @@ export const Register_UI: React.FC<Register_Form_UI> = ({
         onChange={onChange}
         value={inputRegister.password}
       />
-      <p>{errors.password}</p>
+       <p className="text-red-600 mesoninaRegular tracking-widest h-0 text-sm font-extrabold">{errors.password}</p>
 
       <button
         type="submit"

@@ -41,8 +41,8 @@ export const catch_errors_register = (form: Register): FormsErrors => {
   if (!form.name.trim()) {
     bag_errors.name = "campo obligatorio para registrarse";
   }
-  if (form.name.trim().length < 10) {
-    bag_errors.name = "no puede superar 10 caracteres";
+  if (form.name.trim().length < 5) {
+    bag_errors.name = "debe contener minimo 5 caracteres";
   }
 
   return bag_errors;

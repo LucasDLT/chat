@@ -2,7 +2,6 @@ import Image from "next/image";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { FormsErrors, Register } from "@/types/types";
 import { resolve_register } from "@/helpers/forms/register";
-import { useRouter } from "next/navigation";
 import { Register_UI } from "@/app/ui/Register";
 import { catch_errors_register } from "@/helpers/forms/errors";
 import { LoadingModal } from "../../LoadingModal";
@@ -22,9 +21,6 @@ export const Register_Section = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  //instancia router
-  const router = useRouter();
-
   //onchange
   const onChangeRegisterNick = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.currentTarget.value;
@@ -42,6 +38,7 @@ export const Register_Section = () => {
     setLoading(true);
     try {
       const validate_errors = catch_errors_register(inputRegister);
+      setErrors(validate_errors);
       const has_error = Object.keys(validate_errors).some((err) => err !== "");
 
       if (has_error) {

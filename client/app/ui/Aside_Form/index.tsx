@@ -20,19 +20,24 @@ export const Aside_Message: React.FC<Aside_Message_Props> = ({
         <Image src="/icons/google.png" alt="google" width={20} height={20} />
       </a>
       {activeForm === forms.register ? (
-        <div className="flex justify-between items-center w-60">
-          <p>¿estas registrado?</p>
+        <div className="flex justify-between items-center w-75">
+          <p>¿ya estas registrado?</p>
           <button
             className="underline hover:cursor-pointer text-black hover:no-underline"
             onClick={() => setter(forms.login)}
           >
-            ingresar
+            Ingresar
           </button>
         </div>
       ) : (
-        <div className="flex justify-center items-center w-60 border border-black">
+        <div className="flex justify-between items-center w-75">
           <p>¿aun no estas registrado?</p>
-          <button onClick={() => setter(forms.register)}>Crear cuenta</button>
+          <button
+            className="underline hover:cursor-pointer text-black hover:no-underline"
+            onClick={() => setter(forms.register)}
+          >
+            Crear cuenta
+          </button>
         </div>
       )}
     </aside>
