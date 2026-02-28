@@ -33,7 +33,7 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`bg-black z-10 flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
+      className={`bg-black overflow-hidden z-10 flex justify-center items-center  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 h-full border col-start-3 ${
         active === false
           ? "xl:w-15 transition-all duration-100"
           : "xl:w-60 transition-all duration-100"

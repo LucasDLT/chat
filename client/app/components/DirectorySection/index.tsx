@@ -48,28 +48,28 @@ export const DirectorySection = () => {
   }
 
   return (
-    <section className="h-[80vh] w-full xl:flex xl:flex-col xl:w-60 xl:h-[94vh]">
-      <div className="bg-black flex justify-center items-center h-20 m-1 rounded-xs">
+    <section className="grid col-start-1 grid-rows-[60px_1fr] border h-full ">
+      <div className="bg-black flex justify-center items-center m-1">
         <h1 className="titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
           Live Chat
         </h1>
       </div>
 
-      <div className="bg-black p-1 rounded-xs m-1 h-full flex flex-col justify-between items-start xl:items-center relative">
+      <div className="grid grid-rows-[40px_40px_1fr_1fr] gap-1">
         
         {/*Header conectados */}
-        <div className="flex flex-row justify-center items-center ml-2 xl:justify-between xl:w-53">
-          <h2 className="hidden mesoninaRegular p-1 blackDeg xl:flex xl:rounded-xs xl:tracking-[3px] xl:font-bold">
+        <div className="grid grid-cols-[112px_30px_30px] justify-around items-center border">
+          <h2 className="hidden mesoninaRegular xl:block tracking-[3px] xl:font-bold">
             conectados
           </h2>
           <Image
             alt="icon conectados"
             src={"/icons/conectados.png"}
-            width={30}
-            height={30}
-            className="p-2 rounded-sm xl:p-1 xl:rounded-xs"
+            width={20}
+            height={20}
+            className=""
           />
-          <p className="p-2 rounded-sm xl:p-1 xl:rounded-xs">
+          <p className="">
             {conectedCount || 0}
           </p>
         </div>
@@ -77,35 +77,35 @@ export const DirectorySection = () => {
         {/*Buscador */}
         <form
           className={`${
-            activeFeed ? "hidden xl:flex" : ""
-          } absolute w-90 h-9 top-14 left-2 flex flex-row items-center justify-center blackDeg rounded-xs xl:w-54 xl:top-24`}
+            activeFeed ? "hidden md:grid" : ""}
+              grid grid-cols-[1fr_25px] p-0.5 gap-1 justify-between items-center border rounded-xs`}
         >
           <input
             onChange={changeInputSearch}
             type="text"
-            className="yellowBg h-6 rounded-xs text-black px-px text-center w-full mx-1 xl:w-45 xl:h-7"
+            className="yellowBg rounded-xs text-black text-center "
             value={inputSearch}
+            placeholder="buscar"
           />
           <Image
             alt="icon lupa"
             src={"/icons/lupa.png"}
-            width={30}
-            height={30}
-            className="p-1 rounded-xs object-cover h-6 w-6"
+            width={20}
+            height={20}
+            className="object-cover"
           />
         </form>
 
         {/* Fondo */}
-        <Image
+       {/* <Image
           alt="bg directory"
           src={"/background-directorio.jpg"}
-          width={500}
-          height={200}
-          className={`h-150 xl:h-150 border rounded-xs object-cover ${
+          fill
+          className={` object-cover ${
             activeFeed ? "hidden xl:flex" : ""
           }`}
         />
-
+*/}
         {/*Botón grupo */}
         {visibleContacts.length > 0 && (
           <button
