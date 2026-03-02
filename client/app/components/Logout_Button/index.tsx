@@ -8,7 +8,7 @@ export const Logout_Button = () => {
   const router = useRouter();
   return (
     <button
-      className="z-100 hover:cursor-pointer"
+      className="hover:cursor-pointer flex justify-center items-center"
       onClick={() => {
         resolve_logout();
         setActiveUser(false);
@@ -17,10 +17,11 @@ export const Logout_Button = () => {
       }}
     >
       <Image
-        src="/icons/logout.png"
+        src="/icons/logoutminimal.png"
         alt="logout"
-        width={25}
-        height={25}
+        width={28}
+        height={30}
+        className="z-100"
       />
     </button>
   );

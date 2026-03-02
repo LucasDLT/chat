@@ -33,7 +33,7 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`flex flex-row overflow-hidden z-10 justify-center items-center w-full xl:flex-col xl:top-0 xl:right-0 row-start-3 md:col-start-3 ${
+      className={`grid overflow-hidden border col-start-auto row-start-3 md:row-start-auto md:col-start-3 md:justify-center  ${
         active === false
           ? "xl:w-15 transition-all duration-100"
           : "xl:w-60 transition-all duration-100"
@@ -45,7 +45,10 @@ export const NavbarChat = () => {
          }`}
     >
       <nav
-        className={`yellowBg flex justify-between items-center w-full h-full md:rounded-sm xl:mb-2 pt-2 pb-2 xl:mt-2 xl:flex-col xl:h-full  ${
+        className={`yellowBg grid grid-cols-[30px_30px_30px_30px] items-center justify-around md:grid-cols-1
+    md:justify-items-center
+    
+    md:gap-6${
           active === false
             ? "xl:w-10 transition-all duration-100"
             : "xl:w-50 transition-all duration-100 "
@@ -57,7 +60,7 @@ export const NavbarChat = () => {
           }
           `}
       >
-        <div className="flex flex-col justify-center items-center relative">
+        <div className="flex flex-col justify-center items-center">
           <Image
             title="cambiar nickname"
             alt="icon user"
@@ -80,7 +83,7 @@ export const NavbarChat = () => {
         <div
           className={`flex justify-center items-center ${
             active === false
-              ? "bg-yellow-100 rounded-full p-p transition-all ease-in-out duration-500"
+              ? " rounded-full p-p transition-all ease-in-out duration-500"
               : "hover:bg-yellow-100"
           }`}
         >
@@ -96,7 +99,7 @@ export const NavbarChat = () => {
               setActiveMobile(false);
             }}
             className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 ${
-              active === false ? "" : "xl:top-85 absolute"
+              active === false ? "" : ""
             }`}
           />
         </div>
@@ -111,7 +114,7 @@ export const NavbarChat = () => {
           onClick={() => {
             activeFeed ? setActiveFeed(false) : handleToClose();
           }}
-          className="hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300"
+          className="hover:cursor-pointer flex justify-center items-center hover:scale-110 transition-all ease-in-out duration-300"
         />
       </nav>
     </section>
