@@ -3,6 +3,7 @@ import { ClientsConected } from "@/types/types";
 import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 import { useAppContextWs } from "@/context/context";
+import { NavbarChat } from "../NavbarChat";
 
 export const DirectorySection = () => {
   const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
@@ -25,9 +26,7 @@ export const DirectorySection = () => {
   const visibleContacts =
     resSearch.length > 0
       ? resSearch
-      : nickConected.filter(
-          (c) => c.userId !== myId && Boolean(c.nick)
-        );
+      : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
 
   //Creamos un mapa eficiente de metadata por userId
   const metadataMap = useMemo(() => {
@@ -41,25 +40,24 @@ export const DirectorySection = () => {
     const res = nickConected.filter(
       (c) =>
         c.userId !== myId &&
-        c.nick?.trim().toLowerCase().includes(data.trim().toLowerCase())
+        c.nick?.trim().toLowerCase().includes(data.trim().toLowerCase()),
     );
 
     setResSearch(res);
   }
 
   return (
-    <section className="grid col-start-1 grid-rows-[60px_1fr] border h-full ">
+    <section className="grid col-start-1 md:grid-rows-[60px_1fr] h-full">
       <div className="bg-black flex justify-center items-center m-1">
         <h1 className="titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
           Live Chat
         </h1>
       </div>
 
-      <div className="grid grid-rows-[40px_40px_1fr_1fr] gap-1">
-        
+      <div className="grid grid-rows-[40px_40px_50px_1fr] h-full">
         {/*Header conectados */}
-        <div className="grid grid-cols-[112px_30px_30px] justify-around items-center border">
-          <h2 className="hidden mesoninaRegular xl:block tracking-[3px] xl:font-bold">
+        <div className="grid grid-cols-[112px_30px_30px] justify-evenly items-center">
+          <h2 className=" mesoninaRegular xl:flex tracking-[3px] xl:font-bold">
             conectados
           </h2>
           <Image
@@ -69,23 +67,20 @@ export const DirectorySection = () => {
             height={20}
             className=""
           />
-          <p className="">
-            {conectedCount || 0}
-          </p>
+          <p className="">{conectedCount || 0}</p>
         </div>
 
         {/*Buscador */}
         <form
-          className={`${
-            activeFeed ? "hidden md:grid" : ""}
-              grid grid-cols-[1fr_25px] p-0.5 gap-1 justify-between items-center border rounded-xs`}
+          className={`${activeFeed ? "hidden md:grid" : ""}
+              grid grid-cols-[1fr_25px] p-0.5 gap-1 justify-between items-center  rounded-xs`}
         >
           <input
             onChange={changeInputSearch}
             type="text"
             className="yellowBg rounded-xs text-black text-center "
             value={inputSearch}
-            placeholder="buscar"
+            placeholder="Buscar"
           />
           <Image
             alt="icon lupa"
@@ -97,7 +92,7 @@ export const DirectorySection = () => {
         </form>
 
         {/* Fondo */}
-       {/* <Image
+        {/* <Image
           alt="bg directory"
           src={"/background-directorio.jpg"}
           fill
@@ -109,8 +104,8 @@ export const DirectorySection = () => {
         {/*Botón grupo */}
         {visibleContacts.length > 0 && (
           <button
-            className={`absolute top-30 xl:top-40 left-2 p-1 my-1 bgBlurYellow w-90 xl:w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest ${
-              activeFeed ? "hidden xl:flex" : ""
+            className={`bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer flex items-center justify-center tracking-widest h-9  ${
+              activeFeed ? "hidden xl:flex " : ""
             }`}
             onClick={returnToGroup}
           >
@@ -120,12 +115,8 @@ export const DirectorySection = () => {
 
         {/*Lista de contactos */}
         <div
-          className={`absolute ${
-            visibleContacts.length > 0
-              ? "top-40 xl:top-50"
-              : "top-30"
-          } left-2 flex flex-col justify-start items-center w-90 xl:w-54 h-110 overflow-y-auto ${
-            activeFeed ? "hidden xl:flex" : ""
+          className={` ${visibleContacts.length > 0 ? "h-full overflow-y-auto"  : ""}   ${
+            activeFeed ? "hidden xl:flex flex-col" : ""
           }`}
         >
           {visibleContacts.length > 0 ? (
@@ -135,17 +126,17 @@ export const DirectorySection = () => {
               return (
                 <div
                   key={client.userId}
-                  className={`text-black flex ${
+                  className={`text-black flex mt-1 ${
                     meta?.hasNewMessages && meta?.unreadCount > 0
                       ? "justify-evenly"
                       : "justify-center"
-                  } items-center bgBlurYellow w-full p-1 my-1 rounded-xs`}
+                  } items-center bgBlurYellow p-1 rounded-xs h-8 hover:cursor-pointer`}
+                  onClick={() =>
+                    handleSelectClient(client.userId, client.nick!)
+                  }
                 >
                   <p
-                    onClick={() =>
-                      handleSelectClient(client.userId, client.nick!)
-                    }
-                    className="mesoninaRegular font-extrabold text-xl hover:cursor-pointer h-6 flex items-center justify-center tracking-widest transition-all duration-300"
+                    className="mesoninaRegular font-extrabold text-xl h-6 flex items-center justify-center tracking-widest transition-all duration-300"
                   >
                     {client.nick}
                   </p>
@@ -164,8 +155,8 @@ export const DirectorySection = () => {
               );
             })
           ) : (
-            <p className="p-1 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded-xs h-6 flex items-center justify-center tracking-widest w-full mt-6 xl:text-sm">
-              no hay usuarios conectados
+            <p className="p-1 bgBlurYellow text-black mesoninaRegular font-extrabold w-full text-xl rounded-xs h-6 flex items-center justify-center tracking-widest">
+              esperando usuarios
             </p>
           )}
         </div>

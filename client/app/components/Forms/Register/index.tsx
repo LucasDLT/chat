@@ -27,7 +27,8 @@ export const Register_Section = () => {
     const key = event.currentTarget.name;
 
     const update_form: Register = { ...inputRegister, [key]: value };
-
+    console.log(update_form, "updateform");
+    
     setInputRegister(update_form);
     setErrors(catch_errors_register(update_form));
   };
@@ -37,11 +38,19 @@ export const Register_Section = () => {
     event.preventDefault();
     setLoading(true);
     try {
+      console.log(inputRegister, "inputRegister");
+      
       const validate_errors = catch_errors_register(inputRegister);
+      console.log(validate_errors, "validate_errors");
+      
       setErrors(validate_errors);
-      const has_error = Object.keys(validate_errors).some((err) => err !== "");
+      const has_error = Object.values(validate_errors).some((err) => err !== "");
 
       if (has_error) {
+        console.log(validate_errors);
+        
+        console.log(has_error);
+        
         return;
       }
 
@@ -53,7 +62,7 @@ export const Register_Section = () => {
       }
 
       setInputRegister({ name: "", email: "", password: "" });
-      //aca iria ese estado que cambia el valor booleano y hace que se vea el formulario de login.
+      //aca hiria ese estado que cambia el valor booleano y hace que se vea el formulario de login.
     } catch (error) {
       console.log(error);
     } finally {

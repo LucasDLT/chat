@@ -30,7 +30,7 @@ export default function Chat() {
   }, [user]);
 
   return (
-    <main className="h-dvh grid md:grid-cols-[236px_1fr_60px] border">
+    <main className="h-dvh grid grid-rows-[30px_1fr_50px]  md:grid-cols-[236px_1fr_60px] border">
       <DirectorySection />
       <FeedSection />
       <NavbarChat />
