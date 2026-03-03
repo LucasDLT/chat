@@ -33,27 +33,22 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`grid col-start-auto row-start-3 md:row-start-auto md:col-start-3 md:justify-center md:items-center h-full   
+      className={`fixed bottom-0 inset-x-0 
+        md:relative md:relative md:bottom-auto md:inset-auto 
+        md:grid md:row-start-auto md:col-start-3 md:justify-center md:items-center  
          ${
-           activeMobile === false
+           active === false
              ? ""
-             : "flex flex-col justify-between items-center"
+             : "translate-y-0 h-dvh"
          }`}
     >
       <nav
-        className={`yellowBg grid grid-cols-[30px_30px_30px_30px] items-center justify-around md:grid-cols-1
-    md:justify-items-center md:h-[680px]
+        className={`yellowBg flex items-center justify-around md:flex md:flex-col md:h-[680px]
     md:gap-6 rounded border ${
       active === false
-        ? "transition-all duration-300"
-        : "transition-all duration-300 "
-    }
-          ${
-            activeMobile === false
-              ? "transition-all duration-300"
-              : "z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-300 "
-          }
-          `}
+        ? ""
+        : "h-dvh flex-col justify-around items-center gap-4"
+    }`}
       >
         <div className="flex flex-col justify-center items-center">
           <Image
