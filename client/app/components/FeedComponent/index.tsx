@@ -220,14 +220,14 @@ export const FeedSection = () => {
   };
   return (
     <section
-      className={`${activeFeed ? "col-start-2 border border-amber-50 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
+      className={`${activeFeed ? "col-start-2 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
     >
       <InputMsgSearch />
 
       {privateIdMsg ? (
-        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
+        <section className="h-full grid grid-rows-[1fr] min-h-0 min-w-0 relative">
           <div
-            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
+            className="overflow-y-auto min-h-0 min-w-0 bg-blue-800 flex flex-col"
             ref={refMessageInFeedPrivate}
           >
             {isAtTop && (
@@ -268,9 +268,9 @@ export const FeedSection = () => {
           )}
         </section>
       ) : (
-        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
+        <section className="h-full grid grid-rows-[1fr] min-h-0 min-w-0 relative">
           <div
-            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
+            className="overflow-y-auto min-h-0 min-w-0 bg-blue-800 flex flex-col"
             ref={refMessageInFeedPublic}
           >
             {isAtTop && (

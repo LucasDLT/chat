@@ -13,7 +13,7 @@ export const InputMsgSearch = () => {
 
   return (
     <form
-      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_240px_20px] min-w-0 min-h-0 gap-20 items-center justify-center `}
+      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_1fr_20px] min-w-0 min-h-0 gap-4 items-center justify-center `}
       onSubmit={handleSearchMsg}
     >
       {clientSelected

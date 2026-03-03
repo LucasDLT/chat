@@ -73,7 +73,8 @@ interface IcontextProps {
   setInputMsgSearch: React.Dispatch<React.SetStateAction<string | undefined>>;
   handleSearchMsg: (e: React.FormEvent<HTMLFormElement>) => void;
   onChangeSearchMsgFeed: (e: ChangeEvent<HTMLInputElement>) => void;
-
+  active: boolean;
+  setActive: React.Dispatch<React.SetStateAction<boolean>>;
   messageRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   inputSearch: string;
   setInputSearch: React.Dispatch<React.SetStateAction<string>>;
@@ -106,6 +107,7 @@ export function useAppContextWs(): IcontextProps {
 export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const port = process.env.NEXT_PUBLIC_WS_PORT;
   const socketRef = useRef<WebSocket | null>(null);
+  const [active, setActive] = useState<boolean>(false);
 
   const [hasNickname, setHasNickname] = useState<boolean>(false);
   const [privateIdMsg, setPrivateIdMsg] = useState<number | undefined>(
@@ -445,6 +447,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     messageRefs,
     inputSearch,
     setInputSearch,
+    active,
+    setActive,
     //nueos estados
     user,
     setUser,

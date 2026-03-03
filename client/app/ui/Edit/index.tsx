@@ -13,7 +13,7 @@ export const Form_Edit_UI: React.FC<Edit_UI_Props> = ({
 }) => {
   return (
     <form
-      className="flex flex-col g-1 justify-center items-center h-40 w-50 rounded-sm mt-4"
+      className="flex flex-col g-1 justify-center items-center h-40 rounded-sm mt-4"
       onSubmit={onSubmit}
     >
       <label className="mesoninaRegular text-black font-bold tracking-wider text-xl">
@@ -21,7 +21,7 @@ export const Form_Edit_UI: React.FC<Edit_UI_Props> = ({
       </label>
       <input
         type="text"
-        className="blackDegbg rounded text-black px-px m-1 text-center"
+        className="blackDegbg rounded text-black  text-center"
         onChange={onChange}
         name="name"
         value={value}

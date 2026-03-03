@@ -8,7 +8,7 @@ import { resolve_request_me } from "@/helpers/me";
 import { User } from "@/types/types";
 
 export default function Chat() {
-  const { user, setUser } = useAppContextWs();
+  const { user, setUser, active } = useAppContextWs();
 
   const veryfy_user = async () => {
     try {
@@ -30,7 +30,10 @@ export default function Chat() {
   }, [user]);
 
   return (
-    <main className="h-dvh grid grid-cols-1 grid-rows-[30px_1fr_60px] md:grid-rows-1 md:grid-cols-[236px_1fr_60px]">
+    <main className={`h-dvh grid grid-cols-1 grid-rows-[30px_1fr_60px] md:grid-rows-1 overflow-x-hidden
+    ${active 
+    ? `md:grid-cols-[236px_1fr_240px]`
+    :`md:grid-cols-[236px_1fr_60px]`}`}>
       <DirectorySection />
       <FeedSection />
       <NavbarChat />

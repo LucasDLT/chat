@@ -9,10 +9,10 @@ import { INITIAL_STATE } from "@/types/types";
 
 export const NavbarChat = () => {
   const router = useRouter();
-  const [active, setActive] = useState<boolean>(false);
   const [activeMobile, setActiveMobile] = useState<boolean>(false);
   const {
-
+    active,
+    setActive,
     setAppStore,
     setHasNickname,
     setPrivateIdMsg,
@@ -23,7 +23,7 @@ export const NavbarChat = () => {
     setActiveUser,
   } = useAppContextWs();
   const handleToClose = () => {
-    setAppStore(INITIAL_STATE)
+    setAppStore(INITIAL_STATE);
     setHasNickname(false);
     setPrivateIdMsg(undefined);
     setClientSelected(undefined);
@@ -33,30 +33,25 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`grid overflow-hidden border col-start-auto row-start-3 md:row-start-auto md:col-start-3 md:justify-center  ${
-        active === false
-          ? "xl:w-15 transition-all duration-100"
-          : "xl:w-60 transition-all duration-100"
-      } 
+      className={`grid h-full overflow-hidden col-start-auto row-start-3 md:row-start-auto md:col-start-3 md:justify-center md:relative 
          ${
            activeMobile === false
-             ? "transition-all duration-100"
-             : "w-screen h-[92.1vh] top-[-1] right-[-0.1] z-9 flex flex-col justify-between items-center transition-all duration-100 "
+             ? ""
+             : "flex flex-col justify-between items-center"
          }`}
     >
       <nav
         className={`yellowBg grid grid-cols-[30px_30px_30px_30px] items-center justify-around md:grid-cols-1
     md:justify-items-center
-    
-    md:gap-6${
-          active === false
-            ? "xl:w-10 transition-all duration-100"
-            : "xl:w-50 transition-all duration-100 "
-        }
+    md:gap-6 rounded h-[680px]${
+      active === false
+        ? "transition-all duration-300"
+        : "transition-all duration-300 "
+    }
           ${
             activeMobile === false
-              ? "transition-all duration-100"
-              : "w-50 h-170 z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-100 "
+              ? "transition-all duration-300"
+              : "rounded h-[680px] z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-300 "
           }
           `}
       >
@@ -84,7 +79,7 @@ export const NavbarChat = () => {
           className={`flex justify-center items-center ${
             active === false
               ? " rounded-full p-p transition-all ease-in-out duration-500"
-              : "hover:bg-yellow-100"
+              : ""
           }`}
         >
           <Image

@@ -27,7 +27,7 @@ export const InputMsgChat = () => {
     activeFeed && (
       <form
         onSubmit={handleSubmit}
-        className=" bg-white h-full flex justify-center items-center"
+        className=" bg-white h-full flex justify-center items-center min-w-0"
       >
         <input
           onChange={changeInputMessage}
