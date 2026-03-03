@@ -33,7 +33,7 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`grid h-full overflow-hidden col-start-auto row-start-3 md:row-start-auto md:col-start-3 md:justify-center md:relative 
+      className={`grid col-start-auto row-start-3 md:row-start-auto md:col-start-3 md:justify-center md:items-center h-full   
          ${
            activeMobile === false
              ? ""
@@ -42,8 +42,8 @@ export const NavbarChat = () => {
     >
       <nav
         className={`yellowBg grid grid-cols-[30px_30px_30px_30px] items-center justify-around md:grid-cols-1
-    md:justify-items-center
-    md:gap-6 rounded h-[680px]${
+    md:justify-items-center md:h-[680px]
+    md:gap-6 rounded border ${
       active === false
         ? "transition-all duration-300"
         : "transition-all duration-300 "
@@ -51,7 +51,7 @@ export const NavbarChat = () => {
           ${
             activeMobile === false
               ? "transition-all duration-300"
-              : "rounded h-[680px] z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-300 "
+              : "z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-300 "
           }
           `}
       >
