@@ -220,7 +220,7 @@ export const FeedSection = () => {
   };
   return (
     <section
-      className={`${activeFeed ? "grid col-start-auto row-start-3 md:row-start-auto md:col-start-2 md:h-full  md:grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
+      className={`${activeFeed ? "grid col-start-auto row-start-3 grid-rows-[45px_1fr_45px] md:row-start-auto md:col-start-2 md:h-full  md:grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
     >
       <InputMsgSearch />
 

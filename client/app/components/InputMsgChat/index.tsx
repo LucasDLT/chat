@@ -37,7 +37,7 @@ export const InputMsgChat = () => {
         />
         <button
           type="submit"
-          className="text-white text-sm hover:cursor-pointer rounded-br-xl px-2 bg-[#d4ab4a78]"
+          className="text-white text-sm hover:cursor-pointer rounded-br-xl px-2"
         >
           <Image
             src={"/icons/enviar.png"}
