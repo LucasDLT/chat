@@ -6,7 +6,7 @@ import {
   handleNewFeedPublic,
 } from "@/helpers/app_store/app_store_actions";
 export const ButtonsSearch = () => {
-  const { appStore, setAppStore, setInputSearch, privateIdMsg } =
+  const { appStore, setAppStore, setInputSearch, privateIdMsg, setInputMsgSearch } =
     useAppContextWs();
   const goToPrevMatch = () => {
     setAppStore((prev) => {
@@ -50,12 +50,13 @@ export const ButtonsSearch = () => {
     });
   };
   const closeSearch = () => {
-    if (appStore.store.feed.active === "public")
+    if (appStore.store.feed.active === "public"){
       setAppStore((prev) => handleNewFeedPublic(prev));
-
+      setInputMsgSearch("");
+}
     if (appStore.store.feed.active === "private" && privateIdMsg) {
       const id = privateIdMsg.toString();
-      setInputSearch("");
+      setInputMsgSearch("");
       setAppStore((prev) => handleNewFeedPrivate(prev, id));
     }
   };

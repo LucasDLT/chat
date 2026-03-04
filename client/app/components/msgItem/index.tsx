@@ -32,8 +32,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
   const stateClasses = `
     ${isSystem ? "message--system" : ""}
-    ${isMatch ? "message--match" : ""}
-    ${isActive ? "message--active" : ""}
+    ${isMatch ? "bg-[#beb6a178]" : ""}
+    ${isActive ? " bg-[#c7c9c7] text-black" : ""}
   `;
 
   return (

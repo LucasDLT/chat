@@ -242,8 +242,9 @@ export const FeedSection = () => {
             {privateMessages.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
-              const isActive = msg.id === activeMessageId;
-
+              const isActive = Number(msg.id) === Number(activeMessageId);
+              console.log(isActive, );
+              
               return (
                 <MessageItem
                   key={msg.id}
@@ -284,7 +285,7 @@ export const FeedSection = () => {
             {messageFeed.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
-              const isActive = msg.id === activeMessageId;
+              const isActive = msg.id === Number(activeMessageId);
 
               return (
                 <MessageItem
