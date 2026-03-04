@@ -16,6 +16,7 @@ import {
   normalize_msg_public,
 } from "@/helpers/sockets_fn/ws_handles";
 import { resolve_public_messages } from "@/helpers/messages/public_msg";
+import Image from "next/image";
 
 export const FeedSection = () => {
   const {
@@ -238,7 +239,16 @@ export const FeedSection = () => {
                 ↑
               </button>
             )}
-
+          <Image
+            src="/background-yellow.jpg"
+            alt="empty feed"
+            fill
+            className="object-cover md:hidden z-0" />
+             <Image
+            src="/background-yellow-mobile.jpg"
+            alt="empty feed"
+            fill
+            className="hidden object-cover md:block z-0" />
             {privateMessages.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
@@ -274,6 +284,16 @@ export const FeedSection = () => {
             className="overflow-y-auto min-h-0 min-w-0 bg-yellow-600/10 rounded-b-md flex flex-col"
             ref={refMessageInFeedPublic}
           >
+          <Image
+            src="/background-yellow.jpg"
+            alt="empty feed"
+            fill
+            className="object-cover md:hidden z-0" />
+          <Image
+            src="/background-yellow-mobile.jpg"
+            alt="empty feed"
+            fill
+            className="hidden object-cover md:block z-0" />
             {isAtTop && (
               <button
                 onClick={getMoreMessages}

@@ -38,7 +38,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
   return (
     <div
-      className={`message ${baseClasses} ${alignmentClasses} ${stateClasses}`}
+      className={`message ${baseClasses} ${alignmentClasses} ${stateClasses} z-10`}
       ref={(el) => {
         if (messageRefs.current) {
           messageRefs.current[message.id] = el;
