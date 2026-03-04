@@ -47,7 +47,7 @@ export const DirectorySection = () => {
   }
 
   return (
-    <section className="grid col-start-auto row-start-2  md:row-start-auto md:col-start-1 md:grid-rows-[60px_1fr] md:h-full">
+    <section className="grid col-start-auto row-start-2  md:row-start-auto md:col-start-1 md:grid-rows-[60px_1fr] md:h-full p-1">
       <div className="flex justify-center items-center m-1">
         <h1 className="hidden md:flex titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
           Live Chat
