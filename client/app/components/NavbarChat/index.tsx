@@ -33,8 +33,7 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`fixed bottom-0 inset-x-0 
-        md:relative md:relative md:bottom-auto md:inset-auto 
+      className={`grid col-start-auto grid-cols-1 z-15 row-start-1 md:mx-2
         md:grid md:row-start-auto md:col-start-3 md:justify-center md:items-center  
          ${
            active === false
@@ -44,7 +43,7 @@ export const NavbarChat = () => {
     >
       <nav
         className={`yellowBg flex items-center justify-around md:flex md:flex-col md:h-[680px]
-    md:gap-6 rounded border ${
+    md:gap-6 md:rounded border ${
       active === false
         ? ""
         : "h-dvh flex-col justify-around items-center gap-4"

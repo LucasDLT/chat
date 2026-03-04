@@ -220,7 +220,7 @@ export const FeedSection = () => {
   };
   return (
     <section
-      className={`${activeFeed ? "col-start-2 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
+      className={`${activeFeed ? "grid md:col-start-2 md:h-full  md:grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
     >
       <InputMsgSearch />
 
@@ -233,7 +233,7 @@ export const FeedSection = () => {
             {isAtTop && (
               <button
                 onClick={getMoreMessages}
-                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+                className="absolute z-8 top-0 right-0.5 hover:cursor-pointer"
               >
                 ↑
               </button>
@@ -261,7 +261,7 @@ export const FeedSection = () => {
           {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
+              className="z-8 absolute bottom-0 right-0.5 hover:cursor-pointer "
             >
               ↓
             </button>
@@ -276,7 +276,7 @@ export const FeedSection = () => {
             {isAtTop && (
               <button
                 onClick={getMoreMessages}
-                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+                className="absolute z-8 top-0 right-0.5 hover:cursor-pointer"
               >
                 ↑
               </button>
@@ -303,7 +303,7 @@ export const FeedSection = () => {
           {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
+              className="z-8 absolute bottom-0 right-0.5 hover:cursor-pointer "
             >
               ↓
             </button>

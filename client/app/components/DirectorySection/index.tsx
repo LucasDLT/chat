@@ -47,17 +47,17 @@ export const DirectorySection = () => {
   }
 
   return (
-    <section className="grid col-start-1 md:grid-rows-[60px_1fr] h-full">
-      <div className="bg-black flex justify-center items-center m-1">
-        <h1 className="titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
+    <section className="grid col-start-auto row-start-2  md:row-start-auto md:col-start-1 md:grid-rows-[60px_1fr] md:h-full">
+      <div className="flex justify-center items-center m-1">
+        <h1 className="hidden md:flex titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
           Live Chat
         </h1>
       </div>
 
-      <div className="grid grid-rows-[40px_40px_50px_1fr] h-full">
+      <div className="grid grid-rows-[40px_40px_50px_1fr] h-full ">
         {/*Header conectados */}
-        <div className="grid grid-cols-[112px_30px_30px] justify-evenly items-center">
-          <h2 className=" mesoninaRegular xl:flex tracking-[3px] xl:font-bold">
+        <div className="grid grid-cols-[112px_30px_30px] justify-evenly md:items-center">
+          <h2 className=" mesoninaRegular xl:flex  tracking-[3px] xl:font-bold">
             conectados
           </h2>
           <Image
