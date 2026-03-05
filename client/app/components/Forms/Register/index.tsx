@@ -32,8 +32,7 @@ export const Register_Section: React.FC<registerprops> = ({setActiveForm}) => {
     const key = event.currentTarget.name;
 
     const update_form: Register = { ...inputRegister, [key]: value };
-    console.log(update_form, "updateform");
-    
+   
     setInputRegister(update_form);
     setErrors(catch_errors_register(update_form));
   };

@@ -20,7 +20,6 @@ export const resolve_register = async (
       throw new Error("error al registrar usuario");
     }
 
-    console.log(message);
     return message;
       
 };

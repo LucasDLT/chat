@@ -5,7 +5,6 @@ import { useAppContextWs } from "@/context/context";
 export default function Home() {
   const { user } = useAppContextWs();
   const router = useRouter();
-  console.log(user);
 
   return (
     <div className="grid grid-rows-[1fr_300px] grid-cols-1 justify-between items-center yellowBg h-dvh">
@@ -40,11 +39,15 @@ export default function Home() {
         >
           Rooms
         </button>
+
       </div>
-      <section className="bg-black flex w-full h-full justify-center items-center  ">
+      <section className="bg-black flex flex-col w-full h-full justify-center items-center  ">
         <h1 className=" titleColor odor tracking-widest text-6xl md:text-5xl  ">
           SocketHub
         </h1>
+        <p className="text-center text-[14px]">
+          Nota: el servidor se encuentra alojado en free tier de render.com, por lo que puede requerir unos segundos para activarse en el primer acceso. 
+        </p>
       </section>
     </div>
   );

@@ -13,7 +13,6 @@ export default function Chat() {
   const veryfy_user = async () => {
     try {
       const user_refresh: User = await resolve_request_me();
-      console.log(user_refresh, "en verify");
 
       if (user_refresh !== null) {
         setUser(user_refresh);

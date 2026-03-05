@@ -9,20 +9,15 @@ import React, {
   FormEvent,
   ChangeEvent,
   useMemo,
-  use,
 } from "react";
 import { cleanIntervals, startHeartbeat } from "@/helpers/sockets_fn";
 import {
-  ClientsConected,
-  PublicMessage,
-  PrivateMessage,
   SendMessage,
   ServerToClientMessage,
   User,
   DispatchContext,
   AppStore,
   INITIAL_STATE,
-  FeedMessage,
 } from "@/types/types";
 import { nanoid } from "nanoid";
 import { resolve_private_messages } from "@/helpers/messages/private_msg";
@@ -194,7 +189,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     if (!inputMsgSearch) return;
 
     const query = inputMsgSearch.trim().toLowerCase();
-    console.log(query, "query que llega al handle");
 
     if (clientSelected && privateIdMsg) {
       //aca deberia poner el helper para la busqueda de mensajes privados
@@ -227,8 +221,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
   const onChangeSearchMsgFeed = (e: React.ChangeEvent<HTMLInputElement>) => {
     const data = e.currentTarget.value;
     setInputMsgSearch(data);
-
-
   };
 
   const handleActiveUser = () => {
@@ -254,8 +246,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
           toId: privateIdMsg,
         },
       };
-      console.log(message, "mensaje que enviaremos");
-
       socketRef.current?.send(JSON.stringify(message));
       //actualizacion de estados
       setInputMsg("");
@@ -316,7 +306,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
     const offsetPublic = appStore.store.feed.public.remote.offset;
     const limitPublic = appStore.store.remote.limit;
     const public_msg = await resolve_public_messages(offsetPublic, limitPublic);
-    console.log(public_msg);
     
     const normalized_msg = normalize_msg_public(public_msg);
     setAppStore((prev) => 
@@ -377,7 +366,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       socketRef.current = socket;
       socketRef.current.addEventListener("open", (event) => {
         startHeartbeat(socketRef.current!);
-        console.log("cliente conectado al servidor");
       });
       socketRef.current.addEventListener("message", async (event) => {
         const parse: ServerToClientMessage = JSON.parse(event.data);
@@ -388,10 +376,8 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
       });
       socketRef.current.addEventListener("close", (event) => {
         cleanIntervals();
-        console.log(`${socketRef.current?.nickname} sale del chat`);
       });
       socketRef.current.addEventListener("error", (event) => {
-        console.log("Error connecting to server");
       });
     } catch (error) {
       console.log(`error al iniciar el socket: ${error}`);

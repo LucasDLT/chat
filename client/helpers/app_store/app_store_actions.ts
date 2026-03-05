@@ -2,7 +2,6 @@ import {
   AckHandshake,
   AppStore,
   ClientsConected,
-  Conversation,
   FeedMessage,
 } from "@/types/types";
 
@@ -387,7 +386,6 @@ export const handleUpdateViewPublic = (
   const new_buffer = { ...prev.store.feed.public.searchBuffer };
   const current_order = [...prev.store.feed.public.order];
   const limit = prev.store.local.limit;
-  console.log("newbuffer", new_buffer);
 
   // Nuevo offset: sumamos el limit al offset actual
   const new_offset = Math.min(
@@ -484,26 +482,21 @@ export const handleUpdateSearchMsgPublic = (
 
 export const handleNewFeedPrivate = (prev: AppStore, id: string): AppStore => {
   const order = [...prev.store.feed.private[id].order];
-  console.log(order, "order");
 
   //aca hay que actualizar el order de la store y ademas el byId
   const consolidateOrder = order.slice(
     0,
     prev.store.feed.private[id].remote.offset,
   );
-  console.log("consolidate order", consolidateOrder);
 
   //hay que resetear las propiedades de busqueda local
   const currentById = { ...prev.store.feed.private[id].byId };
-  console.log("currentbyId", currentById);
 
   const newById: Record<string, FeedMessage> = {};
   consolidateOrder.forEach((id) => {
     newById[id] = currentById[id];
   });
-  console.log("newById", newById);
   const new_offset = prev.store.feed.private[id].remote.offset;
-  console.log("newOffset", new_offset);
 
   return {
     ...prev,

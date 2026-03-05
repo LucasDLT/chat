@@ -44,8 +44,6 @@ export const catch_errors_register = (form: Register): FormsErrors => {
   if (form.name.trim().length < 5) {
     bag_errors.name = "debe contener minimo 5 caracteres";
   }
-
-  console.log(bag_errors, "errores en fn");
   
   return bag_errors;
 };

@@ -5,9 +5,7 @@ export const resolve_logout = async () => {
       method: "POST",
       credentials: "include",
     });
-    const data =  await response.json();    
-    console.log(data.message);
-    
+    const data =  await response.json();        
   } catch (error) {
     console.log(error);
     throw new Error("error inesperado al cerrar sesion");

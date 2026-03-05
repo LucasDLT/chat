@@ -3,7 +3,6 @@ import { ClientsConected } from "@/types/types";
 import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
 import { useAppContextWs } from "@/context/context";
-import { NavbarChat } from "../NavbarChat";
 
 export const DirectorySection = () => {
   const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
@@ -91,16 +90,6 @@ export const DirectorySection = () => {
           />
         </form>
 
-        {/* Fondo */}
-        {/* <Image
-          alt="bg directory"
-          src={"/background-directorio.jpg"}
-          fill
-          className={` object-cover ${
-            activeFeed ? "hidden xl:flex" : ""
-          }`}
-        />
-*/}
         {/*Botón grupo */}
         {visibleContacts.length > 0 && (
           <button
