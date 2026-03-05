@@ -1,4 +1,4 @@
-import { envs_parse } from "../schemas/env.schema.js";
+import { envs_parse } from "../schemas/env.schema";
 import jwt from "jsonwebtoken";
 export const select_session = async (
   cookie_auth_google: string | undefined,

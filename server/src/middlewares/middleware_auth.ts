@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction } from "express";
-import { select_session } from "../utils/verify_session.js";
+import { select_session } from "../utils/verify_session";
 
 export const verify_auth = async (
   req: Request,

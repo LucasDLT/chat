@@ -1,5 +1,5 @@
-import { AuthProvider } from "../domain/enum/auth_provider_enum.js";
-import { envs_parse } from "../schemas/env.schema.js";
+import { AuthProvider } from "../domain/enum/auth_provider_enum";
+import { envs_parse } from "../schemas/env.schema";
 //const jwt = require("jsonwebtoken");
 import jwt from "jsonwebtoken";
 

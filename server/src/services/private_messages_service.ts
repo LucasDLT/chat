@@ -1,6 +1,6 @@
-import { messageRepository } from "../config_database/data_source.js";
-import { Message } from "../config_database/entities/Message.js";
-import { PrivateMessage } from "../types/messageToClient.t.js";
+import { messageRepository } from "../config_database/data_source";
+import { Message } from "../config_database/entities/Message";
+import { PrivateMessage } from "../types/messageToClient.t";
 
 export const get_private_messages = async (
   sender_id: number,

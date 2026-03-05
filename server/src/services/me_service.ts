@@ -1,5 +1,5 @@
-import { res_user } from "../types/dtos_user_register.js";
-import { userRepository } from "../config_database/data_source.js";
+import { res_user } from "../types/dtos_user_register";
+import { userRepository } from "../config_database/data_source";
 
 export const me_service = async (id: number): Promise<res_user> => {
   let id_user = id;

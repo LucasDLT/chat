@@ -1,4 +1,4 @@
-import { GoogleOAuthErrorCode } from "../types/google_auth.error.js";
+import { GoogleOAuthErrorCode } from "../types/google_auth.error";
 import { Response } from "express";
 
 export const switch_error =(err:GoogleOAuthErrorCode, res:Response)=>{

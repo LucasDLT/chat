@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { search_public_message_service } from "../services/search_public_message.js";
+import { search_public_message_service } from "../services/search_public_message";
 
 export const search_public_messages_controller = async (
   req: Request,

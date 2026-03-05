@@ -1,12 +1,12 @@
-import { userRepository } from "../config_database/data_source.js";
-import { AuthProvider } from "../domain/enum/auth_provider_enum.js";
+import { userRepository } from "../config_database/data_source";
+import { AuthProvider } from "../domain/enum/auth_provider_enum";
 import {
   dto_data_login,
   dto_public_user,
   dto_user,
-} from "../types/dtos_user_register.js";
-import { compare_password } from "../utils/create_hash_password.js";
-import { create_session } from "../utils/create_session_token.js";
+} from "../types/dtos_user_register";
+import { compare_password } from "../utils/create_hash_password";
+import { create_session } from "../utils/create_session_token";
 
 
 export const login_service = async ({

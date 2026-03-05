@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { change_nick_service } from "../services/change_nick.js"
+import { change_nick_service } from "../services/change_nick"
 export const change_nickname_controller=async(req:Request, res:Response)=>{
 try{
     const id = req.id

@@ -1,5 +1,5 @@
-import { messageRepository } from "../config_database/data_source.js";
-import { PublicMessage } from "../types/messageToClient.t.js";
+import { messageRepository } from "../config_database/data_source";
+import { PublicMessage } from "../types/messageToClient.t";
 export const search_public_message_service = async (
   search_data: string,
 ): Promise<PublicMessage[]> => {

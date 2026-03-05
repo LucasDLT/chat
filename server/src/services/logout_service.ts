@@ -1,4 +1,4 @@
-import { event_bus } from "../events/events.bus.js"
+import { event_bus } from "../events/events.bus"
 
 
 export const logout_service = async (id:number)=>{

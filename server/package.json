@@ -9,11 +9,13 @@
     "test:coverage": "jest --coverage",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon --exec node --loader ts-node/esm src/index.ts"
+    "dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
+    "typeorm": "typeorm-ts-node-esm",
+    "migration:run":"node dist/node_modules/typeorm/cli.js migration:run -d dist/config_database/data_source_migration.js"
   },
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -21,7 +23,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.16.3",
+    "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.28",
     "ws": "^8.18.3",
@@ -35,7 +37,7 @@
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.11.0",
     "@types/nodemon": "^1.19.6",
     "@types/ws": "^8.18.1",
     "jest": "^30.2.0",
@@ -43,6 +45,7 @@
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
   }
 }

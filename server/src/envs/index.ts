@@ -11,3 +11,5 @@ export const BDD_PASSWORD=process.env.BDD_PASSWORD
 export const BDD_DATABASE=process.env.BDD_DATABASE
 
 export const JWT_SECRET=process.env.JWT_SECRET
+
+export const DATABASE_URL=process.env.DATABASE_URL
