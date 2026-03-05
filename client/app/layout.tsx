@@ -18,6 +18,14 @@ weight:'400',
 style:'normal'
 })
 
+const odor= localFont({
+  src:'../public/fonts/OdorMeanChey-Regular.woff2',
+  variable:'--font-odor',
+  weight:'400',
+  style:'normal'
+})
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -42,7 +50,9 @@ export default function RootLayout({
     <html lang="en">
       <ContextWebSocket>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${animalHunter.variable} ${mesoninaRegular.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${animalHunter.variable} ${mesoninaRegular.variable} 
+        ${odor.variable}
+       antialiased`}
       >
         {children}
       </body>

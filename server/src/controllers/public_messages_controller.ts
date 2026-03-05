@@ -1,4 +1,4 @@
-import { get_all_public_msg } from "../services/public_messages_service.js";
+import { get_all_public_msg } from "../services/public_messages_service";
 import { Request, Response } from "express";
 
 export const get_public_messages_controller = async (

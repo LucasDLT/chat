@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { me_service } from "../services/me_service.js";
+import { me_service } from "../services/me_service";
 
 export const me_controller = async (req: Request, res: Response) => {
   try {

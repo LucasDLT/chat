@@ -27,18 +27,18 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     "m-2.5 w-fit max-w-[70%] px-3 py-2 rounded-xl break-words whitespace-pre-wrap block";
 
   const alignmentClasses = isMine
-    ? "text-right bg-[#a29714] mr-[1.6rem] xl:mr-52 self-end border border-[#0a0a0a]"
-    : "text-left bg-[#a98543] ml-[1.6rem] xl:ml-56 self-start";
+    ? "text-right bg-[#a29714] self-end border border-[#0a0a0a]"
+    : "text-left bg-[#a98543] self-start";
 
   const stateClasses = `
     ${isSystem ? "message--system" : ""}
-    ${isMatch ? "message--match" : ""}
-    ${isActive ? "message--active" : ""}
+    ${isMatch ? "bg-[#beb6a178]" : ""}
+    ${isActive ? " bg-[#c7c9c7] text-black" : ""}
   `;
 
   return (
     <div
-      className={`message ${baseClasses} ${alignmentClasses} ${stateClasses}`}
+      className={`message ${baseClasses} ${alignmentClasses} ${stateClasses} z-10`}
       ref={(el) => {
         if (messageRefs.current) {
           messageRefs.current[message.id] = el;

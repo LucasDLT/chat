@@ -86,17 +86,24 @@ body {
   font-family: var(--font-mesonina-regular);
 }
 
+.odor{
+  font-family: var(--font-odor);
+}
+
+
 .message {
   padding: 6px 10px;
   
 }
 
 .message--match {
-  color: #561303;
+  color: #523d17;
+  background-color: #e4d5b0;
 }
 
 .message--active {
-  border: #561303 solid 2px;
+  border: #672413 solid 20px;
+  background-color: #903218;
 }
 
 .message--you {

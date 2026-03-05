@@ -11,14 +11,14 @@ import type {
   SnapshotClients,
   ServerToClientMessage,
   AckHandshake
-} from "./types/message.t.js";
-import { isSendMessage } from "./guards/index.js";
-import { event_bus } from "./events/events.bus.js";
+} from "./types/message.t";
+import { isSendMessage } from "./guards/index";
+import { event_bus } from "./events/events.bus";
 import {
   messageRepository,
   userRepository,
-} from "./config_database/data_source.js";
-import { verify_session } from "./utils/verify_session.js";
+} from "./config_database/data_source";
+import { verify_session } from "./utils/verify_session";
 import cookie from "cookie";
 
 //funcion que saque de la documentacion en github, para el ping-pong

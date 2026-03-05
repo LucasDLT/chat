@@ -1,9 +1,9 @@
-import { private_messages_controller } from "../controllers/private_messages_controller.js";
-import { get_public_messages_controller } from "../controllers/public_messages_controller.js";
-import { search_priv_message } from "../controllers/search_private_message.js";
-import { search_public_messages_controller } from "../controllers/search_public_message.js";
-import { verify_auth } from "../middlewares/middleware_auth.js";
-import { router } from "./router.js";
+import { private_messages_controller } from "../controllers/private_messages_controller";
+import { get_public_messages_controller } from "../controllers/public_messages_controller";
+import { search_priv_message } from "../controllers/search_private_message";
+import { search_public_messages_controller } from "../controllers/search_public_message";
+import { verify_auth } from "../middlewares/middleware_auth";
+import { router } from "./router";
 
 router.get("/public", verify_auth, get_public_messages_controller)
 

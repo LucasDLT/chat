@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { search_message_private } from "../services/search_private_message.js";
+import { search_message_private } from "../services/search_private_message";
 
 export const search_priv_message = async (req: Request, res: Response) => {
   try {

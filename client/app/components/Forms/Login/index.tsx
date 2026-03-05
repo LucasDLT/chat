@@ -74,7 +74,13 @@ export const Login_Section = () => {
   };  
 
   return (
-    <section className="flex flex-col justify-center items-center relative h-[60vh]">
+    <section className="flex flex-col justify-center items-center">
+      <Image
+        fill
+        alt="background register section"
+        src={"/background-app.jpg"}
+        className="h-full w-auto object-cover  "
+      />
 
       <Login_UI
         onSubmit={handleLogin}
@@ -83,7 +89,7 @@ export const Login_Section = () => {
         inputLogin={inputLogin}
       />
 
-      {loading && <LoadingModal message="...procesando" />}
+      {loading && <LoadingModal message="espere mientras accedenemos a su cuenta" />}
     </section>
   );
 };

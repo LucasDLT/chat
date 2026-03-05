@@ -8,10 +8,10 @@ import {
 } from "@jest/globals";
 import * as http from "http";
 import type { Server as HttpServer } from "http";
-import { websocketSetup } from "../../websoquet.setup.js";
-import { collectionJsonMessages } from "../helpers/collectionMsg.js";
+import { websocketSetup } from "../../websoquet.setup";
+import { collectionJsonMessages } from "../helpers/collectionMsg";
 import { WebSocket as WsClient } from "ws";
-import { createClient } from "../helpers/createClientWs.js";
+import { createClient } from "../helpers/createClientWs";
 
 
 describe("WSS integration - SendMessage", () => {

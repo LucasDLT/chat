@@ -1,5 +1,5 @@
 import z from "zod"
-import { ID_CLIENT, SECRET_CLIENT,BDD_DATABASE,BDD_HOST,BDD_PASSWORD,BDD_PORT,BDD_USERNAME, JWT_SECRET } from "../envs/index.js"
+import { ID_CLIENT, SECRET_CLIENT,BDD_DATABASE,BDD_HOST,BDD_PASSWORD,BDD_PORT,BDD_USERNAME, JWT_SECRET, DATABASE_URL } from "../envs/index"
 
 const env_schema = z.object({
     client_id:z.string(),
@@ -9,7 +9,8 @@ const env_schema = z.object({
     password:z.string(),
     port:z.string(),
     username:z.string(),
-    jwt_secret_key:z.string()
+    jwt_secret_key:z.string(),
+    database_url:z.string(),
 })
 
 export const envs_parse= env_schema.parse({
@@ -20,5 +21,6 @@ host:BDD_HOST,
 password:BDD_PASSWORD,
 port:BDD_PORT,
 username:BDD_USERNAME,
-jwt_secret_key:JWT_SECRET
+jwt_secret_key:JWT_SECRET,
+database_url:DATABASE_URL
 }) 

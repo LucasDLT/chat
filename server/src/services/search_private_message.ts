@@ -1,6 +1,6 @@
-import { messageRepository } from "../config_database/data_source.js";
+import { messageRepository } from "../config_database/data_source";
 import { Brackets } from "typeorm";
-import { PrivateMessage } from "../types/messageToClient.t.js";
+import { PrivateMessage } from "../types/messageToClient.t";
 export const search_message_private = async (
   sender_id: number,
   receiver_id: number,

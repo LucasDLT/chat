@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { logout_service } from "../services/logout_service.js";
+import { logout_service } from "../services/logout_service";
 export const logout_controller = async (req: Request, res: Response) => {
   try {
     const id = req.id;

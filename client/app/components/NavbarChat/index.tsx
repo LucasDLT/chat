@@ -9,10 +9,10 @@ import { INITIAL_STATE } from "@/types/types";
 
 export const NavbarChat = () => {
   const router = useRouter();
-  const [active, setActive] = useState<boolean>(false);
   const [activeMobile, setActiveMobile] = useState<boolean>(false);
   const {
-
+    active,
+    setActive,
     setAppStore,
     setHasNickname,
     setPrivateIdMsg,
@@ -23,7 +23,7 @@ export const NavbarChat = () => {
     setActiveUser,
   } = useAppContextWs();
   const handleToClose = () => {
-    setAppStore(INITIAL_STATE)
+    setAppStore(INITIAL_STATE);
     setHasNickname(false);
     setPrivateIdMsg(undefined);
     setClientSelected(undefined);
@@ -33,31 +33,23 @@ export const NavbarChat = () => {
   };
   return (
     <section
-      className={`bg-black z-10 flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
-        active === false
-          ? "xl:w-15 transition-all duration-100"
-          : "xl:w-60 transition-all duration-100"
-      } 
+      className={`grid col-start-auto grid-cols-1 z-15 row-start-1 md:mx-2
+        md:grid md:row-start-auto md:col-start-3 md:justify-center md:items-center  
          ${
-           activeMobile === false
-             ? "transition-all duration-100"
-             : "w-screen h-[92.1vh] top-[-1] right-[-0.1] z-9 flex flex-col justify-between items-center transition-all duration-100 "
+           active === false
+             ? ""
+             : "translate-y-0 h-dvh"
          }`}
     >
       <nav
-        className={`yellowBg flex justify-between items-center p-1 mt-1 h-9 w-60 rounded-sm xl:mb-2 pt-2 pb-2 xl:mt-2 xl:flex-col xl:h-full  ${
-          active === false
-            ? "xl:w-10 transition-all duration-100"
-            : "xl:w-50 transition-all duration-100 "
-        }
-          ${
-            activeMobile === false
-              ? "transition-all duration-100"
-              : "w-50 h-170 z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-100 "
-          }
-          `}
+        className={`yellowBg flex items-center justify-around md:flex md:flex-col md:h-[680px]
+    md:gap-6 md:rounded border ${
+      active === false
+        ? ""
+        : "h-dvh flex-col justify-around items-center gap-4"
+    }`}
       >
-        <div className="flex flex-col justify-center items-center relative">
+        <div className="flex flex-col justify-center items-center">
           <Image
             title="cambiar nickname"
             alt="icon user"
@@ -80,8 +72,8 @@ export const NavbarChat = () => {
         <div
           className={`flex justify-center items-center ${
             active === false
-              ? "bg-yellow-100 rounded-full p-p transition-all ease-in-out duration-500"
-              : "hover:bg-yellow-100"
+              ? " rounded-full p-p transition-all ease-in-out duration-500"
+              : ""
           }`}
         >
           <Image
@@ -96,7 +88,7 @@ export const NavbarChat = () => {
               setActiveMobile(false);
             }}
             className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 ${
-              active === false ? "" : "xl:top-85 absolute"
+              active === false ? "" : ""
             }`}
           />
         </div>
@@ -111,7 +103,7 @@ export const NavbarChat = () => {
           onClick={() => {
             activeFeed ? setActiveFeed(false) : handleToClose();
           }}
-          className="hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300"
+          className="hover:cursor-pointer flex justify-center items-center hover:scale-110 transition-all ease-in-out duration-300"
         />
       </nav>
     </section>

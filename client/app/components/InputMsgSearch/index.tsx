@@ -13,27 +13,27 @@ export const InputMsgSearch = () => {
 
   return (
     <form
-      className={`z-8 bg-amber-500 h-full grid grid-cols-[100px_240px_20px] min-w-0 min-h-0 gap-20 items-center justify-center `}
+      className={`z-8 grid grid-cols-[1fr_1fr_1fr] min-w-0 min-h-0 gap-1 items-center mb-0.5`}
       onSubmit={handleSearchMsg}
     >
       {clientSelected
-      ?<h3 className="z-10 text-black">{clientSelected}</h3>
-      : <h3 className="z-10  text-black">sala publica</h3>}
+      ?<h3 className="z-10 text-white  uppercase text-[13px] ">{clientSelected}</h3>
+      : <h3 className="z-10 text-white text-[13px]  ">SALA PUBLICA</h3>}
       <input
         onChange={onChangeSearchMsgFeed}
         type="text"
-        className="bg-amber-600 text-black"
+        className="rounded-t-sm bg-[#d4ab4a78] text-white mr-1"
         value={inputMsgSearch ? inputMsgSearch : ""}
       />
 
       {inputMsgSearch ? (
         <ButtonsSearch />
       ) : (
-        <button type="submit" className=" bg-blue-500">
+        <button type="submit" className="">
           <Image
-            src={"/icons/enviar.png"} //CAMBIAR POR UNA LUPA
+            src={"/icons/lupa.png"} //CAMBIAR POR UNA LUPA
             alt="enviar mensaje"
-            width={20}
+            width={16}
             height={30}
           />
         </button>

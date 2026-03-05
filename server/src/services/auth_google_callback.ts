@@ -1,12 +1,12 @@
-import { userRepository } from "../config_database/data_source.js";
-import { AuthProvider } from "../domain/enum/auth_provider_enum.js";
-import { envs_parse } from "../schemas/env.schema.js";
-import { payload } from "../schemas/google-payload.schema.js";
-import { data_schema } from "../schemas/google-token.schema.js";
-import { dto_user_google } from "../types/dtos_user_register.js";
-import { GoogleOAuthErrorCode } from "../types/google_auth.error.js";
+import { userRepository } from "../config_database/data_source";
+import { AuthProvider } from "../domain/enum/auth_provider_enum";
+import { envs_parse } from "../schemas/env.schema";
+import { payload } from "../schemas/google-payload.schema";
+import { data_schema } from "../schemas/google-token.schema";
+import { dto_user_google } from "../types/dtos_user_register";
+import { GoogleOAuthErrorCode } from "../types/google_auth.error";
 import jwt from "jsonwebtoken";
-import { session_google } from "../utils/create_session_token.js";
+import { session_google } from "../utils/create_session_token";
 
 export const service_auth_google_callback = async (
   code: string

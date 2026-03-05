@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { Column, PrimaryGeneratedColumn, Entity, ManyToOne } from "typeorm";
-import { User } from "./User.js";
+import { User } from "./User";
 
 @Entity()
 export class Message {
@@ -20,3 +20,4 @@ export class Message {
     receiver!: User | null;
 }
 //nota sobre relaciones en la entidad User. 
+export default Message

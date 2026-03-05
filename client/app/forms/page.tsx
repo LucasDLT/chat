@@ -2,8 +2,10 @@ import { Container_Forms } from "../components/ContainerForms";
 
 export default function Forms() {
   return (
-    <div className="flex flex-col justify-between items-center yellowBg h-screen">
+    <main 
+    className="h-dvh grid grid-cols-[1fr] grid-rows-[30px_1fr_120px]"
+    >
       <Container_Forms />
-    </div>
+    </main>
   );
 }

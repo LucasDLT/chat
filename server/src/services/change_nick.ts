@@ -1,6 +1,6 @@
-import { userRepository } from "../config_database/data_source.js"
-import { event_bus } from "../events/events.bus.js"
-import { dto_public_user } from "../types/dtos_user_register.js"
+import { userRepository } from "../config_database/data_source"
+import { event_bus } from "../events/events.bus"
+import { dto_public_user } from "../types/dtos_user_register"
 
 export const change_nick_service=async(id:number, new_name:string):Promise<dto_public_user>=>{
 const id_user:number=id

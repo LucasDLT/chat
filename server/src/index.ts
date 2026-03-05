@@ -1,14 +1,14 @@
 import "reflect-metadata"
-import { AppDataSource } from "./config_database/data_source.js";
+import { AppDataSource } from "./config_database/data_source";
 import { createServer } from "http";
-import { websocketSetup } from "./websoquet.setup.js";
+import { websocketSetup } from "./websoquet.setup";
 import { json } from "express";
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import express from "express"
-import auth_google_routes from "./routes/route.auth-google.js"; // anotacion: lo importado es un mero alias que le ponemos a toda la informacion que venga desde el origen de la importacion. De esta forma ahora las rutas que vengan de ahi, estan contenidas en authgoogle_routes.
-import auth_local_routes from "./routes/route_auth-local.js"
-import message_routes from "./routes/route_messages.js"
+import auth_google_routes from "./routes/route.auth-google"; // anotacion: lo importado es un mero alias que le ponemos a toda la informacion que venga desde el origen de la importacion. De esta forma ahora las rutas que vengan de ahi, estan contenidas en authgoogle_routes.
+import auth_local_routes from "./routes/route_auth-local"
+import message_routes from "./routes/route_messages"
 const app = express();
 const server = createServer(app);
 

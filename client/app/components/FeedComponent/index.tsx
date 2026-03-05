@@ -16,6 +16,7 @@ import {
   normalize_msg_public,
 } from "@/helpers/sockets_fn/ws_handles";
 import { resolve_public_messages } from "@/helpers/messages/public_msg";
+import Image from "next/image";
 
 export const FeedSection = () => {
   const {
@@ -220,30 +221,40 @@ export const FeedSection = () => {
   };
   return (
     <section
-      className={`${activeFeed ? " border border-amber-50 h-full grid grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
+      className={`${activeFeed ? "grid col-start-auto row-start-3 grid-rows-[45px_1fr_45px] md:row-start-auto md:col-start-2 md:h-full  md:grid-rows-[45px_1fr_45px] min-w-0 min-h-0" : "hidden"}`}
     >
       <InputMsgSearch />
 
       {privateIdMsg ? (
-        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
+        <section className="h-full grid grid-rows-[1fr] min-h-0 min-w-0 relative ">
           <div
-            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
+            className="overflow-y-auto min-h-0 min-w-0 bg-yellow-600/10 rounded-b-md flex flex-col"
             ref={refMessageInFeedPrivate}
           >
             {isAtTop && (
               <button
                 onClick={getMoreMessages}
-                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+                className="absolute z-8 top-0 right-0.5 hover:cursor-pointer"
               >
                 ↑
               </button>
             )}
-
+          <Image
+            src="/background-yellow.jpg"
+            alt="empty feed"
+            fill
+            className="object-cover md:hidden z-0" />
+             <Image
+            src="/background-yellow-mobile.jpg"
+            alt="empty feed"
+            fill
+            className="hidden object-cover md:block z-0" />
             {privateMessages.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
-              const isActive = msg.id === activeMessageId;
-
+              const isActive = Number(msg.id) === Number(activeMessageId);
+              console.log(isActive, );
+              
               return (
                 <MessageItem
                   key={msg.id}
@@ -261,22 +272,32 @@ export const FeedSection = () => {
           {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
+              className="z-8 absolute bottom-0 right-0.5 hover:cursor-pointer "
             >
               ↓
             </button>
           )}
         </section>
       ) : (
-        <section className="h-full grid grid-rows-[1fr] min-h-0 relative">
+        <section className="h-full grid grid-rows-[1fr] min-h-0 min-w-0 relative">
           <div
-            className="overflow-y-auto min-h-0  bg-blue-800 flex flex-col"
+            className="overflow-y-auto min-h-0 min-w-0 bg-yellow-600/10 rounded-b-md flex flex-col"
             ref={refMessageInFeedPublic}
           >
+          <Image
+            src="/background-yellow.jpg"
+            alt="empty feed"
+            fill
+            className="object-cover md:hidden z-0" />
+          <Image
+            src="/background-yellow-mobile.jpg"
+            alt="empty feed"
+            fill
+            className="hidden object-cover md:block z-0" />
             {isAtTop && (
               <button
                 onClick={getMoreMessages}
-                className="absolute z-8 top-0 right-4 hover:cursor-pointer"
+                className="absolute z-8 top-0 right-0.5 hover:cursor-pointer"
               >
                 ↑
               </button>
@@ -284,7 +305,7 @@ export const FeedSection = () => {
             {messageFeed.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
-              const isActive = msg.id === activeMessageId;
+              const isActive = msg.id === Number(activeMessageId);
 
               return (
                 <MessageItem
@@ -303,7 +324,7 @@ export const FeedSection = () => {
           {!isAtBottom && (
             <button
               onClick={handleGoToBottom}
-              className="z-8 absolute bottom-0 right-0 hover:cursor-pointer "
+              className="z-8 absolute bottom-0 right-0.5 hover:cursor-pointer "
             >
               ↓
             </button>

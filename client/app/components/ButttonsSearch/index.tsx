@@ -6,7 +6,7 @@ import {
   handleNewFeedPublic,
 } from "@/helpers/app_store/app_store_actions";
 export const ButtonsSearch = () => {
-  const { appStore, setAppStore, setInputSearch, privateIdMsg } =
+  const { appStore, setAppStore, setInputSearch, privateIdMsg, setInputMsgSearch } =
     useAppContextWs();
   const goToPrevMatch = () => {
     setAppStore((prev) => {
@@ -50,17 +50,18 @@ export const ButtonsSearch = () => {
     });
   };
   const closeSearch = () => {
-    if (appStore.store.feed.active === "public")
+    if (appStore.store.feed.active === "public"){
       setAppStore((prev) => handleNewFeedPublic(prev));
-
+      setInputMsgSearch("");
+}
     if (appStore.store.feed.active === "private" && privateIdMsg) {
       const id = privateIdMsg.toString();
-      setInputSearch("");
+      setInputMsgSearch("");
       setAppStore((prev) => handleNewFeedPrivate(prev, id));
     }
   };
   return (
-    <div className="flex justify-between border rounded-sm w-20 p-1 items-center gap-4">
+    <div className="flex justify-between bg-[#d4ab4a78] rounded-t-sm md:w-20 h-6 p-1 items-center gap-4">
       <div className="flex gap-4">
         <button
           className="hover:cursor-pointer"
@@ -74,7 +75,7 @@ export const ButtonsSearch = () => {
           <Image
             src="/icons/flecha-izquierda.png"
             alt="down"
-            width={20}
+            width={15}
             height={20}
             className="rotate-270"
           />
@@ -88,7 +89,7 @@ export const ButtonsSearch = () => {
           <Image
             src="/icons/flecha-izquierda.png"
             alt="down"
-            width={20}
+            width={15}
             height={20}
             className="rotate-90"
           />
@@ -99,7 +100,7 @@ export const ButtonsSearch = () => {
         onClick={closeSearch}
         className="hover:cursor-pointer"
       >
-        <Image src="/icons/x.png" alt="close" width={20} height={20} />
+        <Image src="/icons/x.png" alt="close" width={20} height={10} />
       </button>
     </div>
   );
