@@ -12,7 +12,6 @@ export const resolve_edit = async (new_name: string): Promise<User> => {
   });
 
   const { new_user } = await response.json();
-  console.log(new_user);
 
   if (!new_user) {
     throw new Error("error al editar nombre");

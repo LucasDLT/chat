@@ -5,7 +5,6 @@ import { useAppContextWs } from "@/context/context";
 export default function Home() {
   const { user } = useAppContextWs();
   const router = useRouter();
-  console.log(user);
 
   return (
     <div className="grid grid-rows-[1fr_300px] grid-cols-1 justify-between items-center yellowBg h-dvh">

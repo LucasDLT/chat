@@ -159,13 +159,6 @@ export const FeedSection = () => {
       const query = inputMsgSearch.trim().toLowerCase();
       const activeIndex = appStore.store.local.activeIndex;
       const id = privateIdMsg.toString();
-      console.log(
-        "valores que paso dentro del get more msg",
-        query,
-        activeIndex,
-        id,
-      );
-
       setAppStore((prev) => handleUpdateView(prev, id, activeIndex, query));
     }
     if (appStore.store.feed.mode === "remote" && privateIdMsg) {
@@ -190,17 +183,10 @@ export const FeedSection = () => {
       appStore.store.feed.mode === "remote" &&
       appStore.store.feed.active === "public"
     ) {
-      console.log("log en remote public");
-
       const offset = appStore.store.feed.public.remote.offset;
       const limit = appStore.store.remote.limit;
-      console.log(offset, limit, "offset y limit");
-
       const messages = await resolve_public_messages(offset, limit);
-      console.log("messages:", messages);
-
       const normalized = normalize_msg_public(messages);
-      console.log("normalized: ", normalized);
 
       setAppStore((prev) => handleUpdatePublicData(normalized, prev));
     }
@@ -209,11 +195,7 @@ export const FeedSection = () => {
       appStore.store.feed.active === "public" &&
       inputMsgSearch
     ) {
-      //hay que hacr el handle que sea el handleUpdateView para public}
-      console.log(appStore.store.feed.active, appStore.store.feed.mode);
-
       const query = inputMsgSearch.trim().toLowerCase();
-      console.log(query, " query que quuero ver en getmore");
       setAppStore((prev) =>
         handleUpdateViewPublic(prev, appStore.store.local.activeIndex, query),
       );

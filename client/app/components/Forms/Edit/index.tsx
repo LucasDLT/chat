@@ -9,9 +9,7 @@ export const Section_Edit_Form = () => {
 
   const onChangeNick = async (event: ChangeEvent<HTMLInputElement>) => {
     const data = event.currentTarget.value;
-    setValue(data);
-    console.log();
-    
+    setValue(data);   
   };
 
   const onSubmitChangeNick = async (event: FormEvent) => {

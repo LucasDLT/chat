@@ -1,6 +1,5 @@
 import { FormsErrors, Register } from "@/types/types";
 import React from "react";
-import Image from "next/image";
 
 interface Register_Form_UI {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
