@@ -1,36 +1,106 @@
-interface ButtonsSearchProps {
-  matches: string[];
-  setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
-  activeIndex: number;
-}
-export const ButtonsSearch: React.FC<ButtonsSearchProps> = ({
-  matches,
-  setActiveIndex,
-  activeIndex,
-}) => {
+"use client";
+import Image from "next/image";
+import { useAppContextWs } from "@/context/context";
+import {
+  handleNewFeedPrivate,
+  handleNewFeedPublic,
+} from "@/helpers/app_store/app_store_actions";
+export const ButtonsSearch = () => {
+  const { appStore, setAppStore, setInputSearch, privateIdMsg, setInputMsgSearch } =
+    useAppContextWs();
   const goToPrevMatch = () => {
-    if (matches.length === 0) return;
+    setAppStore((prev) => {
+      const { matches, activeIndex } = prev.store.local;
 
-    setActiveIndex((prev) => (prev - 1 >= 0 ? prev - 1 : prev));
+      if (matches.length === 0) return prev;
+
+      const newIndex = Math.max(activeIndex - 1, 0);
+
+      return {
+        ...prev,
+        store: {
+          ...prev.store,
+          local: {
+            ...prev.store.local,
+            activeIndex: newIndex,
+          },
+        },
+      };
+    });
   };
-  const goToNextMatch = () => {
-    if (matches.length === 0) return;
+  const goToNextMatch = (event: React.FormEvent) => {
+    event.preventDefault();
+    setAppStore((prev) => {
+      const { matches, activeIndex } = prev.store.local;
 
-    setActiveIndex((prev) => (prev + 1 < matches.length ? prev + 1 : prev));
+      if (matches.length === 0) return prev;
+
+      const newIndex = Math.min(activeIndex + 1, matches.length - 1);
+
+      return {
+        ...prev,
+        store: {
+          ...prev.store,
+          local: {
+            ...prev.store.local,
+            activeIndex: newIndex,
+          },
+        },
+      };
+    });
+  };
+  const closeSearch = () => {
+    if (appStore.store.feed.active === "public"){
+      setAppStore((prev) => handleNewFeedPublic(prev));
+      setInputMsgSearch("");
+}
+    if (appStore.store.feed.active === "private" && privateIdMsg) {
+      const id = privateIdMsg.toString();
+      setInputMsgSearch("");
+      setAppStore((prev) => handleNewFeedPrivate(prev, id));
+    }
   };
   return (
-    <div>
+    <div className="flex justify-between bg-[#d4ab4a78] rounded-t-sm md:w-20 h-6 p-1 items-center gap-4">
+      <div className="flex gap-4">
+        <button
+          className="hover:cursor-pointer"
+          type="button"
+          onClick={goToNextMatch}
+          disabled={
+            appStore.store.local.activeIndex ===
+            appStore.store.local.matches.length - 1
+          }
+        >
+          <Image
+            src="/icons/flecha-izquierda.png"
+            alt="down"
+            width={15}
+            height={20}
+            className="rotate-270"
+          />
+        </button>
+        <button
+          className="hover:cursor-pointer"
+          type="button"
+          onClick={goToPrevMatch}
+          disabled={appStore.store.local.activeIndex === 0}
+        >
+          <Image
+            src="/icons/flecha-izquierda.png"
+            alt="down"
+            width={15}
+            height={20}
+            className="rotate-90"
+          />
+        </button>
+      </div>
       <button
         type="button"
-        onClick={goToNextMatch}
-        disabled={activeIndex === matches.length - 1}>
-        ↓
-      </button>
-      <button
-        type="button"
-        onClick={goToPrevMatch}
-        disabled={activeIndex === 0}>
-        ↑
+        onClick={closeSearch}
+        className="hover:cursor-pointer"
+      >
+        <Image src="/icons/x.png" alt="close" width={20} height={10} />
       </button>
     </div>
   );

@@ -2,7 +2,7 @@ import type {
   ChangeNickname,
   RegisterNickname,
   SendMessage,
-} from "../types/message.t.js";
+} from "../types/message.t";
 
   export function isSendMessage(msg: unknown): msg is SendMessage {
     const m = msg as Record<string, unknown>;

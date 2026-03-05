@@ -2,7 +2,7 @@
 export {}
  declare global{ 
  interface WebSocket {
-    userId?: string;
+    userId?: number;
     isAlive?: boolean;
     nickname?: string;
   }}

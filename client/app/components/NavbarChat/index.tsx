@@ -1,75 +1,55 @@
 "use client";
 import Image from "next/image";
-import { ChangeNickSection } from "@/app/components/ChangeNick";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppContextWs } from "@/context/context";
-interface NabvarProps {
-  active: boolean;
-  setActive: React.Dispatch<React.SetStateAction<boolean>>;
-  activeMobile: boolean;
-  setActiveMobile: React.Dispatch<React.SetStateAction<boolean>>;
-  changeRegisterNick: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  inputRegister: string | undefined;
-  registerNick: (e: React.FormEvent<HTMLFormElement>) => void;
-  setActiveRegister: React.Dispatch<React.SetStateAction<boolean>>;
-  setActiveFeed: React.Dispatch<React.SetStateAction<boolean>>;
-  socketRef: React.RefObject<WebSocket | null>;
-  activeFeed: boolean;
-  router: AppRouterInstance;
-}
-export const NavbarChat: React.FC<NabvarProps> = ({
-  active,
-  activeMobile,
-  setActive,
-  setActiveMobile,
-  changeRegisterNick,
-  inputRegister,
-  registerNick,
-  setActiveFeed,
-  activeFeed,
-  socketRef,
-  router,
-  setActiveRegister,
-}) => {
-  const { setMessageFeed, setMessageFeedPriv, setNickConected, setHasNickname, setPrivateIdMsg, setClientSelected } = useAppContextWs();
+import { Section_Edit_Form } from "../Forms/Edit";
+import { Logout_Button } from "@/app/components/Logout_Button";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { INITIAL_STATE } from "@/types/types";
+
+export const NavbarChat = () => {
+  const router = useRouter();
+  const [activeMobile, setActiveMobile] = useState<boolean>(false);
+  const {
+    active,
+    setActive,
+    setAppStore,
+    setHasNickname,
+    setPrivateIdMsg,
+    setClientSelected,
+    setActiveFeed,
+    activeFeed,
+    socketRef,
+    setActiveUser,
+  } = useAppContextWs();
   const handleToClose = () => {
-    setMessageFeed([]);
-    setMessageFeedPriv([]);
-    setNickConected([]);
+    setAppStore(INITIAL_STATE);
     setHasNickname(false);
     setPrivateIdMsg(undefined);
     setClientSelected(undefined);
-    setActiveRegister(false);
+    setActiveUser(false);
     socketRef.current?.close();
     router.push("/");
   };
   return (
     <section
-      className={`bg-black z-10 flex justify-center items-center absolute top-22 right-3  w-60 h-10 xl:flex-col xl:top-0 xl:right-0 xl:h-screen overflow-hidden ${
-        active === false
-          ? "xl:w-15 transition-all duration-100"
-          : "xl:w-60 transition-all duration-100"
-      } 
+      className={`grid col-start-auto grid-cols-1 z-15 row-start-1 md:mx-2
+        md:grid md:row-start-auto md:col-start-3 md:justify-center md:items-center  
          ${
-           activeMobile === false
-             ? "transition-all duration-100"
-             : "w-screen h-[92.1vh] top-[-1] right-[-0.1] z-9 flex flex-col justify-between items-center transition-all duration-100 "
+           active === false
+             ? ""
+             : "translate-y-0 h-dvh"
          }`}
     >
       <nav
-        className={`yellowBg flex justify-between items-center p-1 mt-1 h-9 w-60 rounded-sm xl:mb-2 pt-2 pb-2 xl:mt-2 xl:flex-col xl:h-full  ${
-          active === false
-            ? "xl:w-10 transition-all duration-100"
-            : "xl:w-50 transition-all duration-100 "
-        }
-          ${
-            activeMobile === false
-              ? "transition-all duration-100"
-              : "w-50 h-170 z-10 flex flex-col justify-between gap-2 items-center  transition-all duration-100 "
-          }
-          `}
+        className={`yellowBg flex items-center justify-around md:flex md:flex-col md:h-[680px]
+    md:gap-6 md:rounded border ${
+      active === false
+        ? ""
+        : "h-dvh flex-col justify-around items-center gap-4"
+    }`}
       >
-        <div className="flex flex-col justify-center items-center relative">
+        <div className="flex flex-col justify-center items-center">
           <Image
             title="cambiar nickname"
             alt="icon user"
@@ -87,22 +67,13 @@ export const NavbarChat: React.FC<NabvarProps> = ({
             }`}
           />
 
-          {active && (
-            <ChangeNickSection
-              onChange={changeRegisterNick}
-              value={inputRegister ? inputRegister : ""}
-              onSubmit={registerNick}
-              name={
-                socketRef.current?.nickname ? socketRef.current.nickname : ""
-              }
-            />
-          )}
+          {active && <Section_Edit_Form />}
         </div>
         <div
           className={`flex justify-center items-center ${
             active === false
-              ? "bg-yellow-100 rounded-full p-p transition-all ease-in-out duration-500"
-              : "hover:bg-yellow-100"
+              ? " rounded-full p-p transition-all ease-in-out duration-500"
+              : ""
           }`}
         >
           <Image
@@ -117,10 +88,11 @@ export const NavbarChat: React.FC<NabvarProps> = ({
               setActiveMobile(false);
             }}
             className={`hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300 ${
-              active === false ? "" : "xl:top-85 absolute"
+              active === false ? "" : ""
             }`}
           />
         </div>
+        <Logout_Button />
 
         <Image
           title="regresar atras"
@@ -131,7 +103,7 @@ export const NavbarChat: React.FC<NabvarProps> = ({
           onClick={() => {
             activeFeed ? setActiveFeed(false) : handleToClose();
           }}
-          className="hover:cursor-pointer hover:scale-110 transition-all ease-in-out duration-300"
+          className="hover:cursor-pointer flex justify-center items-center hover:scale-110 transition-all ease-in-out duration-300"
         />
       </nav>
     </section>

@@ -8,7 +8,7 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
-    "target": "es6",
+    "target": "es2020",
     "types": ["node"],
     "moduleResolution": "node",
     "typeRoots": [
@@ -26,6 +26,10 @@
     "declaration": true,
     "declarationMap": true,
 
+    // decorators
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -39,18 +43,19 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
+    "esModuleInterop": true,
+
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true 
+    "skipLibCheck": true
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*ts", "global.d.ts"],
   "ts-node": {
     "files": true
   }
-
 }

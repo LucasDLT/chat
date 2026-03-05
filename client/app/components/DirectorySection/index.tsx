@@ -1,125 +1,151 @@
-'use client';
+"use client";
 import { ClientsConected } from "@/types/types";
 import Image from "next/image";
-import { FormEvent } from "react";
+import { FormEvent, useMemo, useState } from "react";
+import { useAppContextWs } from "@/context/context";
 
-interface DirectoryProps {
-  activeFeed: boolean;
-  conectedCount: number;
-  onChange: (e: FormEvent<HTMLInputElement>) => void;
-  inputSearch: string | undefined;
-  visibleContacts: ClientsConected[];
-  handleSelectClient: (userId: string, nick: string) => void;
-  onClick: () => void;
-}
-export const DirectorySection: React.FC<DirectoryProps> = ({
-  activeFeed,
-  conectedCount,
-  onChange,
-  inputSearch,
-  visibleContacts,
-  handleSelectClient,
-  onClick,
-}) => {
+export const DirectorySection = () => {
+  const [resSearch, setResSearch] = useState<ClientsConected[]>([]);
+
+  const {
+    activeFeed,
+    appStore,
+    inputSearch,
+    handleSelectClient,
+    socketRef,
+    setInputSearch,
+    returnToGroup,
+  } = useAppContextWs();
+
+  const conectedCount = appStore.clients.length;
+  const nickConected = appStore.clients;
+  const myId = socketRef.current?.userId;
+
+  // Contactos visibles
+  const visibleContacts =
+    resSearch.length > 0
+      ? resSearch
+      : nickConected.filter((c) => c.userId !== myId && Boolean(c.nick));
+
+  //Creamos un mapa eficiente de metadata por userId
+  const metadataMap = useMemo(() => {
+    return appStore.inboxMeta;
+  }, [appStore.inboxMeta]);
+
+  function changeInputSearch(e: FormEvent<HTMLInputElement>) {
+    const data = e.currentTarget.value;
+    setInputSearch(data);
+
+    const res = nickConected.filter(
+      (c) =>
+        c.userId !== myId &&
+        c.nick?.trim().toLowerCase().includes(data.trim().toLowerCase()),
+    );
+
+    setResSearch(res);
+  }
+
   return (
-    <section
-      className={`
-        
-           h-[80vh] w-full xl:flex xl:flex-col  xl:w-60 
-           xl:h-[94vh] 
-      `}
-    >
-      <div className="bg-black flex justify-center items-center h-20 m-1 rounded-xs">
-        <h1 className="titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
+    <section className="grid col-start-auto row-start-2  md:row-start-auto md:col-start-1 md:grid-rows-[60px_1fr] md:h-full p-1">
+      <div className="flex justify-center items-center m-1">
+        <h1 className="hidden md:flex titleColor text-3xl mesoninaRegular font-bold tracking-[6px]">
           Live Chat
         </h1>
       </div>
 
-      <div
-        className={`bg-black p-1 rounded-xs m-1 h-full flex flex-col justify-between items-start  xl:items-center relative `}
-      >
-        <div className="flex flex-row justify-center items-center ml-2 xl:justify-between xl:w-53">
-          <h2 className="hidden mesoninaRegular p-1 blackDeg xl:flex xl:rounded-xs  xl:tracking-[3px] xl:font-bold">
+      <div className="grid grid-rows-[40px_40px_50px_1fr] h-full ">
+        {/*Header conectados */}
+        <div className="grid grid-cols-[112px_30px_30px] justify-evenly md:items-center">
+          <h2 className=" mesoninaRegular xl:flex  tracking-[3px] xl:font-bold">
             conectados
           </h2>
           <Image
             alt="icon conectados"
             src={"/icons/conectados.png"}
-            width={30}
-            height={30}
-            className="p-2 rounded-sm xl:p-1 xl:rounded-xs"
-          ></Image>
-          <p className="p-2 rounded-sm  xl:p-1 xl:rounded-xs  ">
-            {conectedCount ? conectedCount : 0}
-          </p>
+            width={20}
+            height={20}
+            className=""
+          />
+          <p className="">{conectedCount || 0}</p>
         </div>
+
+        {/*Buscador */}
         <form
-          className={`${
-            activeFeed ? "hidden xl:flex" : ""
-          } absolute w-90 h-9 top-14 left-2 flex flex-row items-center justify-center blackDeg py-py rounded-xs g-1 xl:w-54 xl:top-24`}
+          className={`${activeFeed ? "hidden md:grid" : ""}
+              grid grid-cols-[1fr_25px] p-0.5 gap-1 justify-between items-center  rounded-xs`}
         >
           <input
-            onChange={onChange}
+            onChange={changeInputSearch}
             type="text"
-            className=" yellowBg h-6 rounded-xs text-black px-px text-center w-full mx-1 xl:w-45 xl:h-7"
+            className="yellowBg rounded-xs text-black text-center "
             value={inputSearch}
+            placeholder="Buscar"
           />
           <Image
             alt="icon lupa"
             src={"/icons/lupa.png"}
-            width={30}
-            height={30}
-            className="p-1 rounded-xs object-cover h-6 w-6"
+            width={20}
+            height={20}
+            className="object-cover"
           />
         </form>
-        <Image
-          alt="bg directory"
-          src={"/background-directorio.jpg"}
-          width={500}
-          height={200}
-          className={`h-150 xl:h-150 border rounded-xs object-cover ${
-            activeFeed ? "hidden xl:flex" : ""
-          } `}
-        />
+
+        {/*Botón grupo */}
         {visibleContacts.length > 0 && (
           <button
-            className={`absolute top-30 xl:top-40 left-2 p-1 my-1 bgBlurYellow  w-90 xl:w-54 text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer h-6 flex items-center justify-center tracking-widest ${
-              activeFeed ? "hidden xl:flex" : ""
+            className={`bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded-xs hover:cursor-pointer flex items-center justify-center tracking-widest h-9  ${
+              activeFeed ? "hidden xl:flex " : ""
             }`}
-            onClick={onClick}
+            onClick={returnToGroup}
           >
             mensaje publico
           </button>
         )}
+
+        {/*Lista de contactos */}
         <div
-          className={`absolute ${
-            visibleContacts.length > 0
-              ? "top-40 xl:top-50 transition-all duration-1000"
-              : "top-30 transition-all duration-1000"
-          } left-2 flex flex-col justify-start items-center w-90 xl:w-54  h-110 xl:left-2 overflow-y-auto ${
-            activeFeed ? "hidden xl:flex" : ""
+          className={` ${visibleContacts.length > 0 ? "h-full overflow-y-auto"  : ""}   ${
+            activeFeed ? "hidden xl:flex flex-col" : ""
           }`}
         >
           {visibleContacts.length > 0 ? (
-            visibleContacts.map((client) => (
-              <div key={client.userId} className={`text-black flex ${client.totalMessageIn && client.totalMessageIn > 0 ?'justify-evenly':" justify-center" } items-center bgBlurYellow w-full p-1 my-1 rounded-xs `}>
-                <p
-                  
-                  onClick={() => handleSelectClient(client.userId, client.nick)}
-                  className=" mesoninaRegular font-extrabold text-xl hover:cursor-pointer h-6 flex items-center justify-center tracking-widest transition-all duration-1000"
+            visibleContacts.map((client) => {
+              const meta = metadataMap[client.userId];
+
+              return (
+                <div
+                  key={client.userId}
+                  className={`text-black flex mt-1 ${
+                    meta?.hasNewMessages && meta?.unreadCount > 0
+                      ? "justify-evenly"
+                      : "justify-center"
+                  } items-center bgBlurYellow p-1 rounded-xs h-8 hover:cursor-pointer`}
+                  onClick={() =>
+                    handleSelectClient(client.userId, client.nick!)
+                  }
                 >
-                  {client.nick}
-                </p>
-                <p
-                  className={`rounded-full yellowBg w-6 h-6 flex items-center justify-center transition-all duration-300 ease-in-out
-                   ${ client.messageIn ? "opacity-100 scale-100" : "opacity-0 scale-0 pointer-events-none"}`}>
-                  {client.totalMessageIn || ""}
-                </p>
-              </div>
-            ))
+                  <p
+                    className="mesoninaRegular font-extrabold text-xl h-6 flex items-center justify-center tracking-widest transition-all duration-300"
+                  >
+                    {client.nick}
+                  </p>
+
+                  <p
+                    className={`rounded-full yellowBg w-6 h-6 flex items-center justify-center transition-all duration-300 ease-in-out
+                    ${
+                      meta?.hasNewMessages
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-0 pointer-events-none"
+                    }`}
+                  >
+                    {meta?.unreadCount || ""}
+                  </p>
+                </div>
+              );
+            })
           ) : (
-            <p className="p-1 bgBlurYellow text-black mesoninaRegular font-extrabold text-xl rounded-xs  h-6 flex items-center justify-center tracking-widest w-full mt-6 xl:text-sm">
-              no hay usuarios conectados
+            <p className="p-1 bgBlurYellow text-black mesoninaRegular font-extrabold w-full text-xl rounded-xs h-6 flex items-center justify-center tracking-widest">
+              esperando usuarios
             </p>
           )}
         </div>
