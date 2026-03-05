@@ -40,11 +40,15 @@ export default function Home() {
         >
           Rooms
         </button>
+
       </div>
-      <section className="bg-black flex w-full h-full justify-center items-center  ">
+      <section className="bg-black flex flex-col w-full h-full justify-center items-center  ">
         <h1 className=" titleColor odor tracking-widest text-6xl md:text-5xl  ">
           SocketHub
         </h1>
+        <p className="text-center text-[14px]">
+          Nota: el servidor se encuentra alojado en free tier de render.com, por lo que puede requerir unos segundos para activarse en el primer acceso. 
+        </p>
       </section>
     </div>
   );
