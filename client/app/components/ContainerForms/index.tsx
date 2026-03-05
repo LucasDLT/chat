@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { Login_Section } from "../Forms/Login";
 import { Register_Section } from "../Forms/Register";
 import { useState } from "react";
@@ -8,13 +7,12 @@ import { forms } from "@/types/types";
 
 export const Container_Forms = () => {
   const [activeForm, setActiveForm] = useState<forms>(forms.register);
-  const router = useRouter();
 
   return (
     <>
       <div className=" bg-[#d4ab4a78] flex justify-center items-center z-1">
       </div>
-      {activeForm === forms.register ? <Register_Section /> : <Login_Section />}
+      {activeForm === forms.register ? <Register_Section setActiveForm={setActiveForm} /> : <Login_Section />}
 
       <Aside_Message setter={setActiveForm} activeForm={activeForm} />
     </>

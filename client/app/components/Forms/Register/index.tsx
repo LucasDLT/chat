@@ -1,11 +1,16 @@
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { FormsErrors, Register } from "@/types/types";
+import { forms, FormsErrors, Register } from "@/types/types";
 import { resolve_register } from "@/helpers/forms/register";
 import { Register_UI } from "@/app/ui/Register";
 import { catch_errors_register } from "@/helpers/forms/errors";
 import { LoadingModal } from "../../LoadingModal";
-export const Register_Section = () => {
+
+interface registerprops {
+  setActiveForm: React.Dispatch<React.SetStateAction<forms>>;
+}
+
+export const Register_Section: React.FC<registerprops> = ({setActiveForm}) => {
   //estados
   const [inputRegister, setInputRegister] = useState<Register>({
     name: "",
@@ -38,19 +43,11 @@ export const Register_Section = () => {
     event.preventDefault();
     setLoading(true);
     try {
-      console.log(inputRegister, "inputRegister");
-      
-      const validate_errors = catch_errors_register(inputRegister);
-      console.log(validate_errors, "validate_errors");
-      
+      const validate_errors = catch_errors_register(inputRegister); 
       setErrors(validate_errors);
       const has_error = Object.values(validate_errors).some((err) => err !== "");
 
       if (has_error) {
-        console.log(validate_errors);
-        
-        console.log(has_error);
-        
         return;
       }
 
@@ -60,7 +57,7 @@ export const Register_Section = () => {
       if (!data_user) {
         throw new Error("error al recibir informacion de registro");
       }
-
+      setActiveForm(forms.login);
       setInputRegister({ name: "", email: "", password: "" });
       //aca hiria ese estado que cambia el valor booleano y hace que se vea el formulario de login.
     } catch (error) {
@@ -70,7 +67,7 @@ export const Register_Section = () => {
     }
   };
   return (
-    <section className="flex flex-col justify-center items-center">
+    <section className="flex flex-col justify-center items-center gap-2">
       <Image
         fill
         alt="background register section"
@@ -84,7 +81,7 @@ export const Register_Section = () => {
         errors={errors}
         inputRegister={inputRegister}
       />
-      {loading && <LoadingModal message="...procesando" />}
+      {loading && <LoadingModal message="procesando registro de usuario en base de datos" />}
     </section>
   );
 };

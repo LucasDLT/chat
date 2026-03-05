@@ -89,7 +89,7 @@ export const Login_Section = () => {
         inputLogin={inputLogin}
       />
 
-      {loading && <LoadingModal message="...procesando" />}
+      {loading && <LoadingModal message="espere mientras accedenemos a su cuenta" />}
     </section>
   );
 };

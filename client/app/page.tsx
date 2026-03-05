@@ -23,7 +23,7 @@ export default function Home() {
               : `bg-grey hover:none`
           }`}
         >
-          Login
+          Forms
         </button>
         <button
           onClick={() => router.push("/chat")}
