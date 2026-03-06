@@ -19,6 +19,7 @@ export const register_controller = async (req: Request, res: Response) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
+      path: "/",
     });
 
     res.status(200).json({

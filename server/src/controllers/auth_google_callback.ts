@@ -16,9 +16,10 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
+      maxAge: 5 * 60 * 1000,
       path: "/",
     });
-//para desarrollo sameSite: "lax" y secure false. En produccion sameSite: "none" y secure true. 
+    //para desarrollo sameSite: "lax" y secure false. En produccion sameSite: "none" y secure true.
     const { token } = await service_auth_google_callback(queryCode.toString());
 
     res.cookie("login_auth_google", token, {

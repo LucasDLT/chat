@@ -18,6 +18,12 @@ export const logout_controller = async (req: Request, res: Response) => {
       secure: true,
       path: "/",
     });
+    res.clearCookie("session",{
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      path: "/",
+    })
     await logout_service(id);
     res.status(200).json({ message: "sesion cerrada exitosamente" });
 
