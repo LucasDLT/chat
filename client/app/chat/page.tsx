@@ -31,7 +31,7 @@ export default function Chat() {
   }, [user]);
 
   return (
-    <main className={`h-dvh overflow-hidden grid grid-cols-1 grid-rows-[40px_40px_1fr] md:grid-rows-1
+    <main className={`h-[calc(var(--vh)*100)] overflow-hidden grid grid-cols-1 grid-rows-[40px_40px_1fr] md:grid-rows-1
     ${active 
     ? `md:grid-cols-[236px_1fr_240px]`
     :`md:grid-cols-[236px_1fr_60px]`}`}>

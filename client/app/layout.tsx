@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from 'next/font/local'
 import "./globals.css";
 import { ContextWebSocket } from "@/context/context";
+import { ViewportFix } from "./components/ViewportFix";
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -58,6 +59,7 @@ export default function RootLayout({
         ${odor.variable}
        antialiased`}
       >
+        <ViewportFix />
         {children}
       </body>
       </ContextWebSocket>
