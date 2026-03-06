@@ -221,7 +221,7 @@ export const FeedSection = () => {
                 ↑
               </button>
             )}
-          <Image
+{  /*        <Image
             src="/background-yellow.jpg"
             alt="empty feed"
             fill
@@ -230,7 +230,7 @@ export const FeedSection = () => {
             src="/background-yellow-mobile.jpg"
             alt="empty feed"
             fill
-            className="hidden object-cover md:block z-0" />
+            className="hidden object-cover md:block z-0" />*/}
             {privateMessages.map((msg) => {
               const id = msg.id.toString();
               const isMatch = appStore.store.local.matches.includes(id);
