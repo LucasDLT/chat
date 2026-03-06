@@ -32,7 +32,7 @@ export default function Chat() {
 
   return (
     <main
-      className={`h-dvh grid grid-cols-1 grid-rows-[40px_40px_1fr] md:grid-rows-1
+      className={`h-screen md:dvh grid grid-cols-1 grid-rows-[40px_40px_1fr] md:grid-rows-1
     ${
       active
         ? `md:grid-cols-[236px_1fr_240px]`
