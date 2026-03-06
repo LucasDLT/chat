@@ -185,7 +185,6 @@ body {
 
 .message--system {
   align-self: center;
-  margin-right: 230px;
   background-color: rgb(82, 82, 59);
 }
 @media (max-width: 639px) {
