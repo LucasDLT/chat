@@ -6,8 +6,18 @@ export const logout_controller = async (req: Request, res: Response) => {
     if (!id) {
       throw new Error("Error de conexion, intente nuevamente");
     }
-    res.clearCookie("login_session");
-    res.clearCookie("login_auth_google");
+    res.clearCookie("login_session",{
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      path: "/",
+    });
+    res.clearCookie("login_auth_google",{
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      path: "/",
+    });
     await logout_service(id);
     res.status(200).json({ message: "sesion cerrada exitosamente" });
 
