@@ -6,15 +6,16 @@ import Image from "next/image";
 export const Logout_Button = () => {
   const { setActiveUser, setUser } = useAppContextWs();
   const router = useRouter();
+  const logout = async () => {
+        await resolve_logout();
+        setActiveUser(false);
+        setUser(null);
+        router.replace("/");
+  };
   return (
     <button
       className="hover:cursor-pointer flex justify-center items-center"
-      onClick={() => {
-        resolve_logout();
-        setActiveUser(false);
-        setUser(null);
-        router.push("/");
-      }}
+      onClick= {logout}      
     >
       <Image
         src="/icons/logoutminimal.png"

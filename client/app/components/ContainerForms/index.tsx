@@ -22,7 +22,6 @@ export const Container_Forms = () => {
         router.push("/chat");
       }else{
         setUser(null);
-        router.push("/forms");
       }
     };
     veryfy_user();
