@@ -14,16 +14,16 @@ export const auth_google_callback = async (req: Request, res: Response) => {
 
     res.clearCookie("state", {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
     });
-
+//para desarrollo sameSite: "lax" y secure false. En produccion sameSite: "none" y secure true. 
     const { token } = await service_auth_google_callback(queryCode.toString());
 
     res.cookie("login_auth_google", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
     });
 
     res.redirect("https://livechat-ls.vercel.app/chat");

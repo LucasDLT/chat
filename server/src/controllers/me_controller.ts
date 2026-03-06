@@ -6,7 +6,6 @@ export const me_controller = async (req: Request, res: Response) => {
     const id = req.id;
     if (id) {
       const user = await me_service(id)
-      console.log(user);
       
       res.status(200).json({ message: "login exitoso", user });
     } else {

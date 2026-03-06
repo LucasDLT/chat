@@ -7,8 +7,8 @@ export const auth_google = async (req: Request, res: Response) => {
 
     res.cookie("state", state, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
       maxAge: 5 * 60 * 1000,
     }); //nota: eso son 5 min
     res.redirect(url);

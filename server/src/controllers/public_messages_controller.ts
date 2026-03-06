@@ -22,7 +22,6 @@ export const get_public_messages_controller = async (
     }
 
     const messages_publics = await get_all_public_msg(limit, offset);
-    console.log(messages_publics);
 
     res.status(200).json({
       message: "mensajes publicos",

@@ -17,8 +17,8 @@ export const login_controller = async (req: Request, res: Response) => {
 
     res.cookie("login_session", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
     });
  
     res.status(200).json({
