@@ -13,7 +13,7 @@ export const auth_google = async (req: Request, res: Response) => {
     }); //nota: eso son 5 min
     res.redirect(url);
   } catch (error) {
-  res.redirect(`http://localhost:3000/login/error?message=${encodeURIComponent("Error al iniciar sesión con Google")}`);
+  res.redirect(`https://livechat-ls.vercel.app/login/error?message=${encodeURIComponent("Error al iniciar sesión con Google")}`);
   }
 };
 

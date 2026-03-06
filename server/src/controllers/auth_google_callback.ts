@@ -26,11 +26,11 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       secure: false,
     });
 
-    res.redirect("http://localhost:3000/chat");
+    res.redirect("https://livechat-ls.vercel.app/chat");
   } catch (err) {
     if (err instanceof GoogleOAuthErrorCode) {
       switch_error(err, res);
-      res.redirect("http://localhost:3000/error");
+      res.redirect("https://livechat-ls.vercel.app/error");
     }
   }
 };

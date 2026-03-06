@@ -25,7 +25,7 @@ export const service_auth_google_callback = async (
     client_secret: client_secret,
     code: code,
     grant_type: "authorization_code",
-    redirect_uri: "http://localhost:3001/api/auth/google/callback",
+    redirect_uri: "https://live-chat-jf8r.onrender.com/api/auth/google/callback",
   });
 
   const response = await fetch(`https://oauth2.googleapis.com/token`, {

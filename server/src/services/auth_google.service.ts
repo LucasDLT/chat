@@ -11,7 +11,7 @@ export const service_auth_google = async (): Promise<dtoServiceToController> => 
 
   const id_client_google = envs_parse.client_id;
     const state = randomUUID();
-    const redirect_uri="http://localhost:3001/api/auth/google/callback";
+    const redirect_uri="https://live-chat-jf8r.onrender.com/api/auth/google/callback";
     const response_type="code"
     const scope="profile openid email"
     const baseUrl="https://accounts.google.com/o/oauth2/v2/auth"
