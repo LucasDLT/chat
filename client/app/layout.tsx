@@ -3,7 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from 'next/font/local'
 import "./globals.css";
 import { ContextWebSocket } from "@/context/context";
-
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 const animalHunter= localFont({
 src:'../public/fonts/AnimalHunterRegular.woff2',
 variable:'--font-animal-hunter',
