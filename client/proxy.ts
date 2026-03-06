@@ -9,10 +9,10 @@ export function proxy(req: NextRequest) {
   const verify_forms=pathname.startsWith("/forms")
   const redirect = NextResponse.redirect(new URL("/", req.url))
 
-  if (authenticated && protect_chat) {//voy a quitar el ! para verificar si esta produciendo una falla
+  if (!authenticated && protect_chat) {
     return redirect
   }
-  if (authenticated && verify_forms) {
+  if (!authenticated && verify_forms) {
     return redirect
   }
 
