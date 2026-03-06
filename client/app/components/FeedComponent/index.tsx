@@ -208,7 +208,7 @@ export const FeedSection = () => {
       <InputMsgSearch />
 
       {privateIdMsg ? (
-        <section className="h-full grid grid-rows-[1fr] min-h-0 min-w-0 relative ">
+        <section className="grid grid-rows-[1fr] min-h-0 min-w-0 relative ">
           <div
             className="overflow-y-auto overscroll-contain min-h-0 min-w-0 bg-yellow-600/10 rounded-b-md flex flex-col"
             ref={refMessageInFeedPrivate}
