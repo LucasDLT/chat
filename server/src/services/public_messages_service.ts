@@ -1,4 +1,4 @@
-import { messageRepository } from "../config_database/data_source";
+import { messageRepository } from "../config_database/data_source_migration";
 import { PublicMessage } from "../types/messageToClient.t";
 
 

@@ -1,4 +1,4 @@
-import { userRepository } from "../config_database/data_source";
+import { userRepository } from "../config_database/data_source_migration";
 import { AuthProvider } from "../domain/enum/auth_provider_enum";
 import {
   dto_data_login,

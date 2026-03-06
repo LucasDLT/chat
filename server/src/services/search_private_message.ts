@@ -1,4 +1,4 @@
-import { messageRepository } from "../config_database/data_source";
+import { messageRepository } from "../config_database/data_source_migration";
 import { Brackets } from "typeorm";
 import { PrivateMessage } from "../types/messageToClient.t";
 export const search_message_private = async (

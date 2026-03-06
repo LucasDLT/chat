@@ -1,4 +1,4 @@
-import { userRepository } from "../config_database/data_source";
+import { userRepository } from "../config_database/data_source_migration";
 import { AuthProvider } from "../domain/enum/auth_provider_enum";
 import { envs_parse } from "../schemas/env.schema";
 import { payload } from "../schemas/google-payload.schema";

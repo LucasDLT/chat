@@ -19,5 +19,6 @@ export const AppDataSource = new DataSource({
     dropSchema:false
 })
 
-export const userRepository = AppDataSource.getRepository(User)
-export const messageRepository = AppDataSource.getRepository(Message)
+//export const userRepository = AppDataSource.getRepository(User)
+//export const messageRepository = AppDataSource.getRepository(Message)
+//COMENTO ESTO PARA FORZAR ERROR EN LOS ARCHIVOS DONDE DEBO HACER LOS CAMBIOS DEL DATASOURCE LOCAL AL CONECTADO A NEON

@@ -17,7 +17,7 @@ import { event_bus } from "./events/events.bus";
 import {
   messageRepository,
   userRepository,
-} from "./config_database/data_source";
+} from "./config_database/data_source_migration";
 import { verify_session } from "./utils/verify_session";
 import cookie from "cookie";
 

@@ -18,5 +18,7 @@ const MigrationAppDataSource = new DataSource({
         rejectUnauthorized:false
     }
 })
+export const userRepository = MigrationAppDataSource.getRepository(User)
+export const messageRepository = MigrationAppDataSource.getRepository(Message)
 
 export default MigrationAppDataSource

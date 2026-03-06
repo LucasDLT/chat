@@ -1,4 +1,4 @@
-import { userRepository } from "../config_database/data_source"
+import { userRepository } from "../config_database/data_source_migration"
 import { event_bus } from "../events/events.bus"
 import { dto_public_user } from "../types/dtos_user_register"
 
