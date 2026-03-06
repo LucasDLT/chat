@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+{/*import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 export function proxy(req: NextRequest) {
@@ -20,4 +20,6 @@ export function proxy(req: NextRequest) {
 }
 export const config = {
   matcher: ["/chat", "/forms"],
-};
+};*/}
+
+//El proxy queda comentado para correr solo en desarrollo y testeos. En produccion las cookies de otros dominios, como los que creo en el servidor, no son visible por nextjs por motivos de seguridad del navegador, y tampoco me sirve setear el dominio en la creacion de la cookie en el servidor ya que necesito un dominio comprado, no uno gestionado por plataforma como vercel. La solucion es usar /me como proteccion real de app  a /chat y una validacion para UX a /forms

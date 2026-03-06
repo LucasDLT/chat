@@ -357,7 +357,6 @@ export const ContextWebSocket = ({ children }: ContextProviderProps) => {
 
   useEffect(() => {
     if (user === null) {
-      console.log("intento para ver por que no sale", user);
       return;
     }
 
