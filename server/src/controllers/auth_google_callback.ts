@@ -16,6 +16,7 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
+      path: "/",
     });
 //para desarrollo sameSite: "lax" y secure false. En produccion sameSite: "none" y secure true. 
     const { token } = await service_auth_google_callback(queryCode.toString());
@@ -24,6 +25,7 @@ export const auth_google_callback = async (req: Request, res: Response) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
+      path: "/",
     });
 
     res.redirect("https://livechat-ls.vercel.app/chat");

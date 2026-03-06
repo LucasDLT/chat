@@ -10,6 +10,7 @@ export const auth_google = async (req: Request, res: Response) => {
       sameSite: "none",
       secure: true,
       maxAge: 5 * 60 * 1000,
+      path: "/",
     }); //nota: eso son 5 min
     res.redirect(url);
   } catch (error) {
