@@ -11,11 +11,6 @@ export const Container_Forms = () => {
   return (
     <>
       <div className=" bg-[#d4ab4a78] flex justify-center items-center z-1">
-        <p className="text-justify text-[14px]">
-          Nota: el servidor se encuentra alojado en free tier de render.com, por
-          lo que puede requerir unos segundos para activarse en el primer
-          acceso.
-        </p>
       </div>
       {activeForm === forms.register ? (
         <Register_Section setActiveForm={setActiveForm} />
